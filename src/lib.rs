@@ -4,52 +4,124 @@ use liquid::ParserBuilder;
 use liquid::object;
 use wasm_bindgen_futures::spawn_local;
 
+use serde_json::Value as JsonValue;
+use liquid::model::Value;
+use liquid::Object;
+
+use std::ffi::CStr;
+use serde_json::{json, Value as ValueJ};
+use wasm_bindgen::JsValue;
+
+use opfs::persistent::{DirectoryHandle, FileHandle, WritableFileStream, app_specific_dir};
+use opfs::{GetFileHandleOptions, CreateWritableOptions};
+use opfs::persistent;
+
+// you must import the traits to call methods on the types
+use opfs::{DirectoryHandle as _, FileHandle as _, WritableFileStream as _};
+
+//use opfs_project::read_dir;
+
 // Include the template as a string at compile time
 const OVERVIEW: &str = include_str!("../templates/overview.liquid");
+const QUERY_OVERVIEW_YEAR: &CStr = unsafe {
+    CStr::from_bytes_with_nul_unchecked(
+        // Add a null terminator at compile time
+        concat!(include_str!("../queries/overview_year.sql"), "\0").as_bytes()
+    )
+};
+//const DB_BYTES: &[u8] = include_bytes!("chronik_8.db");
 
 #[wasm_bindgen(start)]
 pub fn start() -> Result<(), JsValue> {
 
-    let page = get_page();
+    // Get db from OPFS
+    spawn_local(async {
+
+        let dir = app_specific_dir().await.unwrap();
+        let mut all_globals = Object::new();
+
+        let mut db_vec: Option<Vec<u8>> = None;
+        let mut db_bytes: Option<&[u8]> = None;
 
 
-    match page.as_str() {
-        "" | "overview" => {
+        match dir.get_file_handle_with_options(
+            "chronik.db",
+            &GetFileHandleOptions { create: false },
+        ).await {
+            Ok(file) => {
 
-            /*let template = ParserBuilder::with_stdlib()
-            .build()
-            .unwrap()
-            .parse(OVERVIEW)
-            .unwrap();
+                // Only executed if the file was successfully opened
+                //let db_vec: Vec<u8> = file.read().await.unwrap();
+                //let db_bytes: &[u8] = &db_vec;
 
-            let globals = object!({ "num": 4f64, "jek": "56" });
-            let output = template.render(&globals).unwrap();
+                let vec = file.read().await.unwrap();
+                db_bytes = Some(&vec);
+                db_vec = Some(vec);
+                //web_sys::console::log_1(&format!("Loaded chronik.db, {} bytes", db_bytes.len()).into());
 
-            let document = window().unwrap().document().unwrap();
-            let app_div = document
-            .get_element_by_id("app")
-            .ok_or_else(|| JsValue::from_str("#app not found"))?;
+                if let Some(bytes) = db_bytes {
+                    web_sys::console::log_1(
+                        &format!("Loaded chronik.db, {} bytes", bytes.len()).into()
+                    );
+                }
 
-            app_div.set_inner_html(&output);*/
-
-            //let test = { "num": 4f64, "jek": "56" };
-            //let globals = object!(&test);
-            //render_to_dom(OVERVIEW, &globals, "app");
-            let test = r#"{ "num": 4, "jek": "576" }"#;
-            let globals = json_to_object(test);
-            render_to_dom(OVERVIEW, &globals, "app");
-
+            }
+            Err(err) => {
+                // Executed if the file could not be opened
+                web_sys::console::log_1(&format!("File not found or could not be opened: {:?}", err).into());
+            }
         }
-        "map" => {
 
-        }
-        "statistics" => {
 
+
+        /*let json_table = open_and_read_db(db_bytes, QUERY_OVERVIEW_YEAR).await;
+
+        let globals = json_to_object(&json_table);
+
+        let array_value = globals.into_iter().next().unwrap().1; // take first value
+
+        all_globals = Object::new();
+        all_globals.insert("trips".into(), array_value); // directly insert the array
+
+        //globals = new_globals;*/
+
+
+        web_sys::console::log_1(&JsValue::from_str("hej"));
+
+
+
+        let page = get_page();
+
+
+        match page.as_str() {
+            "" | "overview" => {
+
+                let js = JsValue::from_str(&serde_json::to_string(&all_globals).unwrap());
+                web_sys::console::log_1(&js );
+
+                /*web_sys::console::log_1(
+                    &format!("globals type: {}", std::any::type_name::<Object>()).into()
+                );*/
+
+                render_to_dom(OVERVIEW, &all_globals, "app").unwrap();
+
+            }
+            "map" => {
+
+            }
+            "statistics" => {
+
+            }
+            _ => {
+                //content.set_inner_html("<p>Page not found</p>");
+            }
         }
-        _ => {
-            //content.set_inner_html("<p>Page not found</p>");
-        }
-    }
+
+
+
+
+    });
+
 
 
 
@@ -66,7 +138,17 @@ pub fn render_to_dom(template_content: &str, json_data: &liquid::Object, element
     .parse(template_content)
     .unwrap();
 
-    let output = template.render(&json_data).unwrap();
+//    let output = template.render(&json_data).unwrap();
+
+    let output = template
+    .render(&json_data)
+    .map_err(|e| {
+        let msg = format!("Template render error: {}", e);
+        web_sys::console::error_1(&msg.clone().into());
+        JsValue::from_str(&msg)
+    })?;
+
+
 
     let document = window().unwrap().document().unwrap();
     let app_div = document
@@ -90,11 +172,8 @@ pub fn get_page() -> String {
     params.get("p").unwrap_or_default()
 }
 
-use serde_json::Value as JsonValue;
-use liquid::model::Value;
-use liquid::Object;
 
-
+/*
 fn json_to_object(json_str: &str) -> Object {
     let parsed: JsonValue = serde_json::from_str(json_str).unwrap();
     let mut obj = Object::new();
@@ -109,20 +188,68 @@ fn json_to_object(json_str: &str) -> Object {
         }
     }
     obj
+}*/
+
+fn json_to_object(json_str: &Option<String>) -> Object {
+    let mut obj = Object::new();
+
+    // If Option is None, return empty Object
+    let json_str = match json_str {
+        Some(s) => s, // s is &String
+        None => return obj,
+    };
+
+    // Parse JSON from &String
+    let parsed: JsonValue = match serde_json::from_str(json_str) {
+        Ok(p) => p,
+        Err(_) => return obj, // Return empty object on parse error
+    };
+
+    match parsed {
+        JsonValue::Array(arr) => {
+            let mut rows_vec: Vec<Value> = Vec::new();
+            for row in arr {
+                if let JsonValue::Object(map) = row {
+                    let mut row_obj = Object::new();
+                    for (k, v) in map {
+                        let val = match v {
+                            JsonValue::Number(n) => Value::scalar(n.as_f64().unwrap_or(0.0)),
+                            JsonValue::String(s) => Value::scalar(s),
+                            JsonValue::Bool(b) => Value::scalar(b),
+                            _ => continue,
+                        };
+                        row_obj.insert(k.into(), val);
+                    }
+                    rows_vec.push(Value::Object(row_obj));
+                }
+            }
+            obj.insert("rows".into(), Value::Array(rows_vec));
+        }
+        JsonValue::Object(map) => {
+            for (k, v) in map {
+                let val = match v {
+                    JsonValue::Number(n) => Value::scalar(n.as_f64().unwrap_or(0.0)),
+                    JsonValue::String(s) => Value::scalar(s),
+                    JsonValue::Bool(b) => Value::scalar(b),
+                    _ => continue,
+                };
+                obj.insert(k.into(), val);
+            }
+        }
+        _ => {}
+    }
+
+    obj
 }
 
-/*
-#[wasm_bindgen(start)]
-pub fn start() {
-    wasm_bindgen_futures::spawn_local(async {
-        open_db().await;
-    });
-}
+
+
 
 use sqlite_wasm_rs::{
     self as ffi
 };
 
+/*
 unsafe extern "C" fn callback(
     _data: *mut std::ffi::c_void,
     argc: i32,
@@ -138,47 +265,152 @@ unsafe extern "C" fn callback(
         .to_string_lossy()
         .into_owned();
 
-        web_sys::console::log_1(
-            &format!("{} = {}", col, val).into()
-        );
+        // Unquote to see if the sql query returns data
+        web_sys::console::log_1(&format!("{} = {}", col, val).into());
     }
+    0
+}*/
+
+
+/*
+unsafe extern "C" fn callback(
+    _data: *mut std::ffi::c_void,
+    argc: i32,
+    argv: *mut *mut i8,
+    col_names: *mut *mut i8,
+) -> i32 {
+    // Create a JSON object for this row
+    let mut row = serde_json::Map::new();
+
+    for i in 0..argc {
+        let val = std::ffi::CStr::from_ptr(*argv.add(i as usize))
+        .to_string_lossy()
+        .into_owned();
+
+        let col = std::ffi::CStr::from_ptr(*col_names.add(i as usize))
+        .to_string_lossy()
+        .into_owned();
+
+        // Insert into the JSON map
+        row.insert(col, ValueJ::String(val));
+    }
+
+    // Convert row map to a JSON string
+    let row_json = ValueJ::Object(row);
+    let row_str = serde_json::to_string(&row_json).unwrap();
+
+    // Log the JSON
+    web_sys::console::log_1(&JsValue::from_str(&row_str));
+
+    0
+}*/
+
+
+
+// Callback
+unsafe extern "C" fn callback(
+    data: *mut std::ffi::c_void,
+    argc: i32,
+    argv: *mut *mut i8,
+    col_names: *mut *mut i8,
+) -> i32 {
+    let rows: &mut Vec<ValueJ> = &mut *(data as *mut Vec<ValueJ>);
+
+    let mut row = serde_json::Map::new();
+    for i in 0..argc {
+        let val = CStr::from_ptr(*argv.add(i as usize))
+        .to_string_lossy()
+        .into_owned();
+        let col = CStr::from_ptr(*col_names.add(i as usize))
+        .to_string_lossy()
+        .into_owned();
+        row.insert(col, ValueJ::String(val));
+    }
+
+    rows.push(ValueJ::Object(row));
     0
 }
 
 
-async fn open_db() {
 
-    let mut db = std::ptr::null_mut();
-    let ret = unsafe {
-        ffi::sqlite3_open_v2(
-            c"chronik.db".as_ptr().cast(),
-                             &mut db as *mut _,
-                             ffi::SQLITE_OPEN_READONLY,
-                             std::ptr::null()
-        )
-    };
-    if ret == ffi::SQLITE_OK {
-        web_sys::console::log_1(&"sqlite3_exec succeeded".into());
-    } else {
-        web_sys::console::log_1(&format!("sqlite3_exec ERROR: {}", ret).into());
-    }
 
-    // SQL statement
-    let sql = c"PRAGMA database_list;";
 
-    // Execute SQL
-    let ret = unsafe {
-        ffi::sqlite3_exec(
-            db,
-            sql.as_ptr().cast(),
-                          Some(callback),
-                          std::ptr::null_mut(),
-                          std::ptr::null_mut(), // ignore error string
-        )};
-        if ret == ffi::SQLITE_OK {
-            web_sys::console::log_1(&"sqlite3_exec succeeded".into());
-        } else {
-            web_sys::console::log_1(&format!("sqlite3_exec ERROR: {}", ret).into());
+
+// OPEN DB FROM BINARY
+
+pub async fn open_and_read_db(DB_BYTES: &[u8], SQL_QUERY: &CStr) -> Option<String> {
+
+    // Suppose you have this Vec somewhere
+    let mut rows: Vec<ValueJ> = Vec::new();
+
+    // Pass a pointer to rows as _data when calling sqlite3_exec
+    let rows_ptr: *mut std::ffi::c_void = &mut rows as *mut _ as *mut _;
+
+
+
+    unsafe {
+
+
+        let mut db: *mut ffi::sqlite3 = std::ptr::null_mut();
+
+        // Open an EMPTY ephemeral DB
+        let ret = ffi::sqlite3_open_v2(
+            c":memory:".as_ptr(),
+                                       &mut db,
+                                       ffi::SQLITE_OPEN_READWRITE
+                                       | ffi::SQLITE_OPEN_CREATE
+                                       | ffi::SQLITE_OPEN_MEMORY,
+                                       std::ptr::null(),
+        );
+
+        if ret != ffi::SQLITE_OK {
+            web_sys::console::log_1(&format!("open failed: {}", ret).into());
+            return None;
         }
 
-}*/
+        // Allocate SQLite-owned memory for the DB image
+        let size = DB_BYTES.len() as i64;
+        let buf = ffi::sqlite3_malloc64(size as u64) as *mut u8;
+        std::ptr::copy_nonoverlapping(DB_BYTES.as_ptr(), buf, size as usize);
+
+        // Now deserialize the DB into the opened connection
+        let ret = ffi::sqlite3_deserialize(
+            db,
+            c"main".as_ptr() as *const i8,
+                                           buf,
+                                           size,
+                                           size,
+                                           ffi::SQLITE_DESERIALIZE_READONLY, // or 0 if you want writeable
+        );
+
+        if ret != ffi::SQLITE_OK {
+            web_sys::console::log_1(&format!("deserialize failed: {}", ret).into());
+            return None;
+        }
+
+        let sql: &CStr = &SQL_QUERY;
+        //let sql = c"PRAGMA database_list;";
+        //let sql = c"SELECT name FROM sqlite_master WHERE type='table';";
+
+        let ret = ffi::sqlite3_exec(
+            db,
+            sql.as_ptr(),
+                                    Some(callback),
+                                    rows_ptr, //std::ptr::null_mut(),
+                                    std::ptr::null_mut(),
+        );
+
+        if ret == ffi::SQLITE_OK {
+            web_sys::console::log_1(&"sqlite3_exec succeeded".into());
+            // After sqlite3_exec, convert the full table to JSON
+            let json_table = serde_json::to_string(&rows).unwrap();
+            //web_sys::console::log_1(&JsValue::from_str(&json_table));
+            return Some(json_table);
+        } else {
+            web_sys::console::log_1(&format!("sqlite3_exec ERROR: {}", ret).into());
+            return None;
+        }
+    }
+
+
+}
