@@ -19,16 +19,11 @@ use opfs::persistent;
 // you must import the traits to call methods on the types
 use opfs::{DirectoryHandle as _, FileHandle as _, WritableFileStream as _};
 
-//use opfs_project::read_dir;
-
 // Include the template as a string at compile time
-const OVERVIEW: &str = include_str!("../templates/overview.liquid");
-const QUERY_OVERVIEW_YEAR: &CStr = unsafe {
-    CStr::from_bytes_with_nul_unchecked(
-        // Add a null terminator at compile time
-        concat!(include_str!("../queries/overview_year.sql"), "\0").as_bytes()
-    )
-};
+const TEMPLATE_OVERVIEW: &str = include_str!("../templates/overview.liquid");
+const QUERY_OVERVIEW_YEAR: &CStr = unsafe { CStr::from_bytes_with_nul_unchecked(concat!(include_str!("../queries/overview_year.sql"), "\0").as_bytes()) };
+const QUERY_OVERVIEW_COUNTRY: &CStr = unsafe { CStr::from_bytes_with_nul_unchecked(concat!(include_str!("../queries/overview_country.sql"), "\0").as_bytes()) };
+
 //const DB_BYTES: &[u8] = include_bytes!("chronik_8.db");
 
 #[wasm_bindgen(start)]
@@ -38,10 +33,12 @@ pub fn start() -> Result<(), JsValue> {
     spawn_local(async {
 
         let dir = app_specific_dir().await.unwrap();
-        let mut all_globals = Object::new();
+        let mut parameters = Object::new();
 
-        let mut db_vec: Option<Vec<u8>> = None;
-        let mut db_bytes: Option<&[u8]> = None;
+        //let mut db_vec: Option<Vec<u8>> = None;
+        //let mut db_bytes: Option<&[u8]> = None;
+
+         let mut db_vec: Vec<u8> = Vec::new();
 
 
         match dir.get_file_handle_with_options(
@@ -50,43 +47,17 @@ pub fn start() -> Result<(), JsValue> {
         ).await {
             Ok(file) => {
 
-                // Only executed if the file was successfully opened
-                //let db_vec: Vec<u8> = file.read().await.unwrap();
-                //let db_bytes: &[u8] = &db_vec;
+                db_vec = file.read().await.unwrap();
 
-                let vec = file.read().await.unwrap();
-                db_bytes = Some(&vec);
-                db_vec = Some(vec);
                 //web_sys::console::log_1(&format!("Loaded chronik.db, {} bytes", db_bytes.len()).into());
-
-                if let Some(bytes) = db_bytes {
-                    web_sys::console::log_1(
-                        &format!("Loaded chronik.db, {} bytes", bytes.len()).into()
-                    );
-                }
 
             }
             Err(err) => {
-                // Executed if the file could not be opened
                 web_sys::console::log_1(&format!("File not found or could not be opened: {:?}", err).into());
             }
         }
 
 
-
-        /*let json_table = open_and_read_db(db_bytes, QUERY_OVERVIEW_YEAR).await;
-
-        let globals = json_to_object(&json_table);
-
-        let array_value = globals.into_iter().next().unwrap().1; // take first value
-
-        all_globals = Object::new();
-        all_globals.insert("trips".into(), array_value); // directly insert the array
-
-        //globals = new_globals;*/
-
-
-        web_sys::console::log_1(&JsValue::from_str("hej"));
 
 
 
@@ -96,14 +67,26 @@ pub fn start() -> Result<(), JsValue> {
         match page.as_str() {
             "" | "overview" => {
 
-                let js = JsValue::from_str(&serde_json::to_string(&all_globals).unwrap());
-                web_sys::console::log_1(&js );
+                parameters = Object::new();
 
-                /*web_sys::console::log_1(
-                    &format!("globals type: {}", std::any::type_name::<Object>()).into()
-                );*/
+                // OVERVIEW YEAR
+                let json_table = open_and_read_db(&db_vec, QUERY_OVERVIEW_YEAR).await;
+                let json_object = json_to_object(&json_table);
+                let array_value = json_object.into_iter().next().unwrap().1;
+                parameters.insert("overviewYear".into(), array_value);
 
-                render_to_dom(OVERVIEW, &all_globals, "app").unwrap();
+                // OVERVIEW COUNTRY
+                let json_table = open_and_read_db(&db_vec, QUERY_OVERVIEW_COUNTRY).await;
+                let json_object = json_to_object(&json_table);
+                let array_value = json_object.into_iter().next().unwrap().1;
+                parameters.insert("overviewCountry".into(), array_value);
+
+
+
+                //web_sys::console::log_1(&JsValue::from_str("---"));
+                web_sys::console::log_1(&JsValue::from_str(&serde_json::to_string(&parameters).unwrap()));
+
+                render_to_dom(TEMPLATE_OVERVIEW, &parameters, "app").unwrap();
 
             }
             "map" => {
@@ -172,24 +155,6 @@ pub fn get_page() -> String {
     params.get("p").unwrap_or_default()
 }
 
-
-/*
-fn json_to_object(json_str: &str) -> Object {
-    let parsed: JsonValue = serde_json::from_str(json_str).unwrap();
-    let mut obj = Object::new();
-    if let JsonValue::Object(map) = parsed {
-        for (k, v) in map {
-            let val = match v {
-                JsonValue::Number(n) => Value::scalar(n.as_f64().unwrap()),
-                JsonValue::String(s) => Value::scalar(s),
-                _ => continue,
-            };
-            obj.insert(k.into(), val);
-        }
-    }
-    obj
-}*/
-
 fn json_to_object(json_str: &Option<String>) -> Object {
     let mut obj = Object::new();
 
@@ -249,64 +214,6 @@ use sqlite_wasm_rs::{
     self as ffi
 };
 
-/*
-unsafe extern "C" fn callback(
-    _data: *mut std::ffi::c_void,
-    argc: i32,
-    argv: *mut *mut i8,
-    col_names: *mut *mut i8,
-) -> i32 {
-    for i in 0..argc {
-        let val = std::ffi::CStr::from_ptr(*argv.add(i as usize))
-        .to_string_lossy()
-        .into_owned();
-
-        let col = std::ffi::CStr::from_ptr(*col_names.add(i as usize))
-        .to_string_lossy()
-        .into_owned();
-
-        // Unquote to see if the sql query returns data
-        web_sys::console::log_1(&format!("{} = {}", col, val).into());
-    }
-    0
-}*/
-
-
-/*
-unsafe extern "C" fn callback(
-    _data: *mut std::ffi::c_void,
-    argc: i32,
-    argv: *mut *mut i8,
-    col_names: *mut *mut i8,
-) -> i32 {
-    // Create a JSON object for this row
-    let mut row = serde_json::Map::new();
-
-    for i in 0..argc {
-        let val = std::ffi::CStr::from_ptr(*argv.add(i as usize))
-        .to_string_lossy()
-        .into_owned();
-
-        let col = std::ffi::CStr::from_ptr(*col_names.add(i as usize))
-        .to_string_lossy()
-        .into_owned();
-
-        // Insert into the JSON map
-        row.insert(col, ValueJ::String(val));
-    }
-
-    // Convert row map to a JSON string
-    let row_json = ValueJ::Object(row);
-    let row_str = serde_json::to_string(&row_json).unwrap();
-
-    // Log the JSON
-    web_sys::console::log_1(&JsValue::from_str(&row_str));
-
-    0
-}*/
-
-
-
 // Callback
 unsafe extern "C" fn callback(
     data: *mut std::ffi::c_void,
@@ -331,13 +238,7 @@ unsafe extern "C" fn callback(
     0
 }
 
-
-
-
-
-
 // OPEN DB FROM BINARY
-
 pub async fn open_and_read_db(DB_BYTES: &[u8], SQL_QUERY: &CStr) -> Option<String> {
 
     // Suppose you have this Vec somewhere
