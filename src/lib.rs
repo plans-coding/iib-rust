@@ -7,10 +7,11 @@ use wasm_bindgen_futures::spawn_local;
 use serde_json::Value as JsonValue;
 use liquid::model::Value;
 use liquid::Object;
-
+use liquid::model::Value as LiquidValue;
 use std::ffi::CStr;
 use serde_json::{json, Value as ValueJ};
 use wasm_bindgen::JsValue;
+use include_json::include_json;
 
 use opfs::persistent::{DirectoryHandle, FileHandle, WritableFileStream, app_specific_dir};
 use opfs::{GetFileHandleOptions, CreateWritableOptions};
@@ -24,7 +25,12 @@ const TEMPLATE_OVERVIEW: &str = include_str!("../templates/overview.liquid");
 const QUERY_OVERVIEW_YEAR: &CStr = unsafe { CStr::from_bytes_with_nul_unchecked(concat!(include_str!("../queries/overview_year.sql"), "\0").as_bytes()) };
 const QUERY_OVERVIEW_COUNTRY: &CStr = unsafe { CStr::from_bytes_with_nul_unchecked(concat!(include_str!("../queries/overview_country.sql"), "\0").as_bytes()) };
 
+//const TRANSLATION: &str = include_str!("../languages/swedish.json");
+
 //const DB_BYTES: &[u8] = include_bytes!("chronik_8.db");
+
+
+
 
 #[wasm_bindgen(start)]
 pub fn start() -> Result<(), JsValue> {
@@ -32,14 +38,40 @@ pub fn start() -> Result<(), JsValue> {
     // Get db from OPFS
     spawn_local(async {
 
+        // translation
         let dir = app_specific_dir().await.unwrap();
-        let mut parameters = Object::new();
+        let mut translation: Option<String> = None;
 
-        //let mut db_vec: Option<Vec<u8>> = None;
-        //let mut db_bytes: Option<&[u8]> = None;
+        match dir
+        .get_file_handle_with_options(
+            "translation.json",
+            &GetFileHandleOptions { create: false },
+        )
+        .await
+        {
+            Ok(file) => {
+                // Read bytes from file
+                let bytes = file.read().await.unwrap();
 
-         let mut db_vec: Vec<u8> = Vec::new();
+                // Convert bytes to String
+                translation = Some(String::from_utf8(bytes).unwrap());
 
+                // Optional debug
+                // web_sys::console::log_1(&format!("Loaded translation.json, {} bytes", bytes.len()).into());
+            }
+            Err(err) => {
+                web_sys::console::log_1(
+                    &format!("Translation file (translation.json) not found or could not be opened from OPFS: {:?}", err).into(),
+                );
+            }
+        }
+
+
+       let mut parameters = Object::new();
+
+
+        let dir = app_specific_dir().await.unwrap();
+        let mut db_vec: Vec<u8> = Vec::new();
 
         match dir.get_file_handle_with_options(
             "chronik.db",
@@ -53,7 +85,7 @@ pub fn start() -> Result<(), JsValue> {
 
             }
             Err(err) => {
-                web_sys::console::log_1(&format!("File not found or could not be opened: {:?}", err).into());
+                web_sys::console::log_1(&format!("Database file (chronik.db) not found or could not be opened from OPFS: {:?}", err).into());
             }
         }
 
@@ -67,7 +99,20 @@ pub fn start() -> Result<(), JsValue> {
         match page.as_str() {
             "" | "overview" => {
 
-                parameters = Object::new();
+                let json_object = json_to_liquid_from_option(&translation);
+                parameters.insert("translation".into(), json_object);
+
+                // TRIP DOMAINS
+                let json_table = open_and_read_db(&db_vec, c"SELECT * FROM bewx_TripDomains WHERE DomainAbbreviation != 'X';").await;
+                let json_object = json_to_object(&json_table);
+                let array_value = json_object.into_iter().next().unwrap().1;
+                parameters.insert("tripDomains".into(), array_value);
+
+                // PARTICIPANT GROUPS
+                let json_table = open_and_read_db(&db_vec, c"SELECT * FROM bewx_ParticipantGroups;").await;
+                let json_object = json_to_object(&json_table);
+                let array_value = json_object.into_iter().next().unwrap().1;
+                parameters.insert("participantGroups".into(), array_value);
 
                 // OVERVIEW YEAR
                 let json_table = open_and_read_db(&db_vec, QUERY_OVERVIEW_YEAR).await;
@@ -87,6 +132,8 @@ pub fn start() -> Result<(), JsValue> {
                 web_sys::console::log_1(&JsValue::from_str(&serde_json::to_string(&parameters).unwrap()));
 
                 render_to_dom(TEMPLATE_OVERVIEW, &parameters, "app").unwrap();
+                setup_filter_listener("tripDomain");
+                setup_filter_listener("participantGroup");
 
             }
             "map" => {
@@ -112,6 +159,38 @@ pub fn start() -> Result<(), JsValue> {
 
 
     Ok(())
+}
+
+fn json_to_liquid_from_option(opt: &Option<String>) -> LiquidValue {
+    match opt {
+        None => LiquidValue::Nil,
+        Some(s) => {
+            // Try parsing the string as JSON
+            match serde_json::from_str::<JsonValue>(s) {
+                Ok(json) => json_to_liquid(&json),
+                Err(_) => LiquidValue::Scalar(s.clone().into()), // fallback to string
+            }
+        }
+    }
+}
+
+fn json_to_liquid(value: &JsonValue) -> LiquidValue {
+    match value {
+        JsonValue::Null => LiquidValue::Nil,
+        JsonValue::Bool(b) => LiquidValue::Scalar((*b).into()),
+        JsonValue::Number(n) => LiquidValue::Scalar(n.to_string().into()),
+        JsonValue::String(s) => LiquidValue::Scalar(s.clone().into()),
+        JsonValue::Array(arr) => {
+            LiquidValue::Array(arr.iter().map(|v| json_to_liquid(v)).collect())
+        }
+        JsonValue::Object(obj) => {
+            let mut liquid_obj = Object::new();
+            for (k, v) in obj {
+                liquid_obj.insert(k.clone().into(), json_to_liquid(v));
+            }
+            LiquidValue::Object(liquid_obj)
+        }
+    }
 }
 
 pub fn render_to_dom(template_content: &str, json_data: &liquid::Object, element_id: &str) -> Result<(), JsValue> {
@@ -314,4 +393,137 @@ pub async fn open_and_read_db(DB_BYTES: &[u8], SQL_QUERY: &CStr) -> Option<Strin
     }
 
 
+}
+
+use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsCast;
+use web_sys::{Document, HtmlSelectElement, Url};
+
+fn setup_filter_listener(select_id: &str) {
+    let window = web_sys::window().expect("window missing");
+    let document: Document = window.document().expect("document missing");
+
+    let elem = match document.get_element_by_id(select_id) {
+        Some(e) => e,
+        None => {
+            web_sys::console::log_1(
+                &format!("ERROR: missing select element '{}'", select_id).into(),
+            );
+            return;
+        }
+    };
+
+    let select: HtmlSelectElement = match elem.dyn_into() {
+        Ok(s) => s,
+        Err(e) => {
+            web_sys::console::log_1(
+                &format!("ERROR: element '{}' is not a <select>: {:?}", select_id, e).into(),
+            );
+            return;
+        }
+    };
+
+    let closure = Closure::<dyn FnMut(_)>::new(move |_event: web_sys::Event| {
+        update_filter_param();
+    });
+
+    if let Err(e) =
+        select.add_event_listener_with_callback("change", closure.as_ref().unchecked_ref())
+        {
+            web_sys::console::log_1(
+                &format!(
+                    "ERROR: add_event_listener failed on '{}' => {:?}",
+                    select_id, e
+                )
+                .into(),
+            );
+            return;
+        }
+
+        closure.forget();
+}
+
+fn update_filter_param() {
+    let window = web_sys::window().expect("window missing");
+    let document = window.document().expect("document missing");
+
+    let mut parts: Vec<String> = Vec::new();
+    let selects = vec!["tripDomain", "participantGroup"];
+
+    for id in selects {
+        match document.get_element_by_id(id) {
+            None => {
+                web_sys::console::log_1(
+                    &format!("WARN: select '{}' not found", id).into(),
+                );
+            }
+            Some(elem) => {
+                let select: HtmlSelectElement = match elem.dyn_into() {
+                    Ok(s) => s,
+                    Err(e) => {
+                        web_sys::console::log_1(
+                            &format!("ERROR: element '{}' is not <select>: {:?}", id, e).into(),
+                        );
+                        continue;
+                    }
+                };
+
+                let selected = extract_selected(&select);
+                if !selected.is_empty() {
+                    parts.push(format!("{}:{};", id, selected.join(",")));
+                }
+            }
+        }
+    }
+
+    let href = match window.location().href() {
+        Ok(h) => h,
+        Err(e) => {
+            web_sys::console::log_1(&format!("ERROR: window.location.href => {:?}", e).into());
+            return;
+        }
+    };
+
+    let url = match Url::new(&href) {
+        Ok(u) => u,
+        Err(e) => {
+            web_sys::console::log_1(
+                &format!("ERROR: Url::new failed for href '{}': {:?}", href, e).into(),
+            );
+            return;
+        }
+    };
+
+    let search_params = url.search_params();
+
+    if parts.is_empty() {
+        search_params.delete("filter");
+    } else {
+        let filter_value = format!("{{{}}}", parts.join(""));
+        search_params.set("filter", &filter_value);
+    }
+
+    if let Err(e) = window
+        .history()
+        .expect("history")
+        .replace_state_with_url(&JsValue::NULL, "", Some(&url.href()))
+        {
+            web_sys::console::log_1(
+                &format!("ERROR: replace_state_with_url failed => {:?}", e).into(),
+            );
+        }
+}
+
+fn extract_selected(select: &HtmlSelectElement) -> Vec<String> {
+    let selected_options = select.selected_options();
+    let mut out = Vec::new();
+
+    for i in 0..selected_options.length() {
+        if let Some(option) = selected_options.item(i) {
+            if let Some(v) = option.get_attribute("value") {
+                out.push(v);
+            }
+        }
+    }
+    out
 }
