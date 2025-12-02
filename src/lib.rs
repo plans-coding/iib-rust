@@ -13,6 +13,7 @@ use serde_json::{json, Value as ValueJ};
 use wasm_bindgen::JsValue;
 use include_json::include_json;
 
+
 use opfs::persistent::{DirectoryHandle, FileHandle, WritableFileStream, app_specific_dir};
 use opfs::{GetFileHandleOptions, CreateWritableOptions};
 use opfs::persistent;
@@ -21,6 +22,7 @@ use opfs::persistent;
 use opfs::{DirectoryHandle as _, FileHandle as _, WritableFileStream as _};
 
 // Include the template as a string at compile time
+const TEMPLATE_MENU: &str = include_str!("../templates/_menu.liquid");
 const TEMPLATE_OVERVIEW: &str = include_str!("../templates/overview.liquid");
 const QUERY_OVERVIEW_YEAR: &CStr = unsafe { CStr::from_bytes_with_nul_unchecked(concat!(include_str!("../queries/overview_year.sql"), "\0").as_bytes()) };
 const QUERY_OVERVIEW_COUNTRY: &CStr = unsafe { CStr::from_bytes_with_nul_unchecked(concat!(include_str!("../queries/overview_country.sql"), "\0").as_bytes()) };
@@ -93,20 +95,57 @@ pub fn start() -> Result<(), JsValue> {
 
 
 
-        let page = get_page();
+        let queryParams = get_all_query_params();
+        web_sys::console::log_1(&format!("query params = {:?}", queryParams.get("p").map(|s| s.as_str()).unwrap_or("")).into());
 
-
-        match page.as_str() {
+        match queryParams.get("p").map(|s| s.as_str()).unwrap_or("") {
             "" | "overview" => {
 
+                // COMMON: TRANSLATION
                 let json_object = json_to_liquid_from_option(&translation);
                 parameters.insert("translation".into(), json_object);
+
+                // COMMON: SETTINGS
+                use liquid::ValueView;
+                let json_table = open_and_read_db(&db_vec, c"SELECT * FROM bewxx_Settings;").await;
+                let json_object = json_to_object(&json_table);
+                let array_value = json_object.into_iter().next().unwrap().1;
+                //web_sys::console::log_1(&format!("{:#?}", array_value).into());
+                parameters.insert("settings".into(), array_value);
+                //web_sys::console::log_1(&format!("{:#?}", parameters).into());
+
+                // QUERY PARAMS
+                use liquid::model::{Value, Object};
+
+                let mut obj = Object::new();
+                for (k, v) in queryParams {
+                    obj.insert(k.into(), Value::scalar(v));
+                }
+                parameters.insert("queryParams".into(), Value::Object(obj));
+
+                // TIME
+                use kstring::KString;
+                use chrono::Local;
+
+
+                let now = Local::now();
+                let trip_domains: Object = [
+                    ("now_year", now.format("%Y").to_string()),
+                ("now_date", now.format("%Y-%m-%d").to_string())
+                ].into_iter()
+                .map(|(k, v)| (KString::from(k), Value::scalar(v)))
+                .collect();
+
+                parameters.insert("time".into(), Value::Object(trip_domains));
 
                 // TRIP DOMAINS
                 let json_table = open_and_read_db(&db_vec, c"SELECT * FROM bewx_TripDomains WHERE DomainAbbreviation != 'X';").await;
                 let json_object = json_to_object(&json_table);
                 let array_value = json_object.into_iter().next().unwrap().1;
                 parameters.insert("tripDomains".into(), array_value);
+
+                // MENU (need trip domains, settings, translation)
+                render_to_dom(TEMPLATE_MENU, &parameters, "menu").unwrap();
 
                 // PARTICIPANT GROUPS
                 let json_table = open_and_read_db(&db_vec, c"SELECT * FROM bewx_ParticipantGroups;").await;
@@ -161,6 +200,7 @@ pub fn start() -> Result<(), JsValue> {
     Ok(())
 }
 
+
 fn json_to_liquid_from_option(opt: &Option<String>) -> LiquidValue {
     match opt {
         None => LiquidValue::Nil,
@@ -193,36 +233,61 @@ fn json_to_liquid(value: &JsonValue) -> LiquidValue {
     }
 }
 
-pub fn render_to_dom(template_content: &str, json_data: &liquid::Object, element_id: &str) -> Result<(), JsValue> {
-    let template = ParserBuilder::with_stdlib()
+pub fn render_to_dom(
+    template_content: &str,
+    json_data: &liquid::Object,
+    element_id: &str,
+) -> Result<(), JsValue> {
+    // Build the parser
+    let parser = ParserBuilder::with_stdlib()
     .build()
-    .unwrap()
-    .parse(template_content)
-    .unwrap();
-
-//    let output = template.render(&json_data).unwrap();
-
-    let output = template
-    .render(&json_data)
     .map_err(|e| {
+        let msg = format!("Failed to build Liquid parser: {}", e);
+        web_sys::console::error_1(&msg.clone().into());
+        JsValue::from_str(&msg)
+    })?;
+
+    // Parse the template
+    let template = parser.parse(template_content).map_err(|e| {
+        let msg = format!("Failed to parse template: {}", e);
+        web_sys::console::error_1(&msg.clone().into());
+        JsValue::from_str(&msg)
+    })?;
+
+    // Render the template
+    let output = template.render(json_data).map_err(|e| {
         let msg = format!("Template render error: {}", e);
         web_sys::console::error_1(&msg.clone().into());
         JsValue::from_str(&msg)
     })?;
 
+    // Get the document
+    let window = web_sys::window().ok_or_else(|| {
+        let msg = "No window object available".to_string();
+        web_sys::console::error_1(&msg.clone().into());
+        JsValue::from_str(&msg)
+    })?;
+    let document = window.document().ok_or_else(|| {
+        let msg = "No document object available".to_string();
+        web_sys::console::error_1(&msg.clone().into());
+        JsValue::from_str(&msg)
+    })?;
 
-
-    let document = window().unwrap().document().unwrap();
-    let app_div = document
-    .get_element_by_id(element_id)
-    .ok_or_else(|| JsValue::from_str("#app not found"))?;
+    // Get the element
+    let app_div = document.get_element_by_id(element_id).ok_or_else(|| {
+        let msg = format!("Element with id '{}' not found", element_id);
+        web_sys::console::error_1(&msg.clone().into());
+        JsValue::from_str(&msg)
+    })?;
 
     app_div.set_inner_html(&output);
 
     Ok(())
 }
 
+
 // Get UrlSearchParams
+/*
 pub fn get_page() -> String {
     let w = window().unwrap();
     let loc = w.location();
@@ -232,7 +297,59 @@ pub fn get_page() -> String {
     .unwrap_or_else(|_| web_sys::UrlSearchParams::new().unwrap());
 
     params.get("p").unwrap_or_default()
+}*/
+
+use web_sys::{UrlSearchParams};
+use std::collections::HashMap;
+
+pub fn get_all_query_params() -> HashMap<String, String> {
+    let mut result = HashMap::new();
+
+    // Get window.location.search
+    let search = window()
+    .and_then(|w| w.location().search().ok())
+    .unwrap_or_default();
+
+    // Build UrlSearchParams safely
+    let params = UrlSearchParams::new_with_str(&search)
+    .unwrap_or_else(|_| UrlSearchParams::new().unwrap());
+
+    // Iterate over all params
+    let iter = params.entries();
+
+    // Convert JS iterator → Rust HashMap
+    loop {
+        let next = js_sys::Reflect::get(&iter, &"next".into())
+        .ok()
+        .and_then(|n| n.dyn_into::<js_sys::Function>().ok())
+        .and_then(|next_fn| next_fn.call0(&iter).ok());
+
+        if next.is_none() {
+            break;
+        }
+
+        let next_obj = next.unwrap();
+        let done = js_sys::Reflect::get(&next_obj, &"done".into())
+        .ok()
+        .and_then(|d| d.as_bool())
+        .unwrap_or(true);
+
+        if done {
+            break;
+        }
+
+        let value = js_sys::Reflect::get(&next_obj, &"value".into()).unwrap();
+        let arr = value.dyn_into::<js_sys::Array>().unwrap();
+
+        let key = arr.get(0).as_string().unwrap_or_default();
+        let val = arr.get(1).as_string().unwrap_or_default();
+
+        result.insert(key, val);
+    }
+
+    result
 }
+
 
 fn json_to_object(json_str: &Option<String>) -> Object {
     let mut obj = Object::new();
