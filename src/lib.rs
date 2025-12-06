@@ -15,7 +15,7 @@ mod render;
 const TEMPLATE_MENU: &str = include_str!("../templates/_menu.liquid");
 const TEMPLATE_OVERVIEW: &str = include_str!("../templates/overview.liquid");
 const QUERY_OVERVIEW_YEAR: &str = include_str!("../queries/overview_year.sql");
-//const QUERY_OVERVIEW_COUNTRY: &CStr = unsafe { CStr::from_bytes_with_nul_unchecked(concat!(include_str!("../queries/overview_country.sql"), "\0").as_bytes()) };
+const QUERY_OVERVIEW_COUNTRY: &str = include_str!("../queries/overview_country.sql");
 
 #[wasm_bindgen(start)]
 fn start() {
@@ -65,17 +65,28 @@ fn start() {
 
 
         let queries = vec![
-            ("overview_year".to_string(), QUERY_OVERVIEW_YEAR.to_string()),
+            ("overviewYear".to_string(), QUERY_OVERVIEW_YEAR.to_string()),
+            ("overviewCountry".to_string(), QUERY_OVERVIEW_COUNTRY.to_string()),
             ("settings".to_string(), "SELECT * FROM bewxx_Settings;".to_string()),
             ("tripDomains".to_string(), "SELECT * FROM bewx_TripDomains WHERE DomainAbbreviation != 'X';".to_string()),
             ("participantGroups".to_string(), "SELECT * FROM bewx_ParticipantGroups;".to_string())
         ];
         let mut liquid_obj = query::get_query_data(&db_bytes, queries).await;
 
-        // Fortsätt här
 
+        use liquid::Object;
 
-        liquid_obj.insert("time".into(), Value::Object(translation_content));
+        match translation_content.as_ref() {
+            Some(content) => {
+                let translation_obj = liquid::model::to_object(content)
+                .unwrap_or_else(|_| liquid::Object::new());
+                liquid_obj.insert("translation".into(), liquid::model::Value::Object(translation_obj));
+            }
+            None => {
+                liquid_obj.insert("translation".into(), liquid::model::Value::Nil);
+            }
+        }
+
 
         web_sys::console::log_1(
             &serde_json::to_string(&liquid_obj).unwrap().into()
