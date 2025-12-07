@@ -34,10 +34,6 @@ pub async fn fetch_json(url: &str) -> Option<serde_json::Value> {
     serde_json::from_str(&text_str).ok()
 }
 
-
-
-
-
 // Fetch bytes from URL
 async fn fetch_bytes(url: &str) -> Option<Vec<u8>> {
     let window = window()?;
