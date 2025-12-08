@@ -21,10 +21,10 @@ WITH RECURSIVE SplitPins AS
             Remaining LIKE '%{%'
     )
     -- Extract name and coordinates from each pin entry
-    SELECT
-        "${parameter}" AS OuterId,
-        TRIM(SUBSTR(PinEntry, 1, INSTR(PinEntry, '|') - 1)) AS MapPin,
-        TRIM(SUBSTR(PinEntry, INSTR(PinEntry, '|') + 2, INSTR(PinEntry, ',') - INSTR(PinEntry, '|') - 2)) AS Latitude,
-        TRIM(SUBSTR(PinEntry, INSTR(PinEntry, ',') + 2)) AS Longitude
-    FROM
-        SplitPins;
+SELECT
+    "${parameter}" AS OuterId,
+    TRIM(SUBSTR(PinEntry, 1, INSTR(PinEntry, '|') - 1)) AS MapPin,
+    TRIM(SUBSTR(PinEntry, INSTR(PinEntry, '|') + 2, INSTR(PinEntry, ',') - INSTR(PinEntry, '|') - 2)) AS Latitude,
+    TRIM(SUBSTR(PinEntry, INSTR(PinEntry, ',') + 2)) AS Longitude
+FROM
+    SplitPins;
