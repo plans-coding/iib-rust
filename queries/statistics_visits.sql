@@ -21,7 +21,7 @@ ConsecutiveRemoval AS (
            END AS cleaned_country
     FROM SplittedCountries
 ),
-IIBc_BorderCrossings AS (
+BorderCrossings AS (
     SELECT b.OuterId, a.InnerId,
            GROUP_CONCAT(a.cleaned_country, ', ') AS AllBorderCrossings
     FROM ConsecutiveRemoval AS a
@@ -34,7 +34,7 @@ SplitCountries AS (
         OuterId,
         InnerId,
         TRIM(value) AS RawCountry
-    FROM IIBc_BorderCrossings, json_each('["' || REPLACE(AllBorderCrossings, ', ', '","') || '"]')
+    FROM BorderCrossings, json_each('["' || REPLACE(AllBorderCrossings, ', ', '","') || '"]')
 ),
 Normalized AS (
     SELECT DISTINCT
@@ -60,7 +60,7 @@ CountPrefixed AS (
         SUM(CASE WHEN TRIM(value) LIKE '*%' THEN 1 ELSE 0 END) AS SSMQ,
         SUM(CASE WHEN TRIM(value) LIKE '**%' THEN 1 ELSE 0 END) AS VSSMQ,
         SUM(CASE WHEN TRIM(value) LIKE '+%' THEN 1 ELSE 0 END) AS PSMQ
-    FROM IIBc_BorderCrossings, json_each('["' || REPLACE(AllBorderCrossings, ', ', '","') || '"]')
+    FROM BorderCrossings, json_each('["' || REPLACE(AllBorderCrossings, ', ', '","') || '"]')
     GROUP BY Country
 ),
 Aggregated AS (
