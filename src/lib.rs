@@ -4,7 +4,6 @@ use wasm_bindgen_futures::spawn_local;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::JsFuture;
 
-
 //use web_sys::{Response, window};
 use serde_json::json;
 use liquid::model::Value; // Needed for translation
@@ -29,14 +28,18 @@ const TEMPLATE_SOURCE: &str = include_str!("../templates/source.liquid");
 const TEMPLATE_ABOUT: &str = include_str!("../templates/about.liquid");
 const TEMPLATE_CONFIGURE: &str = include_str!("../templates/_configure.liquid");
 
-
 // Queries
+// -- Overview
 const QUERY_OVERVIEW_YEAR: &str = include_str!("../queries/overview_year.sql");
 const QUERY_OVERVIEW_COUNTRY: &str = include_str!("../queries/overview_country.sql");
-
+// -- Statistics
 const QUERY_STATISTICS_VISITS: &str = include_str!("../queries/statistics_visits.sql");
 const QUERY_STATISTICS_BORDER_CROSSINGS: &str = include_str!("../queries/statistics_border_crossings.sql");
 const QUERY_STATISTICS_OVERNIGHTS: &str = include_str!("../queries/statistics_overnights.sql");
+const QUERY_STATISTICS_PER_DOMAIN_YEAR: &str = include_str!("../queries/statistics_per_domain_year.sql");
+const QUERY_STATISTICS_THEME_COUNT: &str = include_str!("../queries/statistics_theme_count.sql");
+// -- Map
+const QUERY_TRIP_MAP_PINS: &str = include_str!("../queries/trip_map_pins.sql");
 
 #[wasm_bindgen(start)]
 fn start() {
