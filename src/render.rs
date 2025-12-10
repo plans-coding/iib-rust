@@ -1,7 +1,7 @@
 use liquid::{ParserBuilder, Object};
 use web_sys::window;
 
-pub fn render_to_dom(
+pub fn render2dom(
     template_content: &str,
     liquid_object: &Object,
     element_id: &str,
