@@ -1,6 +1,5 @@
 use web_sys::{window, Url};
-use serde_json::{Value, json};
-use std::collections::HashMap;
+use serde_json::Value;
 use wasm_bindgen::JsValue;
 
 // Single-value params (p, s, ...) become strings and `f` becomes an object of key-value pairs if present
@@ -55,7 +54,7 @@ pub fn set_query_params(params: &Value) {
     let href = location.href().unwrap_or_default();
 
     // Parse current URL
-    let mut url = Url::new(&href).expect("Invalid URL");
+    let url = Url::new(&href).expect("Invalid URL");
 
     // Remove all current search params
     url.set_search("");

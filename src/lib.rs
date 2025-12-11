@@ -1,6 +1,5 @@
 use wasm_bindgen::prelude::*;
-use std::collections::HashMap;
-use serde_json::{json, Value};
+use serde_json::json;
 
 mod filecontent;
 mod sqlite_query;
@@ -17,7 +16,6 @@ const TEMPLATE_MAP: &str = include_str!("../templates/map.liquid");
 const TEMPLATE_SEARCH: &str = include_str!("../templates/search.liquid");
 const TEMPLATE_STATISTICS: &str = include_str!("../templates/statistics.liquid");
 const TEMPLATE_DATASET: &str = include_str!("../templates/dataset.liquid");
-const TEMPLATE_SOURCE: &str = include_str!("../templates/source.liquid");
 const TEMPLATE_ABOUT: &str = include_str!("../templates/about.liquid");
 const TEMPLATE_CONFIGURE: &str = include_str!("../templates/_configure.liquid");
 
@@ -72,7 +70,7 @@ fn start() {
     // Second: Handle query parameters
     // -----------------------------------------------------------------------
 
-        let mut query_params = query_params::get_query_params();
+        let query_params = query_params::get_query_params();
         // Presume ?p=overview if not set at all
         let page = match &query_params["p"] { serde_json::Value::String(s) if !s.is_empty() => s.as_str(), _ => "overview", };
         web_sys::console::log_1(&format!("Loading page: {}",page).into());
@@ -125,11 +123,12 @@ fn start() {
                         "template": TEMPLATE_OVERVIEW,
                         "queries": {
                             "chronik.db": [
-                                //["settings", "SELECT * FROM bewxx_Settings;".to_string(), ""],
-                                ["overviewYear", QUERY_OVERVIEW_YEAR.to_string(), ""],
+                                ["overviewYear", QUERY_OVERVIEW_YEAR.to_string().replace(
+                                    "/*AND TripDomain IN (TripDomain) AND ParticipantGroup IN (ParticipantGroup)*/",
+                                    "AND TripDomain IN ('U') AND ParticipantGroup IN (ParticipantGroup)"), ""],
                                 ["overviewCountry", QUERY_OVERVIEW_COUNTRY.to_string(), ""],
-                                ["tripDomains", "SELECT * FROM bewx_TripDomains WHERE DomainAbbreviation != 'X';".to_string(), ""],
-                                ["participantGroups", "SELECT * FROM bewx_ParticipantGroups;".to_string(), ""],
+                                ["tripDomains", QUERY_COMMON_TRIP_DOMAINS.to_string(), ""],
+                                ["participantGroups", QUERY_COMMON_PARTICIPANT_GROUPS.to_string(), ""],
                     ]}}});
             }
             "trip" => {
@@ -141,7 +140,6 @@ fn start() {
                         "template": TEMPLATE_TRIP,
                         "queries": {
                             "chronik.db": [
-                                //["settings", "SELECT * FROM bewxx_Settings;".to_string(), ""],
                                 ["trip_summary", QUERY_TRIP_SUMMARY.to_string(), ""],
                                 ["trip_events", QUERY_TRIP_EVENTS.to_string(), ""],
                                 ["trip_allTrips", QUERY_TRIP_ALL_TRIPS.to_string(), ""],
@@ -173,7 +171,6 @@ fn start() {
                         "template": TEMPLATE_MAP,
                         "queries": {
                             "chronik.db": [
-                                //["settings", "SELECT * FROM bewxx_Settings;".to_string(), ""],
                                 ["map_countryList", QUERY_MAP_COUNTRY_LIST.to_string(), ""],
                                 ["map_theme", QUERY_MAP_THEME.to_string(), ""],
                                 ["map_contour", QUERY_MAP_CONTOUR.to_string(), ""],
@@ -189,7 +186,6 @@ fn start() {
                         "template": TEMPLATE_STATISTICS,
                         "queries": {
                             "chronik.db": [
-                                //["settings", "SELECT * FROM bewxx_Settings;".to_string(), ""],
                                 ["statistics_perDomainYear", QUERY_STATISTICS_PER_DOMAIN_YEAR, ""],
                                 ["statistics_tripCount", QUERY_STATISTICS_TRIP_COUNT.to_string(), ""],
                                 ["statistics_overnights", QUERY_STATISTICS_OVERNIGHTS, ""],
@@ -206,12 +202,12 @@ fn start() {
                         "template": TEMPLATE_DATASET,
                     }});
             }
-            "source" => {
+            "configure" => {
                 render_structure["page"] = json!({
                     "title": "Overview",
                     "menu": TEMPLATE_MENU,
                     "app": {
-                        "template": TEMPLATE_SOURCE,
+                        "template": TEMPLATE_CONFIGURE,
                     }});
             }
             "about" => {
@@ -234,7 +230,6 @@ fn start() {
                         "template": TEMPLATE_SEARCH,
                         "queries": {
                             "chronik.db": [
-                                //["settings", "SELECT * FROM bewxx_Settings;".to_string(), ""],
                                 ["search_trip", QUERY_SEARCH_TRIP.to_string(), ""],
                                 ["search_event", QUERY_SEARCH_EVENT.to_string(), ""],
                                 ["common_tripDomains", QUERY_COMMON_TRIP_DOMAINS.to_string(), ""],

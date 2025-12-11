@@ -1,11 +1,10 @@
-use wasm_bindgen::JsValue;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::JsFuture;
 use web_sys::{window, Response};
-use opfs::persistent::{DirectoryHandle, app_specific_dir};
+//use opfs::persistent::{DirectoryHandle, app_specific_dir};
+use opfs::persistent::app_specific_dir;
 use opfs::{GetFileHandleOptions, CreateWritableOptions};
 use opfs::{DirectoryHandle as _, FileHandle as _, WritableFileStream as _}; // traits
-use serde_json::Value;
 
 // Fetch plain text from URL
 pub async fn fetch_text(url: &str) -> Option<String> {
