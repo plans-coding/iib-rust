@@ -130,7 +130,8 @@ fn start() {
                                 ["overviewCountry", QUERY_OVERVIEW_COUNTRY.to_string(), ""],
                                 ["tripDomains", "SELECT * FROM bewx_TripDomains WHERE DomainAbbreviation != 'X';".to_string(), ""],
                                 ["participantGroups", "SELECT * FROM bewx_ParticipantGroups;".to_string(), ""],
-            ]}}});}
+                    ]}}});
+            }
             "trip" => {
                 // Title med outer id + dagbok + pass
                 render_structure["page"] = json!({
@@ -148,7 +149,8 @@ fn start() {
                                 // Lägg till filter
                                 ["trip_borderCrossings", QUERY_STATISTICS_BORDER_CROSSINGS, ""],
                                 ["trip_mapPins", QUERY_TRIP_MAP_PINS, ""],
-            ]}}});}
+                ]}}});
+            }
             "images" => {
                 render_structure["page"] = json!({
                     "title": "Overview",
@@ -161,7 +163,8 @@ fn start() {
                                 ["common_tripDomains", QUERY_COMMON_TRIP_DOMAINS.to_string(), ""],
                                 ["images_photoTime", QUERY_IMAGES_PHOTO_TIME.to_string(), ""],
                                 ["tripDomains", QUERY_COMMON_TRIP_DOMAINS.to_string(), ""],
-            ]}}});}
+                ]}}});
+            }
             "map" => {
                 render_structure["page"] = json!({
                     "title": "Overview",
@@ -176,7 +179,8 @@ fn start() {
                                 ["map_contour", QUERY_MAP_CONTOUR.to_string(), ""],
                                 ["map_country", QUERY_MAP_COUNTRY.to_string(), ""],
                                 ["tripDomains", QUERY_COMMON_TRIP_DOMAINS.to_string(), ""],
-            ]}}});}
+                    ]}}});
+            }
             "statistics" => {
                 render_structure["page"] = json!({
                     "title": "Overview",
@@ -192,21 +196,24 @@ fn start() {
                                 ["common_tripDomains", QUERY_COMMON_TRIP_DOMAINS.to_string(), ""],
                                 ["statistics_OLSSVSS", QUERY_STATISTICS_VISITS, ""],
                                 ["statistics_theme_count", QUERY_STATISTICS_THEME_COUNT, ""],
-            ]}}});}
+                    ]}}});
+            }
             "dataset" => {
                 render_structure["page"] = json!({
                     "title": "Overview",
                     "menu": TEMPLATE_MENU,
                     "app": {
                         "template": TEMPLATE_DATASET,
-                    }});}
+                    }});
+            }
             "source" => {
                 render_structure["page"] = json!({
                     "title": "Overview",
                     "menu": TEMPLATE_MENU,
                     "app": {
                         "template": TEMPLATE_SOURCE,
-                    }});}
+                    }});
+            }
             "about" => {
                 // Lägg till versionskontroll
                 render_structure["page"] = json!({
@@ -214,7 +221,11 @@ fn start() {
                     "menu": TEMPLATE_MENU,
                     "app": {
                         "template": TEMPLATE_ABOUT,
-                    }});}
+                    },
+                });
+                render_structure["all"]["current_version"] = filecontent::fetch_text("version").await.into();
+                render_structure["all"]["latest_version"] = json!(helper::get_latest_version_number().await);
+            }
             "search" => {
                 render_structure["page"] = json!({
                     "title": "translation.menu queryParams p",
@@ -227,7 +238,8 @@ fn start() {
                                 ["search_trip", QUERY_SEARCH_TRIP.to_string(), ""],
                                 ["search_event", QUERY_SEARCH_EVENT.to_string(), ""],
                                 ["common_tripDomains", QUERY_COMMON_TRIP_DOMAINS.to_string(), ""],
-            ]}}});}
+                    ]}}});
+            }
             _ => {
                 web_sys::console::log_1(&"Another error.".into());
             }
@@ -290,5 +302,6 @@ pub async fn prepare_rendering(db_bytes: Vec<u8>, render_structure: serde_json::
     web_sys::console::log_1(&"----------------------".into());
     render::render2dom(&render_structure["page"]["app"]["template"].as_str().expect("template must be a string"), &merged_structure, "app");
 
+    //web_sys::console::log_1(&serde_json::to_string(&render_structure["page"]["latest_version"]).unwrap().into());
 
 }
