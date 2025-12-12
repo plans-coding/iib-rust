@@ -29,21 +29,24 @@
 {% endfor %}
 </style>
 
-<select id="tripDomain" class="form-select form-select-lg mb-3" aria-label="Large select example" multiple size="1">
-  {% for tripDomain in tripDomains %}
-    <option value="{{ tripDomain.DomainAbbreviation }}">{{ tripDomain.DomainDescription }}</option>
-  {% endfor %}
-</select>
-
-<select id="participantGroup" class="form-select form-select-lg mb-3" aria-label="Large select example" multiple size="1">
-  {% for participantGroup in participantGroups %}
-    <option value="{{ participantGroup.ParticipantGroup }}">{{ participantGroup.ParticipantGroup }}</option>
-  {% endfor %}
-</select>
 
 
 
 <div class="container text-center">
+
+<div class="d-flex gap-3">
+  <select id="TripDomain" class="form-select form-select-lg mb-3" multiple size="1">
+    {% for tripDomain in tripDomains %}
+      <option value="{{ tripDomain.DomainAbbreviation }}">{{ tripDomain.DomainDescription }}</option>
+    {% endfor %}
+  </select>
+
+  <select id="ParticipantGroup" class="form-select form-select-lg mb-3" multiple size="1">
+    {% for participantGroup in participantGroups %}
+      <option value="{{ participantGroup.ParticipantGroup }}">{{ participantGroup.ParticipantGroup }}</option>
+    {% endfor %}
+  </select>
+</div>
 
   <ul class="nav nav-tabs" id="myTab" role="tablist">
     <li class="nav-item" role="presentation">

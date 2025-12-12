@@ -3,8 +3,8 @@
 <div><img src="images/frog.svg" style="margin-top:40pt;margin-bottom:0pt;height:150pt;width:150pt;" /></div>
 
 <h1>{{ translation.about.title | default: 'About' }}</h1>
-<span id="currentVersion" class="m-2 badge text-bg-secondary"> include 'version' </span>
-<div class="badge text-bg-warning" id="updateText"></div>
+<span id="currentVersion" class="m-2 badge text-bg-secondary"> {{ current_version }} </span>
+{% if latest_version != current_version %}<div class="badge text-bg-warning" id="updateText">{{ latest_version }}</div>{% endif %}
 
 <p class="lead">
   <span class="immer-in-font-uc">Immer in</span>&nbsp;<span class="bewegung-font-uc">Bewegung</span> <span>{{ translation.about.description | default: 'is your open source, lightweight, and future proof travel documentation app.' }}</span>
