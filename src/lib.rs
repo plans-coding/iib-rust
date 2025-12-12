@@ -9,16 +9,16 @@ mod query_params;
 mod helper;
 
 // Templates
-const TEMPLATE_MENU: &str = include_str!("../templates/_menu.liquid");
-const TEMPLATE_OVERVIEW: &str = include_str!("../templates/overview.liquid");
-const TEMPLATE_TRIP: &str = include_str!("../templates/trip.liquid");
-const TEMPLATE_IMAGES: &str = include_str!("../templates/images.liquid");
-const TEMPLATE_MAP: &str = include_str!("../templates/map.liquid");
-const TEMPLATE_SEARCH: &str = include_str!("../templates/search.liquid");
-const TEMPLATE_STATISTICS: &str = include_str!("../templates/statistics.liquid");
-const TEMPLATE_DATASET: &str = include_str!("../templates/dataset.liquid");
-const TEMPLATE_ABOUT: &str = include_str!("../templates/about.liquid");
-const TEMPLATE_CONFIGURE: &str = include_str!("../templates/_configure.liquid");
+const TEMPLATE_MENU: &str = include_str!("../templates/_menu.tera");
+const TEMPLATE_OVERVIEW: &str = include_str!("../templates/overview.tera");
+const TEMPLATE_TRIP: &str = include_str!("../templates/trip.tera");
+const TEMPLATE_IMAGES: &str = include_str!("../templates/images.tera");
+const TEMPLATE_MAP: &str = include_str!("../templates/map.tera");
+const TEMPLATE_SEARCH: &str = include_str!("../templates/search.tera");
+const TEMPLATE_STATISTICS: &str = include_str!("../templates/statistics.tera");
+const TEMPLATE_DATASET: &str = include_str!("../templates/dataset.tera");
+const TEMPLATE_ABOUT: &str = include_str!("../templates/about.tera");
+const TEMPLATE_CONFIGURE: &str = include_str!("../templates/_configure.tera");
 
 // Advanced queries
 const QUERY_OVERVIEW_YEAR: &str = include_str!("../queries/overview_year.sql");
@@ -88,6 +88,7 @@ fn start() {
         if p_is_empty { render_structure["all"]["query_params"]["p"] = json!("overview"); }
 
         render_structure["all"]["time"] = helper::build_time_json();
+        web_sys::console::log_1(&serde_json::to_string(&render_structure["all"]).unwrap().into());
 
         // Get translation
         let translation_query = vec![
@@ -269,9 +270,7 @@ pub async fn prepare_rendering(db_bytes: Vec<u8>, render_structure: serde_json::
 
     //web_sys::console::log_1(&"----------------------".into());
     //web_sys::console::log_1(&serde_json::to_string(&render_structure["page"]["menu"]).unwrap().into());
-    let menu_liquid: liquid::model::Object = render::json_to_liquid_object(&render_structure["all"]);
-    render::render2dom(TEMPLATE_MENU, &menu_liquid, "menu");
-
+    render::render2dom(TEMPLATE_MENU, &render_structure["all"], "menu");
 
     // RUN SQLITE QUERIES  -----------------------------------------------------------------------
 
@@ -287,12 +286,24 @@ pub async fn prepare_rendering(db_bytes: Vec<u8>, render_structure: serde_json::
     })
     .collect();
 
-    let query_response = sqlite_query::get_query_data(&db_bytes, combined_query).await;
+    let query_response: serde_json::Value = sqlite_query::get_query_data(&db_bytes, combined_query).await;
 
-    let mut merged_structure = render::json_to_liquid_object(&render_structure["all"]);
-    for (k, v) in &query_response {
-        merged_structure.insert(k.clone(), v.clone());
+    // Start with a clone of the "all" section from render_structure
+    let mut merged_structure = render_structure["all"].clone();
+
+    // Merge if both are objects
+    match (&mut merged_structure, query_response) {
+        (serde_json::Value::Object(ref mut target), serde_json::Value::Object(source)) => {
+            for (k, v) in source {
+                target.insert(k, v);
+            }
+        }
+        // If either is not an object, fallback to keeping query_response as is
+        (_, other) => {
+            merged_structure = other;
+        }
     }
+
     //web_sys::console::log_1(&serde_json::to_string(&query_response).unwrap().into());
 
 
@@ -300,9 +311,12 @@ pub async fn prepare_rendering(db_bytes: Vec<u8>, render_structure: serde_json::
 
     //web_sys::console::log_1(&"----------------------".into());
     render::render2dom(&render_structure["page"]["app"]["template"].as_str().expect("template must be a string"), &merged_structure, "app");
-
     //web_sys::console::log_1(&serde_json::to_string(&render_structure["page"]["latest_version"]).unwrap().into());
     helper::apply_preselected(&render_structure["all"]["query_params"]["f"]);
     helper::attach_select_listeners();
 
+
+
 }
+
+
