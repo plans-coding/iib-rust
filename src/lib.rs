@@ -1,5 +1,6 @@
 use wasm_bindgen::prelude::*;
 use serde_json::json;
+use helper::SqlFilterReplace;
 
 mod filecontent;
 mod sqlite_query;
@@ -108,7 +109,7 @@ fn start() {
 
         render_structure["all"]["settings"] = serde_json::to_value(&settings_response["settings"]).unwrap();
         render_structure["all"]["translation"] = translation_content.expect("Error with translation data.");
-        web_sys::console::log_1(&serde_json::to_string(&render_structure).unwrap().into());
+        //web_sys::console::log_1(&serde_json::to_string(&render_structure).unwrap().into());
 
     // -----------------------------------------------------------------------
     // Fourth: Page specific data
@@ -123,10 +124,13 @@ fn start() {
                         "template": TEMPLATE_OVERVIEW,
                         "queries": {
                             "chronik.db": [
-                                ["overviewYear", QUERY_OVERVIEW_YEAR.to_string().replace(
-                                    "/*AND TripDomain IN (TripDomain) AND ParticipantGroup IN (ParticipantGroup)*/",
-                                    "AND TripDomain IN ('U') AND ParticipantGroup IN (ParticipantGroup)"), ""],
-                                ["overviewCountry", QUERY_OVERVIEW_COUNTRY.to_string(), ""],
+                                ["overviewYear", QUERY_OVERVIEW_YEAR.to_string().replace("/*","").replace("*/","")
+                                .replace_filter("(TripDomain)", &render_structure["all"]["query_params"]["f"])
+                                .replace_filter("(ParticipantGroup)", &render_structure["all"]["query_params"]["f"])],
+                                // Replace "c.Continent = 'Europa'" in QUERY_OVERVIEW_COUNTRY with value from settings in future version
+                                ["overviewCountry", QUERY_OVERVIEW_COUNTRY.to_string().replace("/*","").replace("*/","")
+                                .replace_filter("(TripDomain)", &render_structure["all"]["query_params"]["f"])
+                                .replace_filter("(ParticipantGroup)", &render_structure["all"]["query_params"]["f"])],
                                 ["tripDomains", QUERY_COMMON_TRIP_DOMAINS.to_string(), ""],
                                 ["participantGroups", QUERY_COMMON_PARTICIPANT_GROUPS.to_string(), ""],
                     ]}}});
@@ -255,7 +259,7 @@ pub async fn prepare_rendering(db_bytes: Vec<u8>, render_structure: serde_json::
 
     // SET TITLE  -----------------------------------------------------------------------
 
-    web_sys::console::log_1(&"----------------------".into());
+    //web_sys::console::log_1(&"----------------------".into());
     let title = render_structure["page"]["title"].as_str().unwrap_or("Default Title");
     web_sys::window().unwrap().document().unwrap().set_title(title);
     web_sys::console::log_1(&serde_json::to_string(&render_structure["page"]["title"]).unwrap().into());
@@ -263,16 +267,16 @@ pub async fn prepare_rendering(db_bytes: Vec<u8>, render_structure: serde_json::
 
     // RENDER TO 'MENU'  -----------------------------------------------------------------------
 
-    web_sys::console::log_1(&"----------------------".into());
-    web_sys::console::log_1(&serde_json::to_string(&render_structure["page"]["menu"]).unwrap().into());
+    //web_sys::console::log_1(&"----------------------".into());
+    //web_sys::console::log_1(&serde_json::to_string(&render_structure["page"]["menu"]).unwrap().into());
     let menu_liquid: liquid::model::Object = render::json_to_liquid_object(&render_structure["all"]);
     render::render2dom(TEMPLATE_MENU, &menu_liquid, "menu");
 
 
     // RUN SQLITE QUERIES  -----------------------------------------------------------------------
 
-    web_sys::console::log_1(&"----------------------".into());
-    web_sys::console::log_1(&serde_json::to_string(&render_structure["page"]["app"]["queries"]["chronik.db"]).unwrap().into());
+    //web_sys::console::log_1(&"----------------------".into());
+    //web_sys::console::log_1(&serde_json::to_string(&render_structure["page"]["app"]["queries"]["chronik.db"]).unwrap().into());
 
     let combined_query: Vec<(String, String)> = render_structure["page"]["app"]["queries"]["chronik.db"]
     .as_array().unwrap_or(&Vec::new()).iter().map(|row| {
@@ -289,14 +293,16 @@ pub async fn prepare_rendering(db_bytes: Vec<u8>, render_structure: serde_json::
     for (k, v) in &query_response {
         merged_structure.insert(k.clone(), v.clone());
     }
-    web_sys::console::log_1(&serde_json::to_string(&query_response).unwrap().into());
+    //web_sys::console::log_1(&serde_json::to_string(&query_response).unwrap().into());
 
 
     // RENDER TO 'APP'  -----------------------------------------------------------------------
 
-    web_sys::console::log_1(&"----------------------".into());
+    //web_sys::console::log_1(&"----------------------".into());
     render::render2dom(&render_structure["page"]["app"]["template"].as_str().expect("template must be a string"), &merged_structure, "app");
 
     //web_sys::console::log_1(&serde_json::to_string(&render_structure["page"]["latest_version"]).unwrap().into());
+    helper::apply_preselected(&render_structure["all"]["query_params"]["f"]);
+    helper::attach_select_listeners();
 
 }
