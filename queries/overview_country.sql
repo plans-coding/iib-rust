@@ -42,11 +42,13 @@ normalized AS (
         value AS OriginalCountry,
         b.OverallDestination,
         b.ParticipantGroup,
-        b.DepartureDate
+        b.DepartureDate,
+        SUBSTR(a.InnerId, 1, 1) AS TripDomain
     FROM BorderCrossings AS a,
         json_each('["' || REPLACE(AllBorderCrossings, ', ', '", "') || '"]')
     LEFT JOIN  bewa_Overview AS b
     ON b.InnerId = a.InnerId
+    /*WHERE TripDomain IN (TripDomain) AND ParticipantGroup IN (ParticipantGroup)*/
     ORDER BY
         b.DepartureDate ASC
 )
