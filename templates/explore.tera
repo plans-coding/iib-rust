@@ -1,0 +1,26 @@
+<h1>Explore</h1>
+
+<div class="card-container">
+{% for row in explore %}
+
+    <a href="?path=trip:{{ row.OuterId }}" class="card">
+      <!--<img src="{{ row.CoverPhoto }}" class="card-img-top" alt="...">-->
+      <div class="card-body">
+        <h5 class="card-title">{{ row.OverallDestination }}</h5>
+        <p class="card-text">{{ row.TripDescription }}</p>
+      </div>
+      <div class="card-footer">
+        <small class="text-body-secondary">{{ row.TripYear }} {{ row.NumberOfDays }}</small>
+      </div>
+    </a>
+
+{% endfor %}
+</div>
+
+<h2>See a list per...</h2>
+
+<nav class="submenu">
+    <div><a href="?path=overview:year">Year</a></div>
+    <div><a href="?path=overview:country">Country</a></div>
+    <div><a href="?path=overview:plain">Plain</a></div>
+</nav>

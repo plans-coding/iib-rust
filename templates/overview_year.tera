@@ -1,0 +1,92 @@
+<style>
+{% for tripDomain in tripDomains %}
+.iib-plain[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}] {
+  background-color: {{ tripDomain.Color }};
+  padding: 3pt 5pt 3pt 5pt;
+  color:#fff;
+}
+.iib-decade[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}] {
+  background-color: {{ tripDomain.Color }};
+  padding: 3pt 5pt 3pt 5pt;
+  margin:2pt 0 2pt 0;
+  color:#fff;
+}
+.btn-filter-domain[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}] {
+  background-color: {{ tripDomain.Color }};
+  color:#fff;
+}
+.participantGroup {
+  background-color: #000;
+  padding: 3pt 5pt 3pt 5pt;
+  color:#fff;
+}
+.iib-decade[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}]:hover,
+.btn-filter-domain[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}]:active {
+  background-color: {{ tripDomain.Color }}cc;
+  color:#fff;
+}
+{% endfor %}
+</style>
+
+<div class="submenu">
+  <div>Overview</div>
+  <a href="?path=overview:year" class="tab-link {% if query_params.path == 'overview:year' %}active{% endif %}">Year</a>
+  <a href="?path=overview:country" class="tab-link {% if query_params.path == 'overview:country' %}active{% endif %}">Country</a>
+  <a href="?path=overview:plain" class="tab-link {% if query_params.path == 'overview:plain' %}active{% endif %}">Plain</a>
+</div>
+
+<table class="table-overview-year">
+{# Same type as the comparing object #}
+{% set last_decade = 0 %}
+{% set last_year = 0 %}
+{% set year_row_open = false %}
+
+{% for trip in overviewYear %}
+
+    {# If decade changes, close any open year row first, then print decade header #}
+    {% if trip.TripDecade != last_decade %}
+        {% if year_row_open %}
+            </td>
+            </tr>
+            {% set_global year_row_open = false %}
+        {% endif %}
+
+        <tr>
+            <td colspan="2">
+                {{ trip.TripDecade }}{{ translation.overview.century | default(value="'s") }}
+            </td>
+        </tr>
+
+        {% set_global last_decade = trip.TripDecade %}
+        {% set_global last_year = 0 %}
+    {% endif %}
+
+    {# If year changes, close previous year row (if any), then open a new one #}
+    {% if trip.TripYear != last_year %}
+        {% if year_row_open %}
+            </td>
+            </tr>
+        {% endif %}
+
+        <tr>
+            <td>{{ trip.TripYear }}</td>
+            <td>
+                <a href="?path=trip:{{ trip.OuterId }}"><div style="display:inline-block;" class="iib-decade iib-item" data-iib-participantGroup="{{ trip.ParticipantGroup }}" data-iib-tripDomain="{{ trip.TripDomain }}">{{ trip.OuterId }} {{ trip.OverallDestination }}</div></a>
+
+        {% set_global last_year = trip.TripYear %}
+        {% set_global year_row_open = true %}
+
+    {% else %}
+        <a href="?path=trip:{{ trip.OuterId }}"><div style="display:inline-block;" class="iib-decade iib-item" data-iib-participantGroup="{{ trip.ParticipantGroup }}" data-iib-tripDomain="{{ trip.TripDomain }}">{{ trip.OuterId }} {{ trip.OverallDestination }}</div></a>
+    {% endif %}
+
+{% endfor %}
+
+{# Close the final open row #}
+{% if year_row_open %}
+    </td>
+    </tr>
+{% endif %}
+</table>
+
+

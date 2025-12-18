@@ -1,0 +1,96 @@
+<style>
+{% for tripDomain in tripDomains %}
+.iib-plain[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}] {
+  background-color: {{ tripDomain.Color }};
+  padding: 3pt 5pt 3pt 5pt;
+  color:#fff;
+}
+.iib-decade[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}] {
+  background-color: {{ tripDomain.Color }};
+  padding: 3pt 5pt 3pt 5pt;
+  margin:2pt 0 2pt 0;
+  color:#fff;
+}
+.btn-filter-domain[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}] {
+  background-color: {{ tripDomain.Color }};
+  color:#fff;
+}
+.participantGroup {
+  background-color: #000;
+  padding: 3pt 5pt 3pt 5pt;
+  color:#fff;
+}
+.iib-decade[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}]:hover,
+.btn-filter-domain[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}]:active {
+  background-color: {{ tripDomain.Color }}cc;
+  color:#fff;
+}
+{% endfor %}
+</style>
+
+<div class="submenu">
+  <div>Overview</div>
+  <a href="?path=overview:year" class="tab-link {% if query_params.path == 'overview:year' %}active{% endif %}">Year</a>
+  <a href="?path=overview:country" class="tab-link {% if query_params.path == 'overview:country' %}active{% endif %}">Country</a>
+  <a href="?path=overview:plain" class="tab-link {% if query_params.path == 'overview:plain' %}active{% endif %}">Plain</a>
+</div>
+
+<table class="table-overview-plain">
+  <thead>
+    <tr>
+      <th class="iib-silver-grey" style="white-space: nowrap;">
+        {{ translation.trip.id | default(value="ID") }}
+      </th>
+      <th class="iib-silver-grey">
+        {{ translation.trip.overallDestination | default(value="Overall Destination") }}
+      </th>
+      <th class="iib-silver-grey">
+        {{ translation.trip.departureDate | default(value="Departure") }}
+      </th>
+      <th class="iib-silver-grey">
+        {{ translation.trip.returnDate | default(value="Return") }}
+      </th>
+      <th class="iib-silver-grey">
+        {{ translation.trip.numberOfDays | default(value="NoD") }}
+      </th>
+      <th class="iib-silver-grey">
+        {{ translation.trip.participantGroup | default(value="Group") }}
+      </th>
+    </tr>
+  </thead>
+
+  <tbody>
+    {% for trip in overviewYear %}
+      <tr class="iib-item"
+          data-iib-participantGroup="{{ trip.ParticipantGroup }}"
+          data-iib-tripDomain="{{ trip.TripDomain }}">
+
+        <td>
+          <a href="?p=trip&id={{ trip.OuterId }}" style="text-decoration:none;">
+            <div class="text-nowrap iib-decade"
+                 data-iib-participantGroup="{{ trip.ParticipantGroup }}"
+                 data-iib-tripDomain="{{ trip.TripDomain }}">
+              {{ trip.OuterId }}
+            </div>
+          </a>
+        </td>
+
+        <td class="align-middle">{{ trip.OverallDestination }}</td>
+
+        <td class="align-middle"><div class="text-nowrap">{{ trip.DepartureDate }}</div></td>
+
+        <td class="align-middle"><div class="text-nowrap">{{ trip.ReturnDate }}</div></td>
+
+        <td class="align-middle">
+          {{ trip.NumberOfDays | default(value="") }}
+        </td>
+
+        <td>
+          <div class="participantGroup text-nowrap align-middle">{{ trip.ParticipantGroup }}</div>
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+
