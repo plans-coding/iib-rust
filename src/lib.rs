@@ -9,8 +9,10 @@ mod query_params;
 mod helper;
 
 // Templates
-const TEMPLATE_MENU: &str = include_str!("../templates/_menu.tera");
-const TEMPLATE_OVERVIEW: &str = include_str!("../templates/overview.tera");
+const TEMPLATE_EXPLORE: &str = include_str!("../templates/explore.tera");
+const TEMPLATE_OVERVIEW_YEAR: &str = include_str!("../templates/overview_year.tera");
+const TEMPLATE_OVERVIEW_COUNTRY: &str = include_str!("../templates/overview_country.tera");
+const TEMPLATE_OVERVIEW_PLAIN: &str = include_str!("../templates/overview_plain.tera");
 const TEMPLATE_TRIP: &str = include_str!("../templates/trip.tera");
 const TEMPLATE_IMAGES: &str = include_str!("../templates/images.tera");
 const TEMPLATE_MAP: &str = include_str!("../templates/map.tera");
@@ -21,6 +23,7 @@ const TEMPLATE_ABOUT: &str = include_str!("../templates/about.tera");
 const TEMPLATE_CONFIGURE: &str = include_str!("../templates/_configure.tera");
 
 // Advanced queries
+const QUERY_EXPLORE: &str = include_str!("../queries/explore.sql");
 const QUERY_OVERVIEW_YEAR: &str = include_str!("../queries/overview_year.sql");
 const QUERY_OVERVIEW_COUNTRY: &str = include_str!("../queries/overview_country.sql");
 const QUERY_STATISTICS_VISITS: &str = include_str!("../queries/statistics_visits.sql");
@@ -63,7 +66,7 @@ fn start() {
         } else {
             web_sys::console::log_1(&"No DB loaded.".into());
             // Set query parameter 'p' to 'configure'
-            query_params::set_query_params(&json!({"p":"configure"}));
+            query_params::set_query_params(&json!({"path":"configure"}));
             // set page = configure -- needed?
         }
 
@@ -73,7 +76,7 @@ fn start() {
 
         let query_params = query_params::get_query_params();
         // Presume ?p=overview if not set at all
-        let page = match &query_params["p"] { serde_json::Value::String(s) if !s.is_empty() => s.as_str(), _ => "overview", };
+        let page = match &query_params["path"] { serde_json::Value::String(s) if !s.is_empty() => s.as_str(), _ => "explore", };
         web_sys::console::log_1(&format!("Loading page: {}",page).into());
 
     // -----------------------------------------------------------------------
@@ -84,8 +87,8 @@ fn start() {
         render_structure["all"]["query_params"] = query_params.clone();
 
         // If "p" is missing or empty, set it to "overview"
-        let p_is_empty = render_structure["all"]["query_params"]["p"].as_str().map(|s| s.is_empty()).unwrap_or(true);
-        if p_is_empty { render_structure["all"]["query_params"]["p"] = json!("overview"); }
+        let p_is_empty = render_structure["all"]["query_params"]["path"].as_str().map(|s| s.is_empty()).unwrap_or(true);
+        if p_is_empty { render_structure["all"]["query_params"]["path"] = json!("explore"); }
 
         render_structure["all"]["time"] = helper::build_time_json();
         web_sys::console::log_1(&serde_json::to_string(&render_structure["all"]).unwrap().into());
@@ -117,30 +120,71 @@ fn start() {
     // -----------------------------------------------------------------------
 
         match page {
-            "overview" => {
+            "explore" => {
                 render_structure["page"] = json!({
-                    "title": "Overview",
-                    "menu": TEMPLATE_MENU,
+                    "title": "Explore",
                     "app": {
-                        "template": TEMPLATE_OVERVIEW,
+                        "template": TEMPLATE_EXPLORE,
+                        "queries": {
+                            "chronik.db": [
+                                ["explore", QUERY_EXPLORE.to_string().replace("/*","").replace("*/","")
+                                .replace_filter("(TripDomain)", &render_structure["all"]["query_params"]["f"])
+                                .replace_filter("(ParticipantGroup)", &render_structure["all"]["query_params"]["f"])],
+                                ["tripDomains", QUERY_COMMON_TRIP_DOMAINS.to_string(), ""],
+                                ["participantGroups", QUERY_COMMON_PARTICIPANT_GROUPS.to_string(), ""],
+                            ]}}});
+            }
+            "overview:year" => {
+                render_structure["page"] = json!({
+                    "title": "Overview: Year",
+                    "app": {
+                        "template": TEMPLATE_OVERVIEW_YEAR,
                         "queries": {
                             "chronik.db": [
                                 ["overviewYear", QUERY_OVERVIEW_YEAR.to_string().replace("/*","").replace("*/","")
-                                .replace_filter("(TripDomain)", &render_structure["all"]["query_params"]["f"])
-                                .replace_filter("(ParticipantGroup)", &render_structure["all"]["query_params"]["f"])],
-                                // Replace "c.Continent = 'Europa'" in QUERY_OVERVIEW_COUNTRY with value from settings in future version
-                                ["overviewCountry", QUERY_OVERVIEW_COUNTRY.to_string().replace("/*","").replace("*/","")
                                 .replace_filter("(TripDomain)", &render_structure["all"]["query_params"]["f"])
                                 .replace_filter("(ParticipantGroup)", &render_structure["all"]["query_params"]["f"])],
                                 ["tripDomains", QUERY_COMMON_TRIP_DOMAINS.to_string(), ""],
                                 ["participantGroups", QUERY_COMMON_PARTICIPANT_GROUPS.to_string(), ""],
                     ]}}});
             }
+            "overview:country" => {
+                render_structure["page"] = json!({
+                    "title": "Overview: Country",
+                    "app": {
+                        "template": TEMPLATE_OVERVIEW_COUNTRY,
+                        "queries": {
+                            "chronik.db": [
+                                 // Replace "c.Continent = 'Europa'" in QUERY_OVERVIEW_COUNTRY with value from settings in future version
+                                 ["overviewCountry", QUERY_OVERVIEW_COUNTRY.to_string().replace("/*","").replace("*/","")
+                                 .replace_filter("(TripDomain)", &render_structure["all"]["query_params"]["f"])
+                                 .replace_filter("(ParticipantGroup)", &render_structure["all"]["query_params"]["f"])],
+                                 ["tripDomains", QUERY_COMMON_TRIP_DOMAINS.to_string(), ""],
+                                 ["participantGroups", QUERY_COMMON_PARTICIPANT_GROUPS.to_string(), ""],
+                            ]}}});
+            }
+            "overview:plain" => {
+                render_structure["page"] = json!({
+                    "title": "Overview: Plain",
+                    "app": {
+                        "template": TEMPLATE_OVERVIEW_PLAIN,
+                        "queries": {
+                            "chronik.db": [
+                                ["overviewYear", QUERY_OVERVIEW_YEAR.to_string().replace("/*","").replace("*/","")
+                                .replace_filter("(TripDomain)", &render_structure["all"]["query_params"]["f"])
+                                .replace_filter("(ParticipantGroup)", &render_structure["all"]["query_params"]["f"])],
+                                 // Replace "c.Continent = 'Europa'" in QUERY_OVERVIEW_COUNTRY with value from settings in future version
+                                 ["overviewCountry", QUERY_OVERVIEW_COUNTRY.to_string().replace("/*","").replace("*/","")
+                                 .replace_filter("(TripDomain)", &render_structure["all"]["query_params"]["f"])
+                                 .replace_filter("(ParticipantGroup)", &render_structure["all"]["query_params"]["f"])],
+                                 ["tripDomains", QUERY_COMMON_TRIP_DOMAINS.to_string(), ""],
+                                 ["participantGroups", QUERY_COMMON_PARTICIPANT_GROUPS.to_string(), ""],
+                            ]}}});
+            }
             "trip" => {
                 // Title med outer id + dagbok + pass
                 render_structure["page"] = json!({
                     "title": "?",
-                    "menu": TEMPLATE_MENU,
                     "app": {
                         "template": TEMPLATE_TRIP,
                         "queries": {
@@ -157,7 +201,6 @@ fn start() {
             "images" => {
                 render_structure["page"] = json!({
                     "title": "Overview",
-                    "menu": TEMPLATE_MENU,
                     "app": {
                         "template": TEMPLATE_IMAGES,
                         "queries": {
@@ -171,7 +214,6 @@ fn start() {
             "map" => {
                 render_structure["page"] = json!({
                     "title": "Overview",
-                    "menu": TEMPLATE_MENU,
                     "app": {
                         "template": TEMPLATE_MAP,
                         "queries": {
@@ -186,7 +228,6 @@ fn start() {
             "statistics" => {
                 render_structure["page"] = json!({
                     "title": "Overview",
-                    "menu": TEMPLATE_MENU,
                     "app": {
                         "template": TEMPLATE_STATISTICS,
                         "queries": {
@@ -202,7 +243,6 @@ fn start() {
             "dataset" => {
                 render_structure["page"] = json!({
                     "title": "Overview",
-                    "menu": TEMPLATE_MENU,
                     "app": {
                         "template": TEMPLATE_DATASET,
                     }});
@@ -210,7 +250,6 @@ fn start() {
             "configure" => {
                 render_structure["page"] = json!({
                     "title": "Overview",
-                    "menu": TEMPLATE_MENU,
                     "app": {
                         "template": TEMPLATE_CONFIGURE,
                     }});
@@ -219,7 +258,6 @@ fn start() {
                 // Lägg till versionskontroll
                 render_structure["page"] = json!({
                     "title": "Overview",
-                    "menu": TEMPLATE_MENU,
                     "app": {
                         "template": TEMPLATE_ABOUT,
                     },
@@ -230,7 +268,6 @@ fn start() {
             "search" => {
                 render_structure["page"] = json!({
                     "title": "translation.menu queryParams p",
-                    "menu": TEMPLATE_MENU,
                     "app": {
                         "template": TEMPLATE_SEARCH,
                         "queries": {
@@ -270,7 +307,7 @@ pub async fn prepare_rendering(db_bytes: Vec<u8>, render_structure: serde_json::
 
     //web_sys::console::log_1(&"----------------------".into());
     //web_sys::console::log_1(&serde_json::to_string(&render_structure["page"]["menu"]).unwrap().into());
-    render::render2dom(TEMPLATE_MENU, &render_structure["all"], "menu");
+    //render::render2dom(TEMPLATE_MENU, &render_structure["all"], "menu");
 
     // RUN SQLITE QUERIES  -----------------------------------------------------------------------
 
@@ -287,6 +324,7 @@ pub async fn prepare_rendering(db_bytes: Vec<u8>, render_structure: serde_json::
     .collect();
 
     let query_response: serde_json::Value = sqlite_query::get_query_data(&db_bytes, combined_query).await;
+    web_sys::console::log_1(&serde_json::to_string(&query_response).unwrap().into());
 
     // Start with a clone of the "all" section from render_structure
     let mut merged_structure = render_structure["all"].clone();
@@ -304,7 +342,7 @@ pub async fn prepare_rendering(db_bytes: Vec<u8>, render_structure: serde_json::
         }
     }
 
-    //web_sys::console::log_1(&serde_json::to_string(&query_response).unwrap().into());
+    
 
 
     // RENDER TO 'APP'  -----------------------------------------------------------------------
