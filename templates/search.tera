@@ -31,23 +31,16 @@
 {% endfor %}
 </style>
 
-<div class="container text-center">
 
-<ul class="nav nav-tabs" id="myTab" role="tablist">
-  <li class="nav-item" role="presentation">
-    <button class="nav-link iib-nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home-tab-pane" type="button" role="tab" aria-controls="home-tab-pane" aria-selected="true">
-      {{ translation.search.trips | default(value="Trips") }} ({{ search_trip | length }})
-    </button>
-  </li>
-  <li class="nav-item" role="presentation">
-    <button class="nav-link iib-nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile-tab-pane" type="button" role="tab" aria-controls="profile-tab-pane" aria-selected="false">
-      {{ translation.search.dayNotes | default(value="Day Notes") }} ({{ search_event | length }})
-    </button>
-  </li>
-</ul>
+<div class="breadcrumb">
+  <img class="icon-color" src="images/database.svg" />
+  <div>{{ translation.search.title | default(value="Search") }}</div>
+  <img src="images/arrow-right.svg" />
+  <div class="breadcrumb-link active">{{ query_params.path | split(pat=":") | last }}</div>
+</div>
 
-<div class="tab-content" id="myTabContent">
-  <div class="tab-pane fade show active" id="home-tab-pane" role="tabpanel" aria-labelledby="home-tab" tabindex="0" style="width:100%;max-width:100%;overflow-x:auto;">
+<details open class="search">
+    <summary>{{ translation.search.trips | default(value="Trips") }} ({{ search_trip | length }})</summary>
     <table class="table border rounded-bottom">
       {% set tripCount = search_trip | length %}
       {% if tripCount == 0 %}
@@ -65,7 +58,7 @@
       {% for trip in search_trip %}
         <tr>
           <td class="text-start">
-            <a href="?p=trip&id={{ trip.OuterId }}">
+            <a href="?path=trip:{{ trip.OuterId }}">
               <div class="iib-search-domain" data-iib-tripDomain="{{ trip.InnerId | split(pat="") | nth(n=0) }}">
                 {{ trip.OuterId }} {{ trip.OverallDestination }}
               </div>
@@ -80,9 +73,11 @@
         </tr>
       {% endfor %}
     </table>
-  </div>
+</details>
 
-  <div class="tab-pane fade" id="profile-tab-pane" role="tabpanel" aria-labelledby="profile-tab" tabindex="0" style="width:100%;max-width:100%;overflow-x:auto;">
+<br />
+<details open class="search">
+    <summary>{{ translation.search.dayNotes | default(value="Day Notes") }} ({{ search_event | length }})</summary>
     <table class="table border border-top-0">
       {% set eventCount = search_event | length %}
       {% if eventCount == 0 %}
@@ -100,7 +95,7 @@
       {% for day in search_event %}
         <tr>
           <td>
-            <a href="?p=trip&id={{ day.OuterId }}" style="text-decoration:none;">
+            <a href="?path=trip:{{ day.OuterId }}" style="text-decoration:none;">
               <div class="text-nowrap iib-search-domain" data-iib-tripDomain="{{ day.InnerId | split(pat="") | nth(n=0) }}">{{ day.OuterId }}</div>
             </a>
           </td>
@@ -109,7 +104,7 @@
             {{ day.Date | date(format="%A") }}<br/>
             {% if settings.Base.Immich == "Enabled" %}
               {% if day.OuterId not in settings.Base.ExcludeDayPhotos %}
-                <a href="?p=images&id={{ day.OuterId }}&date={{ day.Date }}">
+                <a href="?path=images:{{ day.OuterId }}:{{ day.Date }}">
                   <button type="button" class="btn mt-2 iib-search-photos" data-iib-tripDomain="{{ day.InnerId | split(pat="") | nth(n=0) }}">
                     {{ translation.search.photos | default(value="Photos") }}
                   </button>
@@ -123,7 +118,7 @@
               <a style="text-decoration:none;" target="_blank" href="https://www.google.com/maps/?q={{ day.AccommodationCoordinates }}" class="iib-search-accommodation" data-iib-tripDomain="{{ day.InnerId | split(pat="") | nth(n=0) }}">
                 <div class="acc-icon" data-iib-tripDomain="{{ day.InnerId | split(pat="") | nth(n=0) }}"></div>
                 <span class="acc-text" data-iib-tripDomain="{{ day.InnerId | split(pat="") | nth(n=0) }}">
-                  {{ day.Accommodation }} - {{ day.AccommodationCountry }} {{ day.AccommodationCoordinates }} {{ day.AccommodationCoordinateAccuracy }}
+                  {{ day.Accommodation }} - {{ day.AccommodationCountry }} {{ day.AccommodationCoordinates }} {{ day.AccommodationCoordinateAccuracy | default(value="") }}
                 </span>
               </a>
             </div>
@@ -131,6 +126,4 @@
         </tr>
       {% endfor %}
     </table>
-  </div>
-</div>
-</div>
+</details>

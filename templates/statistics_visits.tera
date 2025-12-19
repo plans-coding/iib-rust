@@ -1,6 +1,15 @@
+<div class="breadcrumb">
+  <img class="icon-color" src="images/database.svg" />
+  <div>{{ translation.statistics.title | default(value="Summary") }}</div>
+  <img src="images/arrow-right.svg" />
+  <a href="?path=statistics:summary" class="breadcrumb-link {% if query_params.path == 'statistics:summary' %}active{% endif %}">{{ translation.statistics.summary | default(value="Summary") }}</a>
+  <a href="?path=statistics:visits" class="breadcrumb-link {% if query_params.path == 'statistics:visits' %}active{% endif %}">{{ translation.statistics.visits | default(value="Visits") }}</a>
+  <a href="?path=statistics:overnights" class="breadcrumb-link {% if query_params.path == 'statistics:overnights' %}active{% endif %}">{{ translation.statistics.overnights | default(value="Overnights") }}</a>
+</div>
+
 <div style="max-width:100%;overflow-x:auto;">
 
-    <table class="table">
+    <table class="table-statistics-visits">
         <tr>
             <td class="iib-silver-grey">
                 {{ translation.statistics.visitCountryCount
@@ -10,7 +19,7 @@
     </table>
 
     <table class="table table-hover">
-        <thead style="position:sticky;top:0;background-color: bodyBackgroundColor ;">
+        <thead style="position:sticky;top:0;">
             <tr style="font-weight:normal;">
                 <td></td>
                 <td colspan="3">
@@ -59,17 +68,22 @@
                 </td>
             </tr>
         </thead>
-
+        <tbody>
         {% for country in statistics_visits %}
             <tr>
                 <td>{{ country.Country }}</td>
                 <td>{{ country.OL }}</td>
                 <td>{{ country.OL + country.SS }}</td>
                 <td>{{ country.OL + country.SS + country.VSS }}</td>
-                <td> country.OLMQ </td>
-                <td> (country.OLMQ + country.SSMQ + country.VSSMQ) * 2 </td>
+                <td>{{ country.OLMQ }}</td>
+                {% set olmq = country.OLMQ | default(value=0) %}
+                {% set ssmq = country.SSMQ | default(value=0) %}
+                {% set vssmq = country.VSSMQ | default(value=0) %}
+                {% set total = olmq + ssmq + vssmq %}
+                <td>{{ total * 2 }}</td>
             </tr>
         {% endfor %}
+        </tbody>
     </table>
 
     <div id="statComment"

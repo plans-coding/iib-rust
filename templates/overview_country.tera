@@ -29,11 +29,13 @@
 </style>
 
 
-<div class="submenu">
-  <div>Overview</div>
-  <a href="?path=overview:year" class="tab-link {% if query_params.path == 'overview:year' %}active{% endif %}">Year</a>
-  <a href="?path=overview:country" class="tab-link {% if query_params.path == 'overview:country' %}active{% endif %}">Country</a>
-  <a href="?path=overview:plain" class="tab-link {% if query_params.path == 'overview:plain' %}active{% endif %}">Plain</a>
+<div class="breadcrumb">
+  <img class="icon-color" src="images/database.svg" />
+  <div>{{ translation.overview.title | default(value="Overview") }}</div>
+  <img src="images/arrow-right.svg" />
+  <a href="?path=overview:year" class="breadcrumb-link {% if query_params.path == 'overview:year' %}active{% endif %}">{{ translation.overview.year | default(value="Year") }}</a>
+  <a href="?path=overview:country" class="breadcrumb-link {% if query_params.path == 'overview:country' %}active{% endif %}">{{ translation.overview.country | default(value="Country") }}</a>
+  <a href="?path=overview:plain" class="breadcrumb-link {% if query_params.path == 'overview:plain' %}active{% endif %}">{{ translation.overview.plain | default(value="Plain") }}</a>
 </div>
 
 <table class="table-overview-country">

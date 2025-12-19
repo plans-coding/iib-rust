@@ -1,6 +1,7 @@
-<div class="container text-center">
-
-<h1>{{ translation.source.title | default(value='Configure your data source') }}</h1>
+<div class="breadcrumb">
+  <img class="icon-color" src="images/database.svg" />
+  <div class="">{{ translation.source.title | default(value='Configure your data source') }}</div>
+</div>
 
 <div class="row" style="max-width:400pt;margin:auto;">
 
@@ -40,5 +41,3 @@ rgb(29,101,94,0.2);">{{ translation.source.currentSource | default(value="Curren
 
 </div>
 
-
-</div>

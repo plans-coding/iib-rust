@@ -1,21 +1,21 @@
-<div class="container text-center">
+<div class="breadcrumb">
+  <img class="icon-color" src="images/database.svg" />
+  <div class="">{{ translation.about.title | default(value='About') }}</div>
+  <img src="images/arrow-right.svg" />
+  <div class="breadcrumb-link active">{{ current_version }}</div>
+  {% if latest_version != current_version %}
+        <div  style="width:auto;">
+            <a class="breadcrumb-link active warning" target="_blank" href="https://github.com/plans-coding/immer-in-bewegung/releases/">{{ translation.about.updateAvailable | default(value='New update available') }} ({{ latest_version }}) <img src="images/ext.svg" /></a>
+        </div>
+    {% endif %}
+</div>
+
+<div style="text-align:center;">
 
     <div>
         <img src="images/frog.svg"
              style="margin-top:40pt;margin-bottom:0pt;height:150pt;width:150pt;" />
     </div>
-
-    <h1>{{ translation.about.title | default(value="About") }}</h1>
-
-    <span id="currentVersion" class="m-2 badge text-bg-secondary">
-        {{ current_version }}
-    </span>
-
-    {% if latest_version != current_version %}
-        <div class="badge text-bg-warning" id="updateText">
-            {{ latest_version }}
-        </div>
-    {% endif %}
 
     <p class="lead">
         <span class="immer-in-font-uc">Immer in</span>&nbsp;
@@ -31,10 +31,10 @@
             {{ translation.about.update | default(value="Check for updates at") }}
         </span>
         <b>
-            <a target="_blank" href="https://plans-coding.github.io/immer-in-bewegung/" class="link-color">
-                plans-coding.github.io/immer-in-bewegung/
+            <a target="_blank" href="https://bewegung.app/" class="single-link">
+                bewegung.app
             </a>
-        </b>.
+        </b>
     </p>
 
 </div>

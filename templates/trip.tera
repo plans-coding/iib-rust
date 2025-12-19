@@ -1,14 +1,281 @@
 <div class="prev_next"><img src="images/arrow-left.svg" /><img src="images/arrow-right.svg" /></div>
 
-<h1>{{trip_summary[0].OuterId}} {{trip_summary[0].OverallDestination}}</h1>
+<div class="breadcrumb">
+  <img class="icon-color" src="images/database.svg" />
+  <div>{{ translation.trip.title | default(value="Trip") }}</div>
+  <img src="images/arrow-right.svg" />
+  <div class="breadcrumb-link active">{{ trip_summary[0].OuterId }} {{ translation.trip.to | default(value="to") }} {{ trip_summary[0].OverallDestination }}</div>
+</div>
 
-<details open>
-    <summary>Trip Summary</summary>
-    <p>This section is visible by default.</p>
+<details open class="trip">
+    <summary data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">{# translation.trip.summary | default(value="Summary") #}{{ trip_summary[0].TripDescription }}</summary>
+    
+    
+    <div style="display:flex;">
+        <div class="col-md">
+            <table class="table">
+                <tbody>
+                    <tr>
+                        <th>{{ translation.trip.departureDate | default(value="Departure Date") }}</th>
+                        <td>{{ trip_summary[0].DepartureDate }}</td>
+                    </tr>
+                    <tr>
+                        <th>{{ translation.trip.returnDate | default(value="Return Date") }}</th>
+                        <td>{{ trip_summary[0].ReturnDate }}</td>
+                    </tr>
+                    <tr>
+                        <th>{{ translation.trip.numberOfDays | default(value="Number of Days") }}</th>
+                        <td>
+                            {# Precompute difference_in_days in Rust and pass as `trip_summary[0].NumberOfDays` or another field #}
+                            {{ trip_summary[0].NumberOfDays }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>{{ translation.trip.participantGroup | default(value="Participant Group") }}</th>
+                        <td>{{ trip_summary[0].ParticipantGroup }}</td>
+                    </tr>
+                    <tr>
+                        <th>{{ translation.trip.outerId | default(value="ID") }}</th>
+                        <td>{{ trip_summary[0].OuterId }}</td>
+                    </tr>
+                    <tr>
+                        <th>{{ translation.trip.numberOfCountries | default(value="Number of Countries") }}</th>
+                        <td class="align-middle">
+                            {# Precompute `countryCount` in Rust: unique countries without prefix ** and excluding home country #}
+                            {# for country in countryCount %}
+                                {{ country }}{% if not loop.last %}, {% endif %}
+                            {% endfor #}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th colspan="2">{{ translation.trip.uniqueCountries | default(value="Unique Countries") }}</th>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            {# for country in countryCount %}
+                                {{ country }}{% if not loop.last %}, {% endif %}
+                            {% endfor #}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th colspan="2">{{ translation.trip.overallRoute | default(value="Overall Route") }}</th>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            {% for location in trip_map_pins %}
+                                {{ location.name }}{% if not loop.last %} &gt; {% endif %}
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th colspan="2">{{ translation.trip.countryTripMovements | default(value="Country Trip Movements") }}</th>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            {# for crossing in borderCrossings %}
+                                {{ crossing | join(" → ") }}
+                            {% endfor #}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+    
+            {# Optional Immich photo albums #}
+            {# if settings.Base.Immich == "Enabled" %}
+                {% for photoAlbum in trip_summary[0].PhotoAlbums %}
+                    <div type="button" class="btn btn-iib-ctt mb-3" data-iib-tripdomain="U"
+                         onclick="openAlbum('{{ photoAlbum }}', '{{ settings.Feature.ImmichApiUrl }}', '{{ settings.Feature.ImmichApiKey }}')">
+                        Immich {{ photoAlbum }}
+                    </div>
+                {% endfor %}
+            {% endif #}
+    
+            {# Optional Movie plugin #}
+            {% if settings.Plugins.Movie.enabled %}
+                {% set movieId = settings.Plugins.Movie.mapping[trip_summary[0].OuterId] %}
+                {% if movieId is defined %}
+                    <a href="{{ settings.Plugins.Movie.path }}{{ movieId }}" target="_blank">
+                        <div type="button" class="btn btn-iib-ctt mb-3" data-iib-tripdomain="U">
+                            {{ settings.Plugins.Movie.translation }} {{ movieId }}
+                        </div>
+                    </a>
+                {% endif %}
+            {% endif %}
+        </div>
+    
+        <div class="col-md">
+            {# Map container #}
+            <div id="map-pin-data"
+                 data-map-overall-route='{# trip_map_pins | json #}'
+                 data-map-accommodation='{# trip_events | json | replace("'", "%27") #}'
+                 data-settings-assets='{# settings | json #}'
+                 data-tripDomain='{{ trip_summary[0].DomainAbbreviation }}'
+                 data-translation-overview='{{ translation.overview.title | default(value="Overview") }}'
+                 data-translation-accommodations='{{ translation.trip.accommodations | default(value="Accommodations") }}'>
+            </div>
+            <div id="map" style="min-height:400pt;height:100%;width:100%;"></div>
+        </div>
+    </div>
+    
+    
 </details>
 
 <div class="day-section">
+{{ translation.trip.dayPerDay | default(value="Day per day") }}
     <div class="day-header">Dag 3: Tisdagen den 23 december 2023</div>
     <div class="day-text">sdkjölksjglksjdfglöksjdflkj</div>
     <div class="day-accommodation">Boende</div>
 </div>
+
+            <table class="table">
+                {% for day in trip_events %}
+                <tr>
+                        
+                        {# Format the weekday in Rust before passing to Tera if needed #}
+                        
+                        {# Immich photos #}
+                        {# if settings.Base.Immich == "Enabled" and not settings.Base.ExcludeDayPhotos contains day.OuterId %}
+                            <a href="?p=images&id={{ day.OuterId }}&date={{ day.Date }}">
+                                <button type="button" class="btn mt-2 btn-iib-ctt" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
+                                    {{ translation.trip.photos | default(value="Photos") }}
+                                </button>
+                            </a>
+                        {% endif #}
+                
+                        {# Diary plugin #}
+                        {# if settings.Plugins.Diary.enabled %}
+                            {% for file in diaryFilesArray | select(day.Date) %}
+                                <button type="button" class="btn mt-2 btn-iib-ctt" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}"
+                                        data-bs-toggle="modal" data-bs-target="#fullScreenModal{{ file }}">
+                                    {{ settings.Plugins.Diary.translation | default(value="Diary") }}
+                                </button>
+                
+                                <div class="modal fade" id="fullScreenModal{{ file }}" tabindex="-1" aria-labelledby="fullScreenModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-fullscreen">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="fullScreenModalLabel">{{ settings.Plugins.Diary.translation | default(value="Diary") }}</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p><img style="max-height:100%;max-width:100%;" src="{{ settings.Plugins.Diary.path }}{{ file }}"></p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ translation.menu.close | default(value="Close") }}</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% endif #}
+                
+                        {# Passport plugin #}
+                        {# if settings.Plugins.Passport.enabled %}
+                            {% for file in passportFilesArray | select(day.Date) %}
+                                <button type="button" class="btn mt-2 btn-iib-ctt" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}"
+                                        data-bs-toggle="modal" data-bs-target="#fullScreenModal{{ file }}">
+                                    {{ settings.Plugins.Passport.translation | default(value="Passport") }}
+                                </button>
+                
+                                <div class="modal fade" id="fullScreenModal{{ file }}" tabindex="-1" aria-labelledby="fullScreenModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-fullscreen">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="fullScreenModalLabel">{{ settings.Plugins.Passport.translation | default(value="Passport") }}</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p><img style="max-height:100%;max-width:100%;" src="{{ settings.Plugins.Passport.path }}{{ file }}"></p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ translation.menu.close | default(value="Close") }}</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% endif #}
+
+                
+                    <td class="text-start p-3">
+                        <b>{{ loop.index }}: {{ day.Weekday | default(value="") }} {{ day.Date }}</b><br>
+                        {{ day.Events }} | parseCoordinateLink <br>
+                        <div class="mt-2">
+                            <a style="text-decoration:none;" target="_blank" href="{{ settings.Base.ExternalMapProvider }}{{ day.AccommodationCoordinates }}" class="iib-trip-tab" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
+                                <div class="acc-icon"></div>
+                                <span class="acc-text">{{ day.Accommodation }} – {{ day.AccommodationCountry }} – {{ day.AccommodationCoordinates }} {{ day.AccommodationCoordinateAccuracy | default(value="") }}</span>
+                            </a>
+                        </div>
+                
+                        {# Theme plugin }
+                        {% if settings.Plugins.Theme.enabled %}
+                            {% set parsedThemeLocations = day.Events | parseThemeLocationsEventString %}
+                            {% if parsedThemeLocations | length > 0 %}
+                                <div class="mt-2 sightseeing-text">
+                                    <div class="sightseeing-icon"></div>
+                                    <b>{{ settings.Plugins.Theme.translation }}</b>:
+                                    {% for item in parsedThemeLocations %}
+                                        <span>
+                                            <a class="sightseeing-text" href="{{ settings.Base.ExternalMapProvider }}{{ item.coordinates }}" target="_blank">
+                                                {{ item.place }}
+                                            </a>
+                                            {% if not loop.last %}, {% endif %}
+                                        </span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        {% endif #}
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+
+
+<style>
+{% for tripDomain in common_trip_domains %}
+.iib-trip-tab.active[data-iib-tripDomain='{{ tripDomain.DomainAbbreviation }}'],
+summary[data-iib-tripDomain='{{ tripDomain.DomainAbbreviation }}'],
+:root[data-bs-theme="dark"] .btn-iib-ctt[data-iib-tripDomain='{{ tripDomain.DomainAbbreviation }}'] {
+    background-color: {{ tripDomain.Color }} !important;
+    color: #fff;
+    border-color: #ffffff33;
+}
+.iib-trip-tab[data-iib-tripDomain='{{ tripDomain.DomainAbbreviation }}']:not(.active) {
+    color: {{ tripDomain.Color }} !important;
+}
+{% if tripDomain.DomainAbbreviation == trip_summary[0].DomainAbbreviation %}
+.accommodationColor, .overviewColor { fill: {{ tripDomain.Color }}; }
+.polylineMap { stroke: {{ tripDomain.Color }}; }
+.acc-icon {
+    mask: url(images/house.svg) no-repeat center / contain;
+    -webkit-mask: url(images/house.svg) no-repeat center / contain;
+    width: 0.9em;
+    height: 0.9em;
+    display: inline-block;
+    transform: translateY(2px);
+}
+:root[data-bs-theme="light"] .acc-icon { background-color: {{ tripDomain.Color }}; }
+:root[data-bs-theme="dark"] .acc-icon { background-color: gold; }
+:root[data-bs-theme="dark"] .acc-text { color: gold; }
+{% endif %}
+{% endfor %}
+
+:root[data-bs-theme="dark"] .accommodationColor,
+:root[data-bs-theme="dark"] .overviewColor { fill: gold; }
+:root[data-bs-theme="dark"] .polylineMap { stroke: gold; }
+
+/* Plugin: Theme */
+.sightseeing-icon {
+    mask: url(img/bookmark-star-fill.svg) no-repeat center / contain;
+    -webkit-mask: url(img/bookmark-star-fill.svg) no-repeat center / contain;
+    width: 0.9em;
+    height: 0.9em;
+    display: inline-block;
+    transform: translateY(2px);
+}
+:root[data-bs-theme="light"] .sightseeing-text { color: #6f757e; }
+:root[data-bs-theme="light"] .sightseeing-icon { background-color: #6f757e; }
+:root[data-bs-theme="dark"] .sightseeing-icon { background-color: gold; }
+:root[data-bs-theme="dark"] .sightseeing-text { color: gold; }
+</style>
+

@@ -1,3 +1,12 @@
+<div class="breadcrumb">
+  <img class="icon-color" src="images/database.svg" />
+  <div>{{ translation.statistics.title | default(value="Summary") }}</div>
+  <img src="images/arrow-right.svg" />
+  <a href="?path=statistics:summary" class="breadcrumb-link {% if query_params.path == 'statistics:summary' %}active{% endif %}">{{ translation.statistics.summary | default(value="Summary") }}</a>
+  <a href="?path=statistics:visits" class="breadcrumb-link {% if query_params.path == 'statistics:visits' %}active{% endif %}">{{ translation.statistics.visits | default(value="Visits") }}</a>
+  <a href="?path=statistics:overnights" class="breadcrumb-link {% if query_params.path == 'statistics:overnights' %}active{% endif %}">{{ translation.statistics.overnights | default(value="Overnights") }}</a>
+</div>
+
 <div class="p-2 bg-white">
 
   <div class="row mt-3">
