@@ -114,9 +114,10 @@ fn start() {
         let settings_response = sqlite_query::get_query_data(&db_bytes, settings_query).await;
 
 
-        render_structure["all"]["settings"] = serde_json::to_value(&settings_response["settings"]).unwrap();
+        //crender_structure["all"]["settings"] = serde_json::to_value(&settings_response["settings"]).unwrap();
+        render_structure["all"]["settings"] = helper::transform_settings(&settings_response["settings"].as_array().unwrap());
         render_structure["all"]["translation"] = translation_content.expect("Error with translation data.");
-        //web_sys::console::log_1(&serde_json::to_string(&render_structure).unwrap().into());
+        web_sys::console::log_1(&serde_json::to_string(&render_structure).unwrap().into());
 
     // -----------------------------------------------------------------------
     // Fourth: Page specific data
@@ -257,12 +258,12 @@ fn start() {
                         "template": TEMPLATE_TRIP,
                         "queries": [
                             ["trip_summary", QUERY_TRIP_SUMMARY.to_string().replace("/*_OUTER_ID_*/",suffix)],
-                            ["trip_events", QUERY_TRIP_EVENTS.to_string()],
-                            ["trip_allTrips", QUERY_TRIP_ALL_TRIPS.to_string()],
-                            ["tripDomains", QUERY_COMMON_TRIP_DOMAINS.to_string()],
+                            ["trip_events", QUERY_TRIP_EVENTS.to_string().replace("/*_OUTER_ID_*/",suffix)],
+                            ["trip_all_trips", QUERY_TRIP_ALL_TRIPS.to_string()],
+                            ["common_trip_domains", QUERY_COMMON_TRIP_DOMAINS.to_string()],
                             // Lägg till filter
                             ["trip_borderCrossings", QUERY_STATISTICS_BORDER_CROSSINGS],
-                            ["trip_mapPins", QUERY_TRIP_MAP_PINS],
+                            ["trip_map_pins", QUERY_TRIP_MAP_PINS],
                     ]});
                 }
                 
@@ -385,5 +386,4 @@ pub async fn prepare_rendering(db_bytes: Vec<u8>, render_structure: serde_json::
 
 
 }
-
 

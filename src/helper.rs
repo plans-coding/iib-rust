@@ -1,5 +1,5 @@
 use chrono::Local;
-use serde_json::{json, Value};
+use serde_json::{json, Value, Map};
 use crate::filecontent;
 use crate::query_params;
 use crate::start;
@@ -23,6 +23,33 @@ pub async fn get_latest_version_number() -> String {
     ).await;
 
     latest_version_number.expect("No version number found")
+}
+
+pub fn transform_settings(settings_array: &Vec<Value>) -> Value {
+    let mut result = Map::new();
+
+    for setting in settings_array {
+        let attribute = setting["Attribute"].as_str().unwrap();
+        let group = setting["AttributeGroup"].as_str().unwrap();
+        let value_str = setting["Value"].as_str().unwrap();
+
+        // Parse the value if it's a JSON object string, else keep as string
+        let value: Value = if value_str.starts_with('{') || value_str.starts_with('[') {
+            serde_json::from_str(value_str).unwrap_or(Value::String(value_str.to_string()))
+        } else {
+            Value::String(value_str.to_string())
+        };
+
+        // Insert into the correct group
+        result
+            .entry(group)
+            .or_insert_with(|| Value::Object(Map::new()))
+            .as_object_mut()
+            .unwrap()
+            .insert(attribute.to_string(), value);
+    }
+
+    Value::Object(result)
 }
 
 
