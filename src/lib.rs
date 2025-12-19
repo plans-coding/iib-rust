@@ -17,10 +17,13 @@ const TEMPLATE_TRIP: &str = include_str!("../templates/trip.tera");
 const TEMPLATE_IMAGES: &str = include_str!("../templates/images.tera");
 const TEMPLATE_MAP: &str = include_str!("../templates/map.tera");
 const TEMPLATE_SEARCH: &str = include_str!("../templates/search.tera");
-const TEMPLATE_STATISTICS: &str = include_str!("../templates/statistics.tera");
+const TEMPLATE_STATISTICS_SUMMARY: &str = include_str!("../templates/statistics_summary.tera");
+const TEMPLATE_STATISTICS_VISITS: &str = include_str!("../templates/statistics_visits.tera");
+const TEMPLATE_STATISTICS_OVERNIGHTS: &str = include_str!("../templates/statistics_overnights.tera");
+const TEMPLATE_STATISTICS_THEMES: &str = include_str!("../templates/statistics_themes.tera");
 const TEMPLATE_DATASET: &str = include_str!("../templates/dataset.tera");
 const TEMPLATE_ABOUT: &str = include_str!("../templates/about.tera");
-const TEMPLATE_CONFIGURE: &str = include_str!("../templates/_configure.tera");
+const TEMPLATE_SOURCE: &str = include_str!("../templates/source.tera");
 
 // Advanced queries
 const QUERY_EXPLORE: &str = include_str!("../queries/explore.sql");
@@ -86,7 +89,7 @@ fn start() {
         let mut render_structure = json!({});
         render_structure["all"]["query_params"] = query_params.clone();
 
-        // If "p" is missing or empty, set it to "overview"
+        // If "path" is missing or empty, set it to "overview"
         let p_is_empty = render_structure["all"]["query_params"]["path"].as_str().map(|s| s.is_empty()).unwrap_or(true);
         if p_is_empty { render_structure["all"]["query_params"]["path"] = json!("explore"); }
 
@@ -122,163 +125,189 @@ fn start() {
         match page {
             "explore" => {
                 render_structure["page"] = json!({
-                    "title": "Explore",
-                    "app": {
-                        "template": TEMPLATE_EXPLORE,
-                        "queries": {
-                            "chronik.db": [
-                                ["explore", QUERY_EXPLORE.to_string().replace("/*","").replace("*/","")
-                                .replace_filter("(TripDomain)", &render_structure["all"]["query_params"]["f"])
-                                .replace_filter("(ParticipantGroup)", &render_structure["all"]["query_params"]["f"])],
-                                ["tripDomains", QUERY_COMMON_TRIP_DOMAINS.to_string(), ""],
-                                ["participantGroups", QUERY_COMMON_PARTICIPANT_GROUPS.to_string(), ""],
-                            ]}}});
+                    "title": render_structure.pointer("/all/translation/explore/title").and_then(|v| v.as_str()).unwrap_or("Explore"),
+                    "template": TEMPLATE_EXPLORE,
+                    "queries": [
+                        ["explore", QUERY_EXPLORE.to_string().replace("/*","").replace("*/","")
+                        .replace_filter("(TripDomain)", &render_structure["all"]["query_params"]["f"])
+                        .replace_filter("(ParticipantGroup)", &render_structure["all"]["query_params"]["f"])],
+                        ["tripDomains", QUERY_COMMON_TRIP_DOMAINS.to_string()],
+                        ["participantGroups", QUERY_COMMON_PARTICIPANT_GROUPS.to_string()],
+                    ]});
             }
             "overview:year" => {
                 render_structure["page"] = json!({
-                    "title": "Overview: Year",
-                    "app": {
-                        "template": TEMPLATE_OVERVIEW_YEAR,
-                        "queries": {
-                            "chronik.db": [
-                                ["overviewYear", QUERY_OVERVIEW_YEAR.to_string().replace("/*","").replace("*/","")
-                                .replace_filter("(TripDomain)", &render_structure["all"]["query_params"]["f"])
-                                .replace_filter("(ParticipantGroup)", &render_structure["all"]["query_params"]["f"])],
-                                ["tripDomains", QUERY_COMMON_TRIP_DOMAINS.to_string(), ""],
-                                ["participantGroups", QUERY_COMMON_PARTICIPANT_GROUPS.to_string(), ""],
-                    ]}}});
+                    "title": render_structure.pointer("/all/translation/overview/year").and_then(|v| v.as_str()).unwrap_or("Overview: Year"),
+                    "template": TEMPLATE_OVERVIEW_YEAR,
+                    "queries": [
+                        ["overviewYear", QUERY_OVERVIEW_YEAR.to_string().replace("/*","").replace("*/","")
+                        .replace_filter("(TripDomain)", &render_structure["all"]["query_params"]["f"])
+                        .replace_filter("(ParticipantGroup)", &render_structure["all"]["query_params"]["f"])],
+                        ["tripDomains", QUERY_COMMON_TRIP_DOMAINS.to_string()],
+                        ["participantGroups", QUERY_COMMON_PARTICIPANT_GROUPS.to_string()],
+                    ]});
             }
             "overview:country" => {
                 render_structure["page"] = json!({
-                    "title": "Overview: Country",
-                    "app": {
-                        "template": TEMPLATE_OVERVIEW_COUNTRY,
-                        "queries": {
-                            "chronik.db": [
-                                 // Replace "c.Continent = 'Europa'" in QUERY_OVERVIEW_COUNTRY with value from settings in future version
-                                 ["overviewCountry", QUERY_OVERVIEW_COUNTRY.to_string().replace("/*","").replace("*/","")
-                                 .replace_filter("(TripDomain)", &render_structure["all"]["query_params"]["f"])
-                                 .replace_filter("(ParticipantGroup)", &render_structure["all"]["query_params"]["f"])],
-                                 ["tripDomains", QUERY_COMMON_TRIP_DOMAINS.to_string(), ""],
-                                 ["participantGroups", QUERY_COMMON_PARTICIPANT_GROUPS.to_string(), ""],
-                            ]}}});
+                    "title": render_structure.pointer("/all/translation/overview/country").and_then(|v| v.as_str()).unwrap_or("Overview: Country"),
+                    "template": TEMPLATE_OVERVIEW_COUNTRY,
+                    "queries": [
+                         // Replace "c.Continent = 'Europa'" in QUERY_OVERVIEW_COUNTRY with value from settings in future version
+                         ["overviewCountry", QUERY_OVERVIEW_COUNTRY.to_string().replace("/*","").replace("*/","")
+                         .replace_filter("(TripDomain)", &render_structure["all"]["query_params"]["f"])
+                         .replace_filter("(ParticipantGroup)", &render_structure["all"]["query_params"]["f"])],
+                         ["tripDomains", QUERY_COMMON_TRIP_DOMAINS.to_string()],
+                         ["participantGroups", QUERY_COMMON_PARTICIPANT_GROUPS.to_string()],
+                     ]});
             }
             "overview:plain" => {
                 render_structure["page"] = json!({
-                    "title": "Overview: Plain",
-                    "app": {
-                        "template": TEMPLATE_OVERVIEW_PLAIN,
-                        "queries": {
-                            "chronik.db": [
-                                ["overviewYear", QUERY_OVERVIEW_YEAR.to_string().replace("/*","").replace("*/","")
-                                .replace_filter("(TripDomain)", &render_structure["all"]["query_params"]["f"])
-                                .replace_filter("(ParticipantGroup)", &render_structure["all"]["query_params"]["f"])],
-                                 // Replace "c.Continent = 'Europa'" in QUERY_OVERVIEW_COUNTRY with value from settings in future version
-                                 ["overviewCountry", QUERY_OVERVIEW_COUNTRY.to_string().replace("/*","").replace("*/","")
-                                 .replace_filter("(TripDomain)", &render_structure["all"]["query_params"]["f"])
-                                 .replace_filter("(ParticipantGroup)", &render_structure["all"]["query_params"]["f"])],
-                                 ["tripDomains", QUERY_COMMON_TRIP_DOMAINS.to_string(), ""],
-                                 ["participantGroups", QUERY_COMMON_PARTICIPANT_GROUPS.to_string(), ""],
-                            ]}}});
-            }
-            "trip" => {
-                // Title med outer id + dagbok + pass
-                render_structure["page"] = json!({
-                    "title": "?",
-                    "app": {
-                        "template": TEMPLATE_TRIP,
-                        "queries": {
-                            "chronik.db": [
-                                ["trip_summary", QUERY_TRIP_SUMMARY.to_string(), ""],
-                                ["trip_events", QUERY_TRIP_EVENTS.to_string(), ""],
-                                ["trip_allTrips", QUERY_TRIP_ALL_TRIPS.to_string(), ""],
-                                ["tripDomains", QUERY_COMMON_TRIP_DOMAINS.to_string(), ""],
-                                // Lägg till filter
-                                ["trip_borderCrossings", QUERY_STATISTICS_BORDER_CROSSINGS, ""],
-                                ["trip_mapPins", QUERY_TRIP_MAP_PINS, ""],
-                ]}}});
-            }
-            "images" => {
-                render_structure["page"] = json!({
-                    "title": "Overview",
-                    "app": {
-                        "template": TEMPLATE_IMAGES,
-                        "queries": {
-                            "chronik.db": [
-                                ["images_dateList", QUERY_IMAGES_DATE_LIST.to_string(), ""],
-                                ["common_tripDomains", QUERY_COMMON_TRIP_DOMAINS.to_string(), ""],
-                                ["images_photoTime", QUERY_IMAGES_PHOTO_TIME.to_string(), ""],
-                                ["tripDomains", QUERY_COMMON_TRIP_DOMAINS.to_string(), ""],
-                ]}}});
+                    "title": render_structure.pointer("/all/translation/overview/plain").and_then(|v| v.as_str()).unwrap_or("Overview: Plain"),
+                    "template": TEMPLATE_OVERVIEW_PLAIN,
+                    "queries": [
+                        ["overviewYear", QUERY_OVERVIEW_YEAR.to_string().replace("/*","").replace("*/","")
+                        .replace_filter("(TripDomain)", &render_structure["all"]["query_params"]["f"])
+                        .replace_filter("(ParticipantGroup)", &render_structure["all"]["query_params"]["f"])],
+                         // Replace "c.Continent = 'Europa'" in QUERY_OVERVIEW_COUNTRY with value from settings in future version
+                         ["overviewCountry", QUERY_OVERVIEW_COUNTRY.to_string().replace("/*","").replace("*/","")
+                         .replace_filter("(TripDomain)", &render_structure["all"]["query_params"]["f"])
+                         .replace_filter("(ParticipantGroup)", &render_structure["all"]["query_params"]["f"])],
+                         ["tripDomains", QUERY_COMMON_TRIP_DOMAINS.to_string()],
+                         ["participantGroups", QUERY_COMMON_PARTICIPANT_GROUPS.to_string()],
+                    ]});
             }
             "map" => {
                 render_structure["page"] = json!({
                     "title": "Overview",
-                    "app": {
-                        "template": TEMPLATE_MAP,
-                        "queries": {
-                            "chronik.db": [
-                                ["map_countryList", QUERY_MAP_COUNTRY_LIST.to_string(), ""],
-                                ["map_theme", QUERY_MAP_THEME.to_string(), ""],
-                                ["map_contour", QUERY_MAP_CONTOUR.to_string(), ""],
-                                ["map_country", QUERY_MAP_COUNTRY.to_string(), ""],
-                                ["tripDomains", QUERY_COMMON_TRIP_DOMAINS.to_string(), ""],
-                    ]}}});
+                    "template": TEMPLATE_MAP,
+                    "queries": [
+                        ["map_country_list", QUERY_MAP_COUNTRY_LIST.to_string()],
+                        ["map_theme", QUERY_MAP_THEME.to_string()],
+                        ["map_contour", QUERY_MAP_CONTOUR.to_string()],
+                        ["map_country", QUERY_MAP_COUNTRY.to_string()],
+                        ["common_trip_domains", QUERY_COMMON_TRIP_DOMAINS.to_string()],
+                    ]});
+                // See later in code for special cases
             }
-            "statistics" => {
+            "statistics:summary" => {
                 render_structure["page"] = json!({
                     "title": "Overview",
-                    "app": {
-                        "template": TEMPLATE_STATISTICS,
-                        "queries": {
-                            "chronik.db": [
-                                ["statistics_perDomainYear", QUERY_STATISTICS_PER_DOMAIN_YEAR, ""],
-                                ["statistics_tripCount", QUERY_STATISTICS_TRIP_COUNT.to_string(), ""],
-                                ["statistics_overnights", QUERY_STATISTICS_OVERNIGHTS, ""],
-                                ["common_tripDomains", QUERY_COMMON_TRIP_DOMAINS.to_string(), ""],
-                                ["statistics_OLSSVSS", QUERY_STATISTICS_VISITS, ""],
-                                ["statistics_theme_count", QUERY_STATISTICS_THEME_COUNT, ""],
-                    ]}}});
+                    "template": TEMPLATE_STATISTICS_SUMMARY,
+                    "queries": [
+                        ["statistics_visits", QUERY_STATISTICS_VISITS.replace("SELECT\n    Country,\n    OL,\n    SS,\n    VSS,\n    PS,\n    OLMQ,\n    SSMQ,\n    VSSMQ,\n    PSMQ\nFROM Aggregated\nORDER BY OL DESC;", "SELECT COUNT(DISTINCT Country) AS TripCount FROM Aggregated;")],
+                        ["statistics_trip_count", QUERY_STATISTICS_TRIP_COUNT.to_string()],
+                        ["statistics_per_domain_year", QUERY_STATISTICS_PER_DOMAIN_YEAR],
+                        ["common_trip_domains", QUERY_COMMON_TRIP_DOMAINS.to_string()],
+                    ]});
+            }
+            "statistics:visits" => {
+                render_structure["page"] = json!({
+                    "title": "Overview",
+                    "template": TEMPLATE_STATISTICS_VISITS,
+                    "queries": [
+                        ["statistics_visits", QUERY_STATISTICS_VISITS],
+                    ]});
+            }
+            "statistics:overnights" => {
+                render_structure["page"] = json!({
+                    "title": "Overview",
+                    "template": TEMPLATE_STATISTICS_OVERNIGHTS,
+                    "queries": [
+                        ["statistics_overnights", QUERY_STATISTICS_OVERNIGHTS],
+                    ]});
+            }
+            "statistics:themes" => {
+                render_structure["page"] = json!({
+                    "title": "Themes",
+                    "template": TEMPLATE_STATISTICS_THEMES,
+                    "queries": [
+                         ["statistics_theme_count", QUERY_STATISTICS_THEME_COUNT],
+                    ]});
             }
             "dataset" => {
                 render_structure["page"] = json!({
-                    "title": "Overview",
-                    "app": {
-                        "template": TEMPLATE_DATASET,
-                    }});
+                    "title": render_structure.pointer("/all/translation/dataset/title").and_then(|v| v.as_str()).unwrap_or("Dataset"),
+                    "settings": render_structure["all"]["settings"],
+                    "template": TEMPLATE_DATASET,
+                    });
             }
-            "configure" => {
+            "more:source" => {
                 render_structure["page"] = json!({
-                    "title": "Overview",
-                    "app": {
-                        "template": TEMPLATE_CONFIGURE,
-                    }});
+                    "title": render_structure.pointer("/all/translation/source/title").and_then(|v| v.as_str()).unwrap_or("Source"),
+                    "template": TEMPLATE_SOURCE,
+                    });
             }
-            "about" => {
+            "more:about" => {
                 // Lägg till versionskontroll
                 render_structure["page"] = json!({
-                    "title": "Overview",
-                    "app": {
-                        "template": TEMPLATE_ABOUT,
-                    },
-                });
+                    "title": render_structure.pointer("/all/translation/about/title").and_then(|v| v.as_str()).unwrap_or("About"),
+                    "template": TEMPLATE_ABOUT,
+                    });
                 render_structure["all"]["current_version"] = filecontent::fetch_text("version").await.into();
                 render_structure["all"]["latest_version"] = json!(helper::get_latest_version_number().await);
             }
-            "search" => {
-                render_structure["page"] = json!({
-                    "title": "translation.menu queryParams p",
-                    "app": {
-                        "template": TEMPLATE_SEARCH,
-                        "queries": {
-                            "chronik.db": [
-                                ["search_trip", QUERY_SEARCH_TRIP.to_string(), ""],
-                                ["search_event", QUERY_SEARCH_EVENT.to_string(), ""],
-                                ["common_tripDomains", QUERY_COMMON_TRIP_DOMAINS.to_string(), ""],
-                    ]}}});
-            }
             _ => {
-                web_sys::console::log_1(&"Another error.".into());
+            
+                web_sys::console::log_1(&"Second tier.".into());
+                
+                if let Some(suffix) = page.strip_prefix("trip:") {
+                    // Title med outer id + dagbok + pass
+                    render_structure["page"] = json!({
+                        "title": suffix,
+                        "template": TEMPLATE_TRIP,
+                        "queries": [
+                            ["trip_summary", QUERY_TRIP_SUMMARY.to_string().replace("/*_OUTER_ID_*/",suffix)],
+                            ["trip_events", QUERY_TRIP_EVENTS.to_string()],
+                            ["trip_allTrips", QUERY_TRIP_ALL_TRIPS.to_string()],
+                            ["tripDomains", QUERY_COMMON_TRIP_DOMAINS.to_string()],
+                            // Lägg till filter
+                            ["trip_borderCrossings", QUERY_STATISTICS_BORDER_CROSSINGS],
+                            ["trip_mapPins", QUERY_TRIP_MAP_PINS],
+                    ]});
+                }
+                
+                if let Some(suffix) = page.strip_prefix("images:") {
+                    render_structure["page"] = json!({
+                        "title": "Images",
+                        "template": TEMPLATE_IMAGES,
+                        "queries": [
+                            ["images_date_list", QUERY_IMAGES_DATE_LIST.to_string()],
+                            ["common_trip_domains", QUERY_COMMON_TRIP_DOMAINS.to_string()],
+                            ["images_photoTime", QUERY_IMAGES_PHOTO_TIME.to_string()],
+                    ]});
+                }
+                
+                if let Some(suffix) = page.strip_prefix("map:") {
+                
+                    if let Some(country) = suffix.strip_prefix("country:") {
+                    
+                    }
+                    // Title med outer id + dagbok + pass
+                    render_structure["page"] = json!({
+                        "title": "MAP",
+                        "template": TEMPLATE_MAP,
+                        "queries": [
+                            ["map_country_list", QUERY_MAP_COUNTRY_LIST.to_string()],
+                            ["map_contour", QUERY_MAP_CONTOUR.to_string()],
+                            ["map_country", QUERY_MAP_COUNTRY.to_string()],
+                            ["map_theme", QUERY_MAP_THEME.to_string()],
+                            ["common_trip_domains", QUERY_COMMON_TRIP_DOMAINS.to_string()],
+                        ]});
+                }
+                
+                if let Some(suffix) = page.strip_prefix("search:") {
+                    // Title med outer id + dagbok + pass
+                    render_structure["page"] = json!({
+                        "title": "translation.menu queryParams p",
+                        "template": TEMPLATE_SEARCH,
+                        "settings": serde_json::to_value(&settings_response["settings"]).unwrap(),
+                        "queries": [
+                            ["search_trip", QUERY_SEARCH_TRIP.to_string().replace("/*_STRING_*/", suffix)],
+                            ["search_event", QUERY_SEARCH_EVENT.to_string().replace("/*_STRING_*/", suffix)],
+                            ["common_trip_domains", QUERY_COMMON_TRIP_DOMAINS.to_string()],
+                        ]});
+                }
+                
             }
         }
 
@@ -314,7 +343,7 @@ pub async fn prepare_rendering(db_bytes: Vec<u8>, render_structure: serde_json::
     //web_sys::console::log_1(&"----------------------".into());
     //web_sys::console::log_1(&serde_json::to_string(&render_structure["page"]["app"]["queries"]["chronik.db"]).unwrap().into());
 
-    let combined_query: Vec<(String, String)> = render_structure["page"]["app"]["queries"]["chronik.db"]
+    let combined_query: Vec<(String, String)> = render_structure["page"]["queries"]
     .as_array().unwrap_or(&Vec::new()).iter().map(|row| {
         // Each row: [key, value]
         let k = row[0].as_str().unwrap_or("").to_string();
@@ -348,10 +377,10 @@ pub async fn prepare_rendering(db_bytes: Vec<u8>, render_structure: serde_json::
     // RENDER TO 'APP'  -----------------------------------------------------------------------
 
     //web_sys::console::log_1(&"----------------------".into());
-    render::render2dom(&render_structure["page"]["app"]["template"].as_str().expect("template must be a string"), &merged_structure, "app");
+    render::render2dom(&render_structure["page"]["template"].as_str().expect("template must be a string"), &merged_structure, "app");
     //web_sys::console::log_1(&serde_json::to_string(&render_structure["page"]["latest_version"]).unwrap().into());
-    helper::apply_preselected(&render_structure["all"]["query_params"]["f"]);
-    helper::attach_select_listeners();
+    //helper::apply_preselected(&render_structure["all"]["query_params"]["f"]);
+    //helper::attach_select_listeners();
 
 
 
