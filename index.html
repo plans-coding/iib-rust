@@ -1,44 +1,474 @@
 <!DOCTYPE html>
 <html>
-<head>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Immer in Bewegung</title>
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="theme-color" content="#6f757e" id="themeColorMeta">
+        <meta name="msapplication-navbutton-color" content="#6f757e">
+        <link rel="shortcut icon" href="images/frog.svg" />
+        <!--<script src="bundle/bootstrap/bootstrap.bundle.5.3.8.min.js"></script>
+        <link href="bundle/bootstrap/bootstrap.5.3.8.min.css" rel="stylesheet">
+        <link href="bewegung.css" rel="stylesheet">-->
 
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Immer in Bewegung</title>
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#6f757e" id="themeColorMeta">
-    <meta name="msapplication-navbutton-color" content="#6f757e">
-    <link rel="shortcut icon" href="img/frog.svg" />
+    <style>
 
-    <script src="bundle/bootstrap/bootstrap.bundle.5.3.3.min.js"></script>
-    <link href="bundle/bootstrap/bootstrap.5.3.3.min.css" rel="stylesheet">
-    <link href="bewegung.css" rel="stylesheet">
+:root {
+    --color-background: #f8fafd;
+    --color-text:#000;
+    --color-hover-background: #6f757e;
+    --color-hover-background-alpha: #6f757e22;
+    --color-hover-text: #fff;
 
-</head>
-<body>
+    --color-filter: #fdf8ee;
+}
 
-    <div class="container-fluid p-0">
-        <div class="container-fluid vh-100 d-flex flex-column p-0">
-            <div class="wrapper d-flex flex-column flex-grow-1">
+.acc-icon {
+    background-color: #1d655e;
+}
 
-                <div class="gradient-bar-inactive"></div>
-                <nav class="navbar navbar-expand-lg" id="menu">
 
-                </nav>
+.table td {padding:5pt;}
 
-                <main style="height:100%;" id="app">
-                    <div>
-                        <!--<div class="loader"></div>-->
-                        <div class="text-center" style="margin-top:50pt;"><img src="img/frog.svg" style="width:233px;height:233px;" class="delayed-pulse" /></div>
-                    </div>
-                </main>
-            </div>
-        </div>
-    </div>
+.table-overview-year td, .table-overview-country td, .table-overview-plain thead th, .table-overview-plain td {padding:8pt;font-weight:normal;}
+.table-overview-year td:first-child, .table-overview-country td:first-child, .table-overview-plain thead th {background-color: var(--color-hover-background);color:var(--color-hover-text);}
+.table-statistics-visits { width:100%;background-color:var(--color-hover-background); color:var(--color-hover-text);padding:5pt; }
+.table { border-collapse: collapse; }
+.table-hover {}
 
-    <script type="module">
-        import init from "./pkg/lib.js"; // <- match crate name
-        init(); // optional: can be awaited if async
-    </script>
-</body>
+
+.table tbody tr {
+    border-bottom: 1px solid var(--color-hover-background);
+    padding: 8px;
+    text-align: left;
+}
+.table tbody tr:hover {
+    background-color:var(--color-hover-background-alpha);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+
+    }
+
+}
+
+        @font-face {
+            font-family: 'Cairo';
+            src: url('bundle/fonts/Cairo-VariableFont_slnt,wght.ttf') format('truetype');
+        }
+
+        @font-face {
+            font-family: 'Righteous';
+            src: url('bundle/fonts/Righteous-Regular.ttf') format('truetype');
+        }
+
+        .immer-in-font-uc {font-family: 'Cairo', sans-serif;text-transform: uppercase;}
+        .bewegung-font-uc {font-family: 'Righteous', sans-serif;text-transform: uppercase;}
+
+/* ===== Top gradient bar ===== */
+        /* Loader css code */
+
+        .gradient-bar-inactive {
+            height: 5pt;
+            width: 100%;
+            background: linear-gradient(90deg, #1d655e, #1d655ecc, #82ec3e, #1d655e);
+        }
+
+        .gradient-bar {
+            height: 5pt;
+            width: 100%;
+            background: linear-gradient(90deg, #1d655e, #1d655ecc, #82ec3e, #1d655e);
+            background-size: 500%;
+            animation: moveGradient 7s linear infinite;
+        }
+
+        @keyframes moveGradient {
+            0% { background-position: 0 0; }
+            0% { background-position: 500% 0; }
+        }
+
+        .delayed-pulse {
+            opacity: 0;
+            animation: showImage 2s 3s forwards, pulse 1s 2s infinite;
+        }
+
+        @keyframes showImage {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+
+/* ===== Base ===== */
+body {
+    margin: 0;
+    font-family:
+  system-ui,
+  -apple-system,
+  "Segoe UI",
+  Roboto,
+  "Helvetica Neue",
+  Arial,
+  "Noto Sans",
+  "Liberation Sans",
+  sans-serif,
+  "Apple Color Emoji",
+  "Segoe UI Emoji",
+  "Segoe UI Symbol",
+  "Noto Color Emoji";
+}
+
+/* ===== Main menu bar ===== */
+.menu {
+    background-color: var(--color-background);
+    padding:2pt;
+}
+
+/* Flex layout for top-level menu */
+.menu > ul {
+    display: flex;
+    align-items: stretch;        /* forces equal height */
+    gap: 1.5rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* All top-level items */
+.menu > ul > li {
+    display: flex;
+    align-items: stretch;
+    padding: 0;
+}
+
+.menu > ul > li:last-child {
+    margin-left: auto;
+}
+
+.menu > ul > li:hover > a { background-color:var(--color-hover-background);color:var(--color-hover-text);}
+
+
+
+.menu > ul > a {padding:10pt;}
+
+
+/* ===== Top-level links (FIX) ===== */
+.menu > ul > li > a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 0.75rem;
+    height: 100%;                /* fill the menu item */
+    text-decoration: none;
+    color: inherit;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+/* Non-link items (e.g. "Icon") */
+.menu > ul > li:not(.dropdown):not(:has(a)) {
+    padding: 4pt 10pt 4pt 10pt;
+    display: flex;
+    align-items: center;
+}
+
+.menu > ul > li:not(:has(input)) {
+    padding:0pt;
+}
+
+/* ===== Dropdown ===== */
+.dropdown {
+    position: relative;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    min-width: 160px;
+    display: none;
+    background-color: var(--color-background);
+    border: 2pt solid var(--color-hover-background);
+    border-bottom-left-radius:10pt;
+    border-bottom-right-radius:10pt;
+    border-top-right-radius:10pt;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    z-index: 1000;
+}
+
+.dropdown-menu > li:hover { background-color:var(--color-hover-background);color:var(--color-hover-text); }
+.dropdown-menu > li:hover:first-child { border-top-right-radius: 8pt; }
+.dropdown-menu > li:hover:last-child { border-bottom-right-radius: 8pt;border-bottom-left-radius: 8pt; }
+
+
+/* Desktop: hover opens dropdown */
+@media (hover: hover) {
+    .dropdown:hover .dropdown-menu {
+        display: block;
+    }
+}
+
+/* Touch + keyboard: focus opens dropdown */
+.dropdown:focus-within .dropdown-menu {
+    display: block;
+}
+
+/* Disable hover click trap on touch */
+@media (hover: none) {
+    .dropdown-link {
+        pointer-events: none;
+    }
+}
+
+/* Dropdown items */
+.dropdown-menu li a {
+    display: block;
+    padding: 0.5rem 0.75rem;
+    text-decoration: none;
+    color: inherit;
+    white-space: nowrap;
+}
+
+/* ===== Secondary bars ===== */
+.filter {
+    background-color: var(--color-hover-background-alpha);
+    padding: 10pt;
+    margin:0 10pt 20pt 10pt;
+    border-radius:5pt;
+    border:2pt solid var(--color-hover-background);
+    /*box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;*/
+}
+
+.submenu {
+    padding: 10pt;
+    display:flex;
+    gap:10pt;
+}
+
+section {width:800pt;margin:auto;}
+
+.acc-icon {
+    mask: url(images/house.svg) no-repeat center / contain;
+    -webkit-mask: url(images/house.svg) no-repeat center / contain;
+    width: 0.9em;
+    height: 0.9em;
+    display: inline-block;
+    transform: translateY(2px);
+}
+
+/* search */
+details.search {
+  background-color: var(--color-hover-background-alpha);
+}
+
+details.search summary {
+    background-color: var(--color-hover-background);
+    color:#fff;
+  font-weight: bold;
+
+  padding: 10pt;
+}
+
+details[open].search {
+
+
+}
+
+/* trip */
+details[open].trip summary {
+  margin-bottom: 0.5em;
+}
+
+
+details.trip {
+  border-radius: 10pt;
+  padding:10pt;
+  background-color: #1d655e22;
+}
+
+details.trip summary {
+    background-color: #1d655e;
+    color:#fff;
+  font-weight: bold;
+
+  padding: 10pt;
+}
+
+details[open].trip {
+
+
+}
+
+details[open].trip summary {
+  margin-bottom: 0.5em;
+}
+
+
+.prev_next {position:absolute;left:0;right:0;display:flex;justify-content: space-between;}
+.prev_next > img {height:20pt;padding:5pt 10pt 10pt 10pt}
+
+select {font-size:14pt;font-family:arial;font-weight:normal;border:2pt solid red;padding:5pt;}
+input{font-size:14pt;font-family:arial;padding:2pt;border:1px solid red;border-radius:5pt;}
+
+.form-select {
+    --bs-form-select-bg-img: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+
+    padding: .375rem 2.25rem .375rem .75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--bs-body-color);
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-color: var(--bs-body-bg);
+    background-image: var(--bs-form-select-bg-img),var(--bs-form-select-bg-icon,none);
+    background-repeat: no-repeat;
+    background-position: right .75rem center;
+    background-size: 16px 12px;
+    border: var(--bs-border-width) solid var(--bs-border-color);
+    border-radius: var(--bs-border-radius);
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+
+.form-control {
+    display: block;
+    width: 100%;
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--bs-body-color);
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-color: var(--color-background);
+    background-clip: padding-box;
+    border: 1pt solid var(--color-hover-background);
+    border-radius: 5pt;
+    transition: border-color .15s
+ease-in-out, box-shadow .15s
+ease-in-out;
+border:2pt solid var(--color-hover-background);
+}
+
+.day-section, .day-accommodation { margin-top:10pt; }
+.day-header { margin-bottom:10pt; font-weight:bold; }
+
+h1 {font-family: 'Cairo', sans-serif;font-size:32pt;padding:0;margin:0;}
+h2 {text-align:center;}
+
+.card-container {display:flex;flex-direction:row;gap:10pt;}
+.card-container > * {
+  flex: 1;
+}
+.card {text-decoration:none;color:#000;border-radius:5pt; border:2pt solid var(--color-hover-background);padding:5pt;}
+.card:hover {background-color:var(--color-hover-background-alpha);color:var(--color-hover-background);}
+.card-title {font-family: 'Cairo', sans-serif;font-weight:bold;font-size:16pt;padding:5pt;line-height:16pt;}
+.card-text {padding:5pt;}
+.card-footer {padding:5pt;}
+.card-cover-img {height:100pt;}
+
+.submenu{display:flex;}
+.submenu div {font-family: 'Cairo', sans-serif;font-size:32pt;font-weight:bold;color:var(--color-hover-background); }
+
+a.tab-link:not(.active) {font-size:20pt;margin:10pt;text-decoration:none; padding:10pt; border-radius:10pt; background-color: var(--color-background); color:var(--color-text); }
+a.tab-link:not(.active):hover {text-decoration:underline;}
+
+
+.breadcrumb{display:flex;align-items: center; font-family: 'Cairo', sans-serif;font-weight:bold;font-size:16pt;margin:10pt 0 10pt 0;gap:5pt;}
+.breadcrumb img:first-child {height:18pt;}
+.breadcrumb img:second-child {height:10pt;}
+.bi-database path {color: red !important;}
+.breadcrumb-link {text-decoration:none;font-weight:bold;color:var(--color-hover-background);padding:0 5pt 0 5pt;border-radius:5pt; }
+.breadcrumb-link.active {text-decoration:none;background-color:var(--color-hover-background);color:var(--color-hover-text);}
+.breadcrumb-link:not(.active):hover {background-color:var(--color-hover-background-alpha);}
+.warning {background: linear-gradient(90deg, #1d655e, #1d655ecc, #82ec3e, #1d655e);}
+
+.single-link {text-decoration:none;color:#1d655e;}
+    </style>
+
+
+    </head>
+    <body>
+
+        <div class="gradient-bar-inactive"></div>
+
+        <nav class="menu">
+            <ul>
+            <li><a href="?path=explore" class="dropdown-link"><img src="https://online.bewegung.app/img/frog.svg" alt="Logo" width="24" height="auto" class="d-inline-block align-text-center"></a></li>
+            <li class="dropdown">
+                <a href="?path=overview:year" class="dropdown-link">Overview +</a>
+                <ul class="dropdown-menu">
+                <li><a href="?path=overview:year">Year</a></li>
+                <li><a href="?path=overview:country">Country</a></li>
+                <li><a href="?path=overview:plain">Plain</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="?path=map" class="dropdown-link">Map</a>
+            </li>
+            <li class="dropdown">
+                <a href="?path=statistics:summary" class="dropdown-link">Statistics +</a>
+                <ul class="dropdown-menu">
+                <li><a href="?path=statistics:summary">Summary</a></li>
+                <li><a href="?path=statistics:visits">Visits</a></li>
+                <li><a href="?path=statistics:overnights">Overnights</a></li>
+                </ul>
+            </li>
+            <li class="">
+                <a href="?path=dataset" class="dropdown-link">Dataset</a>
+            </li>
+            <li class="dropdown">
+                <a href="" class="dropdown-link">≡</a>
+                <ul class="dropdown-menu">
+                    <li><a href="?path=more:report">Report <img src="images/ext.svg" /></a></li>
+                    <li><a href="?path=more:toolbox">Toolbox <img src="images/ext.svg" /></a></li>
+                    <li><a href="?path=more:source">Source</a></li>
+                    <li><a href="?path=more:about">About</a></li>
+                </ul>
+            </li>
+            <li><input type="search" placeholder="Search trip" class="form-control" onkeydown="if(event.key==='Enter'){window.location.href='?path=search:'+encodeURIComponent(this.value);}" /></li>
+            </ul>
+        </nav>
+
+        <nav class="filter">
+            <img src="images/funnel.svg" />
+            <select class="form-select" multiple size="1"><option>Hej</option><option>Hej2</option></select>
+            <select class="form-select" multiple size="1"><option>Hej</option><option>Hej2</option></select>
+        </nav>
+
+        <section id="app">
+
+            <div style="text-align:center;margin-top:50pt;"><img src="images/frog.svg" style="width:233px;height:233px;" class="delayed-pulse" /></div>
+
+        </section>
+
+                        <div id="iib-foot" style="text-align:center;font-size:32pt;padding-top:20pt;padding-bottom:30pt;"><span class="immer-in-font-uc">II</span><span class="bewegung-font-uc">B</span>
+                <!--<br/><div style="font-size:12pt;font-family: 'Francois+One', sans-serif;">Revisit your travel memories</div>--></div>
+
+        <script type="module">
+            import init from "./pkg/lib.js"; // <- match crate name
+            init(); // optional: can be awaited if async
+        </script>
+    </body>
 </html>
