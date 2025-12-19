@@ -1,0 +1,34 @@
+{% if settings.Plugins.Theme.enabled %}
+
+<table class="table table-hover">
+    <thead style="position:sticky;top:0;background-color:;">
+        <tr>
+            <td>
+                <b>{{ settings.Plugins.Theme.translation }}</b>
+            </td>
+            <td>
+                <b>{{ translation.statistics.count | default(value="Count") }}</b>
+            </td>
+        </tr>
+    </thead>
+
+    {% for item in settings.Plugins.Theme.mapping %}
+        {# Find the first match in statistics_theme_count[0] where key == item.key #}
+        {% set match = statistics_theme_count[0]
+                       | filter(v => v.key == item.key)
+                       | first %}
+
+        {% if match is defined %}
+            <tr>
+                <td>{{ item.label }}</td>
+                <td style="text-align:center;">{{ match.total_count }}</td>
+            </tr>
+        {% endif %}
+    {% endfor %}
+</table>
+
+{% elif %}
+
+Themes not activated.
+
+{% endif %}

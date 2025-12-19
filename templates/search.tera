@@ -1,6 +1,6 @@
 <style>
-{% for tripDomain in tripDomains[0] %}
-.iib-search-domain[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}] {
+{% for tripDomain in common_trip_domains %}
+.iib-search-domain[data-iib-tripDomain='{{ tripDomain.DomainAbbreviation }}'] {
   background-color: {{ tripDomain.Color }};
   padding: 3pt 5pt 3pt 5pt;
   margin:2pt 0 2pt 0;
@@ -18,7 +18,6 @@
   background-color: {{ tripDomain.Color }}!important;
   color:#fff;
 }
-
 .acc-icon[data-iib-tripDomain='{{ tripDomain.DomainAbbreviation }}'] {
   mask: url(img/house.svg) no-repeat center / contain;
   -webkit-mask: url(img/house.svg) no-repeat center / contain;
@@ -28,82 +27,110 @@
 }
 :root[data-bs-theme="light"] .acc-icon[data-iib-tripDomain='{{ tripDomain.DomainAbbreviation }}'] { background-color: {{ tripDomain.Color }}; }
 :root[data-bs-theme="dark"] .acc-icon[data-iib-tripDomain='{{ tripDomain.DomainAbbreviation }}'] { background-color: gold; }
-:root[data-bs-theme="dark"] .acc-text[data-iib-tripDomain='{{ tripDomain.DomainAbbreviation }}'] {color:gold;}
-
+:root[data-bs-theme="dark"] .acc-text[data-iib-tripDomain='{{ tripDomain.DomainAbbreviation }}'] { color: gold; }
 {% endfor %}
-
 </style>
 
 <div class="container text-center">
 
-
-  <ul class="nav nav-tabs" id="myTab" role="tablist">
+<ul class="nav nav-tabs" id="myTab" role="tablist">
   <li class="nav-item" role="presentation">
-    <button class="nav-link iib-nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home-tab-pane" type="button" role="tab" aria-controls="home-tab-pane" aria-selected="true">{{ translation.search.trips | default: "Trips" }} ({{ trip[0] | size }})</button>
+    <button class="nav-link iib-nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home-tab-pane" type="button" role="tab" aria-controls="home-tab-pane" aria-selected="true">
+      {{ translation.search.trips | default(value="Trips") }} ({{ search_trip | length }})
+    </button>
   </li>
   <li class="nav-item" role="presentation">
-    <button class="nav-link iib-nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile-tab-pane" type="button" role="tab" aria-controls="profile-tab-pane" aria-selected="false">{{ translation.search.dayNotes | default: "Day Notes" }} ({{ sevent[0] | size }})</button>
+    <button class="nav-link iib-nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile-tab-pane" type="button" role="tab" aria-controls="profile-tab-pane" aria-selected="false">
+      {{ translation.search.dayNotes | default(value="Day Notes") }} ({{ search_event | length }})
+    </button>
   </li>
 </ul>
 
 <div class="tab-content" id="myTabContent">
   <div class="tab-pane fade show active" id="home-tab-pane" role="tabpanel" aria-labelledby="home-tab" tabindex="0" style="width:100%;max-width:100%;overflow-x:auto;">
+    <table class="table border rounded-bottom">
+      {% set tripCount = search_trip | length %}
+      {% if tripCount == 0 %}
+        <tr>
+          <td class="text-center align-middle p-3 icon-color">
+            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" class="bi bi-calendar2-x" viewBox="0 0 16 16">
+              <path d="M6.146 8.146a.5.5 0 0 1 .708 0L8 9.293l1.146-1.147a.5.5 0 1 1 .708.708L8.707 10l1.147 1.146a.5.5 0 0 1-.708.708L8 10.707l-1.146 1.147a.5.5 0 0 1-.708-.708L7.293 10 6.146 8.854a.5.5 0 0 1 0-.708"/>
+              <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5M2 2a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1z"/>
+              <path d="M2.5 4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5H3a.5.5 0 0 1-.5-.5z"/>
+            </svg>
+          </td>
+        </tr>
+      {% endif %}
 
-  <table class="table border rounded-bottom">
-
-{% assign tripCount = trip[0] | size %}
-{% if tripCount == 0 %}
-    <tr><td class="text-center align-middle p-3 icon-color"><svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" class="bi bi-calendar2-x" viewBox="0 0 16 16">
-  <path d="M6.146 8.146a.5.5 0 0 1 .708 0L8 9.293l1.146-1.147a.5.5 0 1 1 .708.708L8.707 10l1.147 1.146a.5.5 0 0 1-.708.708L8 10.707l-1.146 1.147a.5.5 0 0 1-.708-.708L7.293 10 6.146 8.854a.5.5 0 0 1 0-.708"/>
-  <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5M2 2a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1z"/>
-  <path d="M2.5 4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5H3a.5.5 0 0 1-.5-.5z"/>
-</svg></td></tr>
-{% endif %}
-
-
-{% for trip in trip[0] %}
-    <tr><td class="text-start"><a href="?p=trip&id={{ trip.OuterId }}"><div style="display:inline-block;" class="iib-search-domain" data-iib-tripDomain="{{ trip.InnerId | slice: 0, 1 }}">{{ trip.OuterId }} {{ trip.OverallDestination }}</div></a></td><td class="text-start align-middle">{{ trip.TripDescription }} {{ trip.DepartureDate }} {{ trip.ReturnDate }}</td><td><div class="participantGroup">{{ trip.ParticipantGroup }}</div></td></tr>
-{% endfor %}
-</table>
-
-  </div>
-  <div class="tab-pane fade" id="profile-tab-pane" role="tabpanel" aria-labelledby="profile-tab" tabindex="0" style="width:100%;max-width:100%;overflow-x:auto;">
-
-
-
-  <table class="table border border-top-0">
-
-  {% assign eventCount = sevent[0] | size %}
-{% if eventCount == 0 %}
-    <tr><td class="text-center align-middle p-3 icon-color"><svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" class="bi bi-calendar2-x" viewBox="0 0 16 16">
-  <path d="M6.146 8.146a.5.5 0 0 1 .708 0L8 9.293l1.146-1.147a.5.5 0 1 1 .708.708L8.707 10l1.147 1.146a.5.5 0 0 1-.708.708L8 10.707l-1.146 1.147a.5.5 0 0 1-.708-.708L7.293 10 6.146 8.854a.5.5 0 0 1 0-.708"/>
-  <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5M2 2a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1z"/>
-  <path d="M2.5 4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5H3a.5.5 0 0 1-.5-.5z"/>
-</svg></td></tr>
-{% endif %}
-
-  {% for day in sevent[0] %}
-    <tr><td><a href="?p=trip&id={{ day.OuterId }}" style="text-decoration:none;"><div class="text-nowrap iib-search-domain" data-iib-tripDomain="{{ day.InnerId | slice: 0, 1 }}">{{ day.OuterId }}</div></a></td><td style="white-space: nowrap;"><b>{{ day.Date }}</b><br />{{ day.Date | date: "%A" }}<br />
-    {% if settings.Base.Immich == 'Enabled' %}
-      {% unless settings.Base.ExcludeDayPhotos contains day.OuterId %}
-        <a href="?p=images&id={{ day.OuterId }}&date={{ day.Date }}"><button type="button" class="btn mt-2 iib-search-photos" data-iib-tripDomain="{{ day.InnerId | slice: 0, 1 }}">{{ translation.search.photos | default: "Photos" }}</button></a>
-      {% endunless %}
-    {% endif %}
-</td><td class="text-start">{{ day.Events }}<br /><div cla
-ss="mt-2"><a style="text-decoration:none;" target="_blank" href="https://www.google.com/maps/?q={{ day.AccommodationCoordinates }}" class="iib-search-accommodation" data-iib-tripDomain="{{ day.InnerId | slice: 0, 1 }}"><div class="acc-icon" data-iib-tripDomain="{{ day.InnerId | slice: 0, 1 }}"></div> <span class="acc-text" data-iib-tripDomain="{{ day.InnerId | slice: 0, 1 }}">{{ day.Accommodation }} - {{ day.AccommodationCountry }} {{ day.AccommodationCoordinates }} {{ day.AccommodationCoordinateAccuracy }}</span></a></div></td></tr>
-  {% endfor %}
+      {% for trip in search_trip %}
+        <tr>
+          <td class="text-start">
+            <a href="?p=trip&id={{ trip.OuterId }}">
+              <div class="iib-search-domain" data-iib-tripDomain="{{ trip.InnerId | split(pat="") | nth(n=0) }}">
+                {{ trip.OuterId }} {{ trip.OverallDestination }}
+              </div>
+            </a>
+          </td>
+          <td class="text-start align-middle">
+            {{ trip.TripDescription }} {{ trip.DepartureDate }} {{ trip.ReturnDate }}
+          </td>
+          <td>
+            <div class="participantGroup">{{ trip.ParticipantGroup }}</div>
+          </td>
+        </tr>
+      {% endfor %}
     </table>
-
-
-
   </div>
 
+  <div class="tab-pane fade" id="profile-tab-pane" role="tabpanel" aria-labelledby="profile-tab" tabindex="0" style="width:100%;max-width:100%;overflow-x:auto;">
+    <table class="table border border-top-0">
+      {% set eventCount = search_event | length %}
+      {% if eventCount == 0 %}
+        <tr>
+          <td class="text-center align-middle p-3 icon-color">
+            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" class="bi bi-calendar2-x" viewBox="0 0 16 16">
+              <path d="M6.146 8.146a.5.5 0 0 1 .708 0L8 9.293l1.146-1.147a.5.5 0 1 1 .708.708L8.707 10l1.147 1.146a.5.5 0 0 1-.708.708L8 10.707l-1.146 1.147a.5.5 0 0 1-.708-.708L7.293 10 6.146 8.854a.5.5 0 0 1 0-.708"/>
+              <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5M2 2a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1z"/>
+              <path d="M2.5 4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5H3a.5.5 0 0 1-.5-.5z"/>
+            </svg>
+          </td>
+        </tr>
+      {% endif %}
+
+      {% for day in search_event %}
+        <tr>
+          <td>
+            <a href="?p=trip&id={{ day.OuterId }}" style="text-decoration:none;">
+              <div class="text-nowrap iib-search-domain" data-iib-tripDomain="{{ day.InnerId | split(pat="") | nth(n=0) }}">{{ day.OuterId }}</div>
+            </a>
+          </td>
+          <td style="white-space: nowrap;">
+            <b>{{ day.Date | date(format="%Y-%m-%d") }}</b><br/>
+            {{ day.Date | date(format="%A") }}<br/>
+            {% if settings.Base.Immich == "Enabled" %}
+              {% if day.OuterId not in settings.Base.ExcludeDayPhotos %}
+                <a href="?p=images&id={{ day.OuterId }}&date={{ day.Date }}">
+                  <button type="button" class="btn mt-2 iib-search-photos" data-iib-tripDomain="{{ day.InnerId | split(pat="") | nth(n=0) }}">
+                    {{ translation.search.photos | default(value="Photos") }}
+                  </button>
+                </a>
+              {% endif %}
+            {% endif %}
+          </td>
+          <td class="text-start">
+            {{ day.Events }}<br/>
+            <div class="mt-2">
+              <a style="text-decoration:none;" target="_blank" href="https://www.google.com/maps/?q={{ day.AccommodationCoordinates }}" class="iib-search-accommodation" data-iib-tripDomain="{{ day.InnerId | split(pat="") | nth(n=0) }}">
+                <div class="acc-icon" data-iib-tripDomain="{{ day.InnerId | split(pat="") | nth(n=0) }}"></div>
+                <span class="acc-text" data-iib-tripDomain="{{ day.InnerId | split(pat="") | nth(n=0) }}">
+                  {{ day.Accommodation }} - {{ day.AccommodationCountry }} {{ day.AccommodationCoordinates }} {{ day.AccommodationCoordinateAccuracy }}
+                </span>
+              </a>
+            </div>
+          </td>
+        </tr>
+      {% endfor %}
+    </table>
+  </div>
 </div>
-
-
-
-
-
 </div>
-
-{% include 'components/footer.html' %}

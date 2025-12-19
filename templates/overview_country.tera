@@ -70,7 +70,7 @@
 
           {% for trip in countryOuterId %}
             {% set i = loop.index0 %}
-            <a href="?p=trip&id={{ countryOuterId[i] }}">
+            <a href="?path=trip:{{ countryOuterId[i] }}">
               <div
                 style="display:inline-block;"
                 class="iib-decade iib-item"

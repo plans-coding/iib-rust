@@ -1,0 +1,32 @@
+<div class="p-2 bg-white">
+
+  <div class="row mt-3">
+    <div class="col m-1">
+      <h2>{{ statistics_visits[0].TripCount }}</h2>
+      <p>
+        {{ translation.statistics.uniqueCountries
+           | default(value="Count of unique countries") }}
+      </p>
+    </div>
+
+    <div class="col m-1">
+      <h2>{{ statistics_trip_count[0].Count }}</h2>
+      <p class="card-text">
+        {{ translation.statistics.totalTrips
+           | default(value="Number of trips in total") }}
+      </p>
+    </div>
+  </div>
+
+  <div id="stat-trip-overview-chart-data"
+       data-json='{{ statistics_per_domain_year[0] | json_encode }}'
+       data-json-color='{{ common_trip_domains[0] | json_encode }}'>
+  </div>
+
+  <div class="m-3">
+    <canvas id="stat-trip-overview"></canvas>
+    {{ translation.statistics.tripDomainYear
+       | default(value="Trips per domain and year") }}
+  </div>
+
+</div>
