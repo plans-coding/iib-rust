@@ -11,4 +11,5 @@ SELECT
     City,
     COUNT(*) AS Count
 FROM DistinctCityOccurrences
-GROUP BY City;
+GROUP BY City
+ORDER BY Count DESC;
