@@ -1,11 +1,12 @@
 use web_sys::{window, Url};
 use serde_json::{Value};
 use wasm_bindgen::JsValue;
+use urlencoding::decode;
 
 pub fn get_query_params() -> Value {
     let window = window().expect("no global `window` exists");
     let location = window.location();
-    let search = location.search().unwrap_or_default(); // e.g. "?p=xxx&s=yyy&f=(aaa=xxx,zzz;bbb=yyy,qqq)"
+    let search = location.search().unwrap_or_default();
 
     let mut result = serde_json::Map::new();
 
@@ -14,44 +15,47 @@ pub fn get_query_params() -> Value {
 
         for pair in query.split('&') {
             let mut iter = pair.splitn(2, '=');
-            let Some(key) = iter.next() else { continue };
-            if key.is_empty() { continue; }
 
-            let value = iter.next().unwrap_or("");
+            let Some(raw_key) = iter.next() else { continue };
+            if raw_key.is_empty() { continue; }
+
+            let raw_value = iter.next().unwrap_or("");
+
+            // URL-decode key and value
+            let key = decode(raw_key).unwrap_or_else(|_| raw_key.into());
+            let value = decode(raw_value).unwrap_or_else(|_| raw_value.into());
 
             if key == "f" {
-                // Expected format: f=(aaa=xxx,zzz;bbb=yyy,qqq)
                 let obj = if value.starts_with('(') && value.ends_with(')') {
-                    let inner = &value[1..value.len()-1]; // strip "()"
+                    let inner = &value[1..value.len() - 1];
                     let mut fmap = serde_json::Map::new();
 
-                    // Split by semicolon between keys
                     for kv_block in inner.split(';') {
-                        if kv_block.trim().is_empty() { continue; }
+                        if kv_block.trim().is_empty() {
+                            continue;
+                        }
 
                         let mut kv_iter = kv_block.splitn(2, '=');
                         let Some(k) = kv_iter.next() else { continue };
                         let Some(vlist) = kv_iter.next() else { continue };
 
-                        // Values separated by commas
                         let vals: Vec<Value> = vlist
-                        .split(',')
-                        .filter(|s| !s.trim().is_empty())
-                        .map(|s| Value::String(s.to_string()))
-                        .collect();
+                            .split(',')
+                            .filter(|s| !s.trim().is_empty())
+                            .map(|s| Value::String(s.to_string()))
+                            .collect();
 
                         fmap.insert(k.to_string(), Value::Array(vals));
                     }
 
                     Value::Object(fmap)
                 } else {
-                    Value::String(value.to_string())
+                    Value::String(value.into_owned())
                 };
 
                 result.insert("f".to_string(), obj);
-
             } else {
-                result.insert(key.to_string(), Value::String(value.to_string()));
+                result.insert(key.into_owned(), Value::String(value.into_owned()));
             }
         }
     }

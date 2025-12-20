@@ -52,6 +52,8 @@ const QUERY_TRIP_ALL_TRIPS: &str = include_str!("../queries/simple/trip_all_trip
 const QUERY_TRIP_BORDER_CROSSINGS: &str = include_str!("../queries/simple/trip_border_crossings.sql");
 const QUERY_TRIP_EVENTS: &str = include_str!("../queries/simple/trip_events.sql");
 const QUERY_TRIP_SUMMARY: &str = include_str!("../queries/simple/trip_summary.sql");
+const QUERY_TRIP_PREVIOUS: &str = include_str!("../queries/simple/trip_previous.sql");
+const QUERY_TRIP_NEXT: &str = include_str!("../queries/simple/trip_next.sql");
 
 
 #[wasm_bindgen(start)]
@@ -264,6 +266,8 @@ fn start() {
                             // Lägg till filter
                             ["trip_borderCrossings", QUERY_STATISTICS_BORDER_CROSSINGS],
                             ["trip_map_pins", QUERY_TRIP_MAP_PINS],
+                            ["trip_previous", QUERY_TRIP_PREVIOUS.replace("/*_OUTER_ID_*/",suffix)],
+                            ["trip_next", QUERY_TRIP_NEXT.replace("/*_OUTER_ID_*/",suffix)],
                     ]});
                 }
                 
