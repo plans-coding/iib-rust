@@ -111,3 +111,55 @@ pub async fn get_sqlite_binary() -> Vec<u8> {
 
     Vec::new()
 }
+
+
+pub async fn save_filter2opfs(json_str: &str) -> Result<(), String> {
+    let dir = app_specific_dir()
+        .await
+        .map_err(|e| format!("Failed to access OPFS dir: {:?}", e))?;
+
+    let json_bytes = json_str.as_bytes().to_vec();
+
+    let mut file = dir
+        .get_file_handle_with_options("filter.json", &GetFileHandleOptions { create: true })
+        .await
+        .map_err(|e| format!("Failed to get file handle: {:?}", e))?;
+
+    let write_options = CreateWritableOptions { keep_existing_data: false };
+    let mut writer = file
+        .create_writable_with_options(&write_options)
+        .await
+        .map_err(|e| format!("Failed to create writable stream: {:?}", e))?;
+
+    writer
+        .write_at_cursor_pos(json_bytes)
+        .await
+        .map_err(|e| format!("Failed to write: {:?}", e))?;
+
+    writer
+        .close()
+        .await
+        .map_err(|e| format!("Failed to close: {:?}", e))?;
+
+    Ok(())
+}
+
+pub async fn load_filter_from_opfs() -> Option<Vec<u8>> {
+    let dir = match app_specific_dir().await {
+        Ok(d) => d,
+        Err(e) => {
+            web_sys::console::log_1(&format!("Failed to access OPFS dir: {:?}", e).into());
+            return None;
+        }
+    };
+
+    if let Ok(file) = dir
+        .get_file_handle_with_options("filter.json", &GetFileHandleOptions { create: false })
+        .await
+    {
+        web_sys::console::log_1(&"Found filter.json in OPFS".into());
+        return Some(file.read().await.unwrap_or_default());
+    }
+
+    None
+}

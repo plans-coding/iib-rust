@@ -22,11 +22,12 @@ ConsecutiveRemoval AS (
     FROM SplittedCountries
 ),
 BorderCrossings AS (
-    SELECT b.OuterId, a.InnerId,
+    SELECT b.OuterId, a.InnerId, SUBSTR(a.InnerId, 1, 1) AS TripDomain,
            GROUP_CONCAT(a.cleaned_country, ', ') AS AllBorderCrossings
     FROM ConsecutiveRemoval AS a
     LEFT JOIN bewa_Overview AS b ON a.InnerId = b.InnerId
     WHERE a.cleaned_country IS NOT NULL
+    /*AND TripDomain IN (TripDomain) AND ParticipantGroup IN (ParticipantGroup)*/
     GROUP BY a.InnerId
 ),
 SplitCountries AS (

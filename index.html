@@ -31,6 +31,7 @@
 
 .table td {padding:5pt;}
 
+.table-overview-plain {width:100%;}
 .table-overview-year td, .table-overview-country td, .table-overview-plain thead th, .table-overview-plain td {padding:8pt;font-weight:normal;}
 .table-overview-year td:first-child, .table-overview-country td:first-child, .table-overview-plain thead th {background-color: var(--color-hover-background);color:var(--color-hover-text);}
 .table-statistics-visits { width:100%;background-color:var(--color-hover-background); color:var(--color-hover-text);padding:5pt; }
@@ -138,13 +139,13 @@ body {
 }
 
 /* ===== Main menu bar ===== */
-.menu {
+#menu {
     background-color: var(--color-background);
     padding:2pt;
 }
 
 /* Flex layout for top-level menu */
-.menu > ul {
+#menu > ul {
     display: flex;
     align-items: stretch;        /* forces equal height */
     gap: 1.5rem;
@@ -154,25 +155,25 @@ body {
 }
 
 /* All top-level items */
-.menu > ul > li {
+#menu > ul > li {
     display: flex;
     align-items: stretch;
     padding: 0;
 }
 
-.menu > ul > li:last-child {
+#menu > ul > li:last-child {
     margin-left: auto;
 }
 
-.menu > ul > li:hover > a { background-color:var(--color-hover-background);color:var(--color-hover-text);}
+#menu > ul > li:hover > a { background-color:var(--color-hover-background);color:var(--color-hover-text);}
 
 
 
-.menu > ul > a {padding:10pt;}
+#menu > ul > a {padding:10pt;}
 
 
 /* ===== Top-level links (FIX) ===== */
-.menu > ul > li > a {
+#menu > ul > li > a {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -185,13 +186,13 @@ body {
 }
 
 /* Non-link items (e.g. "Icon") */
-.menu > ul > li:not(.dropdown):not(:has(a)) {
+#menu > ul > li:not(.dropdown):not(:has(a)) {
     padding: 4pt 10pt 4pt 10pt;
     display: flex;
     align-items: center;
 }
 
-.menu > ul > li:not(:has(input)) {
+#menu > ul > li:not(:has(input)) {
     padding:0pt;
 }
 
@@ -254,7 +255,7 @@ body {
 .filter {
     background-color: var(--color-hover-background-alpha);
     padding: 10pt;
-    margin:0 10pt 20pt 10pt;
+    margin:0 10pt 10pt 10pt;
     border-radius:5pt;
     border:2pt solid var(--color-hover-background);
     /*box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;*/
@@ -418,48 +419,8 @@ a.tab-link:not(.active):hover {text-decoration:underline;}
 
         <div class="gradient-bar-inactive"></div>
 
-        <nav class="menu">
-            <ul>
-            <li><a href="?path=explore" class="dropdown-link"><img src="https://online.bewegung.app/img/frog.svg" alt="Logo" width="24" height="auto" class="d-inline-block align-text-center"></a></li>
-            <li class="dropdown">
-                <a href="?path=overview:year" class="dropdown-link">Overview +</a>
-                <ul class="dropdown-menu">
-                <li><a href="?path=overview:year">Year</a></li>
-                <li><a href="?path=overview:country">Country</a></li>
-                <li><a href="?path=overview:plain">Plain</a></li>
-                </ul>
-            </li>
-            <li>
-                <a href="?path=map" class="dropdown-link">Map</a>
-            </li>
-            <li class="dropdown">
-                <a href="?path=statistics:summary" class="dropdown-link">Statistics +</a>
-                <ul class="dropdown-menu">
-                <li><a href="?path=statistics:summary">Summary</a></li>
-                <li><a href="?path=statistics:visits">Visits</a></li>
-                <li><a href="?path=statistics:overnights">Overnights</a></li>
-                </ul>
-            </li>
-            <li class="">
-                <a href="?path=dataset" class="dropdown-link">Dataset</a>
-            </li>
-            <li class="dropdown">
-                <a href="" class="dropdown-link">≡</a>
-                <ul class="dropdown-menu">
-                    <li><a href="?path=more:report">Report <img src="images/ext.svg" /></a></li>
-                    <li><a href="?path=more:toolbox">Toolbox <img src="images/ext.svg" /></a></li>
-                    <li><a href="?path=more:source">Source</a></li>
-                    <li><a href="?path=more:about">About</a></li>
-                </ul>
-            </li>
-            <li><input type="search" placeholder="Search trip" class="form-control" onkeydown="if(event.key==='Enter'){window.location.href='?path=search:'+encodeURIComponent(this.value);}" /></li>
-            </ul>
-        </nav>
+        <nav id="menu">
 
-        <nav class="filter">
-            <img src="images/funnel.svg" />
-            <select class="form-select" multiple size="1"><option>Hej</option><option>Hej2</option></select>
-            <select class="form-select" multiple size="1"><option>Hej</option><option>Hej2</option></select>
         </nav>
 
         <section id="app">

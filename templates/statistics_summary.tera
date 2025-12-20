@@ -7,10 +7,10 @@
   <a href="?path=statistics:overnights" class="breadcrumb-link {% if query_params.path == 'statistics:overnights' %}active{% endif %}">{{ translation.statistics.overnights | default(value="Overnights") }}</a>
 </div>
 
-<div class="p-2 bg-white">
+<div class="breadcrumb" style="justify-content: center;">
 
-  <div class="row mt-3">
-    <div class="col m-1">
+  <div>
+    <div style="background-color:var(--color-hover-background-alpha);border-radius:10pt;padding:10pt;margin:3pt;">
       <h2>{{ statistics_visits[0].TripCount }}</h2>
       <p>
         {{ translation.statistics.uniqueCountries
@@ -18,7 +18,7 @@
       </p>
     </div>
 
-    <div class="col m-1">
+    <div style="background-color:var(--color-hover-background-alpha);border-radius:10pt;padding:10pt;margin:3pt;">
       <h2>{{ statistics_trip_count[0].Count }}</h2>
       <p class="card-text">
         {{ translation.statistics.totalTrips

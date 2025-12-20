@@ -1,13 +1,154 @@
 use chrono::Local;
 use serde_json::{json, Value, Map};
 use crate::filecontent;
-use crate::query_params;
-use crate::start;
 
-use wasm_bindgen::JsCast;
-use web_sys::{window, Document, HtmlSelectElement, HtmlOptionElement, Event};
 use wasm_bindgen::prelude::*;
-use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsCast; // needed for `unchecked_into`
+use wasm_bindgen::closure::Closure; // needed for event listener closures
+use web_sys::{HtmlSelectElement, HtmlOptionElement, window, console};
+use wasm_bindgen_futures::spawn_local;
+
+use js_sys::Array;
+
+pub fn attach_select_listener() {
+    let document = window().unwrap().document().unwrap();
+
+    // List of select IDs
+    let ids = ["TripDomain", "ParticipantGroup"];
+
+    for id in ids.iter() {
+        let element = document
+            .get_element_by_id(id)
+            .unwrap()
+            .unchecked_into::<HtmlSelectElement>();
+
+        // Create closure for change event
+        let closure = Closure::wrap(Box::new(move || {
+            let document = window().unwrap().document().unwrap();
+
+            let get_selected = |id: &str| -> Vec<String> {
+                let select: HtmlSelectElement = document
+                    .get_element_by_id(id)
+                    .unwrap()
+                    .unchecked_into();
+
+                (0..select.length())
+                    .filter_map(|i| {
+                        let option: HtmlOptionElement = select.item(i).unwrap().unchecked_into();
+                        if option.selected() { Some(option.value()) } else { None }
+                    })
+                    .collect()
+            };
+
+            let json_value = json!({
+                "TripDomain": get_selected("TripDomain"),
+                "ParticipantGroup": get_selected("ParticipantGroup")
+            });
+
+            // Convert JSON to string for logging
+            let json_str = serde_json::to_string(&json_value).unwrap();
+            
+            // PRINT ALL CHANGES IN FILTERS
+            //console::log_1(&wasm_bindgen::JsValue::from_str(&json_str));
+            
+            let value = json_str.clone();
+            spawn_local(async move {
+                match filecontent::save_filter2opfs(&value).await {
+                    Ok(()) => web_sys::console::log_1(&"filter.json saved".into()),
+                    Err(e) => web_sys::console::log_1(&format!("save failed: {e}").into()),
+                }
+            });
+            
+            
+        }) as Box<dyn Fn()>);
+
+        element
+            .add_event_listener_with_callback("change", closure.as_ref().unchecked_ref())
+            .unwrap();
+
+        // Prevent closure from being dropped
+        closure.forget();
+    }
+}
+
+pub fn apply_filter_from_opfs_to_selects() {
+    spawn_local(async move {
+        let bytes = match filecontent::load_filter_from_opfs().await {
+            Some(b) if !b.is_empty() => b,
+            _ => return, // no file (or empty)
+        };
+
+        let json_str = match String::from_utf8(bytes) {
+            Ok(s) => s,
+            Err(e) => {
+                web_sys::console::log_1(&format!("filter.json is not valid UTF-8: {e:?}").into());
+                return;
+            }
+        };
+
+        let v: Value = match serde_json::from_str(&json_str) {
+            Ok(v) => v,
+            Err(e) => {
+                web_sys::console::log_1(&format!("Failed to parse filter.json: {e:?}").into());
+                return;
+            }
+        };
+
+        let document = window().unwrap().document().unwrap();
+
+        // Helper: set selected options in a <select> by values
+        let set_selected = |select_id: &str, selected_values: &[String]| {
+            let select: HtmlSelectElement = document
+                .get_element_by_id(select_id)
+                .unwrap()
+                .unchecked_into();
+
+            // Clear current selection
+            for i in 0..select.length() {
+                let opt: HtmlOptionElement = select.item(i).unwrap().unchecked_into();
+                opt.set_selected(false);
+            }
+
+            // Apply selection
+            for i in 0..select.length() {
+                let opt: HtmlOptionElement = select.item(i).unwrap().unchecked_into();
+                if selected_values.iter().any(|s| s == &opt.value()) {
+                    opt.set_selected(true);
+                }
+            }
+
+            // Optional: fire "change" so any dependent UI updates run
+            let evt = web_sys::Event::new("change").unwrap();
+            let _ = select.dispatch_event(&evt);
+        };
+
+        // Pull arrays out of JSON
+        let trip_domain: Vec<String> = v
+            .get("TripDomain")
+            .and_then(|x| x.as_array())
+            .map(|arr| {
+                arr.iter()
+                    .filter_map(|it| it.as_str().map(|s| s.to_string()))
+                    .collect()
+            })
+            .unwrap_or_default();
+
+        let participant_group: Vec<String> = v
+            .get("ParticipantGroup")
+            .and_then(|x| x.as_array())
+            .map(|arr| {
+                arr.iter()
+                    .filter_map(|it| it.as_str().map(|s| s.to_string()))
+                    .collect()
+            })
+            .unwrap_or_default();
+
+        set_selected("TripDomain", &trip_domain);
+        set_selected("ParticipantGroup", &participant_group);
+
+        web_sys::console::log_1(&"Applied filter.json to selects".into());
+    });
+}
 
 pub fn build_time_json() -> Value {
     let now = Local::now();
@@ -51,103 +192,6 @@ pub fn transform_settings(settings_array: &Vec<Value>) -> Value {
 
     Value::Object(result)
 }
-
-
-pub fn apply_preselected(query_params: &Value) {
-    let document = window().unwrap().document().unwrap();
-    let filter_keys = ["TripDomain", "ParticipantGroup"];
-
-    for key in filter_keys {
-        let Some(select_el) = document.get_element_by_id(key) else { continue };
-        let select_el: HtmlSelectElement = select_el.dyn_into().unwrap();
-
-        if let Some(arr) = query_params.get(key).and_then(|v| v.as_array()) {
-            let target_values: Vec<String> =
-            arr.iter().filter_map(|v| v.as_str().map(|s| s.to_string())).collect();
-
-            for i in 0..select_el.length() {
-                if let Some(option_el) = select_el.item(i) {
-                    // Convert Element → HtmlOptionElement
-                    let option: web_sys::HtmlOptionElement = option_el
-                    .dyn_into()
-                    .expect("Expected <option> element");
-
-                    let value = option.value(); // uses .value(), safer than attribute
-                    option.set_selected(target_values.contains(&value));
-                }
-            }
-        }
-    }
-}
-
-
-
-
-
-
-pub fn attach_select_listeners() {
-    let document: Document = window().unwrap().document().unwrap();
-    let filter_keys = ["TripDomain", "ParticipantGroup"];
-
-    for key in filter_keys {
-        let Some(element) = document.get_element_by_id(key) else { continue };
-        let select_el: HtmlSelectElement = element.dyn_into().unwrap();
-        let key_clone = key.to_string();
-
-        let closure = Closure::<dyn FnMut(Event)>::new(move |_| {
-            let document = window().unwrap().document().unwrap();
-
-            // 1. Get current query params (top-level object)
-            let params = query_params::get_query_params(); // &Value
-
-            let mut full_updated_map = match params.as_object() {
-                Some(map) => map.clone(),
-                                                       None => serde_json::Map::new(),
-            };
-
-            // 2. Read current selections for this <select>
-            if let Some(el) = document.get_element_by_id(&key_clone) {
-                let select: HtmlSelectElement = el.dyn_into().unwrap();
-                let mut selected_values = Vec::new();
-
-                for i in 0..select.length() {
-                    if let Some(option_el) = select.item(i) {
-                        let option: HtmlOptionElement = option_el.dyn_into().unwrap();
-                        if option.selected() {
-                            selected_values.push(option.value());
-                        }
-                    }
-                }
-
-                // 3. Update only the key inside "f"
-                let mut updated_f = full_updated_map
-                .get("f")
-                .and_then(|v| v.as_object())
-                .cloned()
-                .unwrap_or_default();
-
-                updated_f.insert(
-                    key_clone.clone(),
-                                 Value::Array(selected_values.into_iter().map(Value::String).collect()),
-                );
-
-                full_updated_map.insert("f".to_string(), Value::Object(updated_f));
-
-                // 4. Call set_query_params
-                query_params::set_query_params(&Value::Object(full_updated_map));
-
-                // optional: rerender
-                start();
-            }
-        });
-
-        select_el.add_event_listener_with_callback("change", closure.as_ref().unchecked_ref()).unwrap();
-
-        closure.forget();
-    }
-}
-
-
 
 pub trait SqlFilterReplace {
     fn replace_filter(self, placeholder: &str, data: &Value) -> String;

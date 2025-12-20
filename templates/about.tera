@@ -5,7 +5,7 @@
   <div class="breadcrumb-link active">{{ current_version }}</div>
   {% if latest_version != current_version %}
         <div  style="width:auto;">
-            <a class="breadcrumb-link active warning" target="_blank" href="https://github.com/plans-coding/immer-in-bewegung/releases/">{{ translation.about.updateAvailable | default(value='New update available') }} ({{ latest_version }}) <img src="images/ext.svg" /></a>
+            <a class="breadcrumb-link active warning" target="_blank" href="https://github.com/plans-coding/immer-in-bewegung/releases/">{{ translation.update.message | default(value='New update available') }} ({{ latest_version }}) <img src="images/ext.svg" /></a>
         </div>
     {% endif %}
 </div>

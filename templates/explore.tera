@@ -1,6 +1,6 @@
 <div class="breadcrumb">
   <img class="icon-color" src="images/database.svg" />
-  <div>{{ translation.overview.explore | default(value="Explore") }}</div>
+  <div>{{ translation.explore.title | default(value="Explore") }}</div>
   <!--<img src="images/arrow-right.svg" />
   <div class="breadcrumb-link active warning"><span class="immer-in-font-uc" style="font-weight:normal;">Immer in</span>&nbsp;<span class="bewegung-font-uc">Bewegung</span></div>
   -->
@@ -30,7 +30,7 @@
 {% endfor %}
 </div>
 <br />
-<h2>{{ translation.explore.seeAll | default(value="See all trips per") }}</h2>
+<h2>{{ translation.explore.seeAllTripsPer | default(value="See all trips per") }}</h2>
 
 <div class="breadcrumb" style="justify-content: center; ">
   <a href="?path=overview:year" class="breadcrumb-link {% if query_params.path == 'overview:year' %}active{% endif %}">{{ translation.overview.year | default(value="Year") }}</a>

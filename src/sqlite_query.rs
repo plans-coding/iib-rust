@@ -1,6 +1,4 @@
 use sqlite_wasm_rs as ffi;
-use liquid::{Object};
-use liquid::model::Value as LiquidValue;
 
 use std::ffi::CString;
 use std::ptr;

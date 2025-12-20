@@ -29,7 +29,6 @@ web-sys = { version = "0.3", features = [
     "Url",
     "History",
     "Location",
-
 ] }
 js-sys = "0.3"
 # beroende nedan till CONSOLE
@@ -46,4 +45,4 @@ kstring = "2.0.2"
 tera = "1.20.1"
 getrandom = { version = "0.2", features = ["js"] }
 tmp = "0.0.1"
-
+urlencoding = "2.1"

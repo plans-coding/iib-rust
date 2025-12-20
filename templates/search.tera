@@ -1,5 +1,5 @@
 <style>
-{% for tripDomain in common_trip_domains %}
+{% for tripDomain in common.common_trip_domains %}
 .iib-search-domain[data-iib-tripDomain='{{ tripDomain.DomainAbbreviation }}'] {
   background-color: {{ tripDomain.Color }};
   padding: 3pt 5pt 3pt 5pt;
@@ -41,7 +41,7 @@
 
 <details open class="search">
     <summary>{{ translation.search.trips | default(value="Trips") }} ({{ search_trip | length }})</summary>
-    <table class="table border rounded-bottom">
+    <table class="table" style="width:100%;">
       {% set tripCount = search_trip | length %}
       {% if tripCount == 0 %}
         <tr>
@@ -78,7 +78,7 @@
 <br />
 <details open class="search">
     <summary>{{ translation.search.dayNotes | default(value="Day Notes") }} ({{ search_event | length }})</summary>
-    <table class="table border border-top-0">
+    <table class="table" style="width:100%;">
       {% set eventCount = search_event | length %}
       {% if eventCount == 0 %}
         <tr>
