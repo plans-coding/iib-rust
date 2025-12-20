@@ -1,4 +1,4 @@
-<div class="prev_next"><img src="images/arrow-left.svg" /><img src="images/arrow-right.svg" /></div>
+<div class="prev_next"><a href="?path=trip:{{ trip_previous[0].OuterId }}"><img src="images/arrow-left.svg" /></a><a href="?path=trip:{{ trip_next[0].OuterId }}"><img src="images/arrow-right.svg" /></a></div>
 
 <div class="breadcrumb">
   <img class="icon-color" src="images/database.svg" />
@@ -11,9 +11,9 @@
     <summary data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">{# translation.trip.summary | default(value="Summary") #}{{ trip_summary[0].TripDescription }}</summary>
     
     
-    <div style="display:flex;">
+    <div style="display:flex;" class="trip-flex">
         <div class="col-md">
-            <table class="table">
+            <table class="table" style="width:100%;margin:15pt;">
                 <tbody>
                     <tr>
                         <th>{{ translation.trip.departureDate | default(value="Departure Date") }}</th>
@@ -104,6 +104,7 @@
         </div>
     
         <div class="col-md">
+
             {# Map container #}
             <div id="map-pin-data"
                  data-map-overall-route='{# trip_map_pins | json #}'
@@ -198,8 +199,8 @@
 
                 
                     <td class="text-start p-3">
-                        <b>{{ loop.index }}: {{ day.Weekday | default(value="") }} {{ day.Date }}</b><br>
-                        {{ day.Events }} | parseCoordinateLink <br>
+                        <b>{{ translation.trip.day | default(value="Day") }} {{ loop.index }}: {{ day.Weekday | default(value="") }} {{ day.Date }}</b><br>
+                        <div class="trip-day-event">{{ day.Events }}</div> | parseCoordinateLink <br>
                         <div class="mt-2">
                             <a style="text-decoration:none;" target="_blank" href="{{ settings.Base.ExternalMapProvider }}{{ day.AccommodationCoordinates }}" class="iib-trip-tab" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
                                 <div class="acc-icon"></div>
