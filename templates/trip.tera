@@ -7,12 +7,59 @@
   <div class="breadcrumb-link active">{{ trip_summary[0].OuterId }} {{ translation.trip.to | default(value="to") }} {{ trip_summary[0].OverallDestination }}</div>
 </div>
 
+
+<style>
+.trip-details-container {
+  position: relative;
+  /*width: 250px; /* adjust as needed */
+}
+
+.trip-details-field {
+  width:;
+  padding: 1.5rem 0.5rem 0.5rem 0.8rem; /* top padding for label space */
+  font-size: 1rem;
+  border:0;
+  border-radius: 4px;
+  background-color: #e5e5e5; /* grey background */
+  box-sizing: border-box;
+}
+
+.trip-details-label {
+  position: absolute;
+  top: 0.3rem;  /* slightly down from the top */
+  left: 0.5rem; /* same as input padding-left */
+  font-size: 0.8rem;
+  color: #666;
+  background-color: #e5e5e5; /* matches input bg to appear embedded */
+  padding: 0 4px;
+  pointer-events: none; /* label doesn’t block input */
+}
+</style>
+
+
+
 <details open class="trip">
     <summary data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">{# translation.trip.summary | default(value="Summary") #}{{ trip_summary[0].TripDescription }}</summary>
     
     
     <div style="display:flex;" class="trip-flex">
         <div class="col-md">
+        
+        <div style="display:flex;gap:2pt;">
+          <div class="trip-details-container">
+            <label for="amount" class="trip-details-label">{{ translation.trip.departureDate | default(value="Departure Date") }}</label>
+            <input type="text" id="amount" name="amount" class="trip-details-field" disabled value="{{ trip_summary[0].DepartureDate }}">
+          </div>         
+          <div class="trip-details-container">
+            <label for="amount" class="trip-details-label">{{ translation.trip.returnDate | default(value="Return Date") }}</label>
+            <input type="text" id="amount" name="amount" class="trip-details-field" disabled value="{{ trip_summary[0].ReturnDate }}">
+          </div>
+          <div class="trip-details-container">
+            <label for="amount" class="trip-details-label">{{ translation.trip.numberOfDays | default(value="Number of Days") }}</label>
+            <input type="text" id="amount" name="amount" class="trip-details-field" disabled value="{{ trip_summary[0].NumberOfDays }}">
+          </div>
+        </div>
+        
             <table class="table" style="width:100%;margin:15pt;">
                 <tbody>
                     <tr>

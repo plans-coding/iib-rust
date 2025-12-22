@@ -79,8 +79,8 @@
       {% endfor %}
     </select>
     
-    <button onclick="navigator.storage.getDirectory().then(dir => dir.removeEntry('filter.json').catch(()=>{})).then(() => window.location.reload())">
-      Delete filter.json
+    <button class="filter-button" onclick="navigator.storage.getDirectory().then(dir => dir.removeEntry('filter.json').catch(()=>{})).then(() => window.location.reload())">
+      {{ translation.menu.clearFilter | default(value="Clear filter") }}
     </button>
 
     

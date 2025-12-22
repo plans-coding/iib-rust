@@ -274,6 +274,7 @@ fn start() {
                     "title": render_structure.pointer("/all/translation/source/title").and_then(|v| v.as_str()).unwrap_or("Source"),
                     "template": TEMPLATE_SOURCE,
                     });
+                render_structure["all"]["db_loaded"] = json!(if !&db_bytes.is_empty() { "stored" } else { "missing" });
             }
             "more:about" => {
                 // Lägg till versionskontroll

@@ -14,7 +14,8 @@
     "previous": "Föregående",
     "next": "Nästa",
     "close": "Stäng",
-    "darkMode": "Natt"
+    "darkMode": "Natt",
+    "clearFilter": "Rensa filter"
   },
   "explore": {
     "title": "Utforska",
@@ -26,8 +27,10 @@
     "asSpecifiedIn": "Använd databasen och inställningarna som anges i",
     "bindDB": "Bind databasen till webbläsaren och tillämpa inställningarna från själva filen",
     "info": "Filen kommer att sparas i webbläsarens lokala lagringsminne men inte laddas upp. Läs mer om",
-    "applySettings": "Tillämpa inställningar",
-    "reload": "Ladda om appen och gå till startsidan"
+    "delete_db": "Ta bort nuvarande databasfil",
+    "delete_cache": "Ta bort webbappens cache",
+    "missing": "Databasen finns inte lagrad på OPFS.",
+    "stored": "Databasen finns lagrad på OPFS."
   },
   "search": {
     "trips": "Resor",
