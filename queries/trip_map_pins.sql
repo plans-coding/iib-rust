@@ -7,8 +7,8 @@ WITH RECURSIVE SplitPins AS
             SUBSTR(MapPins, INSTR(MapPins, '}') + 2) AS Remaining
         FROM
             bewa_Overview
-        WHERE
-            OuterId = "${parameter}"
+        /*WHERE
+            OuterId = "_OUTER_ID_"*/
         UNION ALL
         -- Recursively extract subsequent portions
         SELECT
@@ -22,7 +22,7 @@ WITH RECURSIVE SplitPins AS
     )
     -- Extract name and coordinates from each pin entry
 SELECT
-    "${parameter}" AS OuterId,
+    OuterId,
     TRIM(SUBSTR(PinEntry, 1, INSTR(PinEntry, '|') - 1)) AS MapPin,
     TRIM(SUBSTR(PinEntry, INSTR(PinEntry, '|') + 2, INSTR(PinEntry, ',') - INSTR(PinEntry, '|') - 2)) AS Latitude,
     TRIM(SUBSTR(PinEntry, INSTR(PinEntry, ',') + 2)) AS Longitude

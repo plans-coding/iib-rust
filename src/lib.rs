@@ -31,6 +31,7 @@ const TEMPLATE_SOURCE: &str = include_str!("../templates/source.tera");
 const QUERY_EXPLORE: &str = include_str!("../queries/explore.sql");
 const QUERY_OVERVIEW_YEAR: &str = include_str!("../queries/overview_year.sql");
 const QUERY_OVERVIEW_COUNTRY: &str = include_str!("../queries/overview_country.sql");
+const QUERY_TRIP_BORDER_CROSSINGS: &str = include_str!("../queries/trip_border_crossings.sql");
 const QUERY_STATISTICS_VISITS: &str = include_str!("../queries/statistics_visits.sql");
 const QUERY_STATISTICS_OVERNIGHTS: &str = include_str!("../queries/statistics_overnights.sql");
 const QUERY_STATISTICS_PER_DOMAIN_YEAR: &str = include_str!("../queries/statistics_per_domain_year.sql");
@@ -50,7 +51,6 @@ const QUERY_SEARCH_EVENT: &str = include_str!("../queries/simple/search_event.sq
 const QUERY_SEARCH_TRIP: &str = include_str!("../queries/simple/search_trip.sql");
 const QUERY_STATISTICS_TRIP_COUNT: &str = include_str!("../queries/simple/statistics_trip_count.sql");
 const QUERY_TRIP_ALL_TRIPS: &str = include_str!("../queries/simple/trip_all_trips.sql");
-const QUERY_TRIP_BORDER_CROSSINGS: &str = include_str!("../queries/simple/trip_border_crossings.sql");
 const QUERY_TRIP_EVENTS: &str = include_str!("../queries/simple/trip_events.sql");
 const QUERY_TRIP_SUMMARY: &str = include_str!("../queries/simple/trip_summary.sql");
 const QUERY_TRIP_PREVIOUS: &str = include_str!("../queries/simple/trip_previous.sql");
@@ -300,8 +300,8 @@ fn start() {
                             ["trip_all_trips", QUERY_TRIP_ALL_TRIPS.to_string()],
                             ["common_trip_domains", QUERY_COMMON_TRIP_DOMAINS.to_string()],
                             // Lägg till filter
-                            ["trip_borderCrossings", QUERY_TRIP_BORDER_CROSSINGS],
-                            ["trip_map_pins", QUERY_TRIP_MAP_PINS],
+                            ["trip_border_crossings", QUERY_TRIP_BORDER_CROSSINGS.replace("/*","").replace("*/","").replace("_OUTER_ID_",suffix)],
+                            ["trip_map_pins", QUERY_TRIP_MAP_PINS.replace("/*","").replace("*/","").replace("_OUTER_ID_",suffix)],
                             ["trip_previous", QUERY_TRIP_PREVIOUS.replace("/*_OUTER_ID_*/",suffix)],
                             ["trip_next", QUERY_TRIP_NEXT.replace("/*_OUTER_ID_*/",suffix)],
                     ]});
