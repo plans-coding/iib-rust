@@ -12,9 +12,6 @@
     {% endif %}
 {% endfor %}
           
-<script src="https://unpkg.com/maplibre-gl@^5.15.0/dist/maplibre-gl.js"></script>
-<link href="https://unpkg.com/maplibre-gl@^5.15.0/dist/maplibre-gl.css" rel="stylesheet" />
-
 <div class="prev_next"><a href="?path=trip:{{ trip_previous[0].OuterId }}"><img src="images/arrow-left.svg" /></a><a href="?path=trip:{{ trip_next[0].OuterId }}"><img src="images/arrow-right.svg" /></a></div>
 
 <div class="breadcrumb">
@@ -107,8 +104,30 @@
           <div class="trip-details-field" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">{{ trip_border_crossings[0].AllBorderCrossings }}</div>
         </div>
         
-        <button class="filter-button"><img src="images/photos.svg" />Immich</button>
-        <button class="filter-button"><img src="images/photos.svg" />Movie</button>
+        {# Optional Immich photo albums INACTIVATED #}
+        {# if settings.Base.Immich == "Enabled" %}
+            {% for photoAlbum in trip_summary[0].PhotoAlbums %}
+                <div type="button" class="btn btn-iib-ctt mb-3" data-iib-tripdomain="U"
+                     onclick="openAlbum('{{ photoAlbum }}', '{{ settings.Feature.ImmichApiUrl }}', '{{ settings.Feature.ImmichApiKey }}')">
+                    Immich {{ photoAlbum }}
+                </div>
+            {% endfor %}
+        {% endif #}
+        
+        {# Optional Movie plugin #}
+        {# if settings.Plugin.Movie.enabled %}
+            {% set_global movieId = settings.Plugin.Movie.mapping | get(key=trip_summary[0].OuterId) %}
+            {% if movieId is defined %}
+                <a href="{{ settings.Plugin.Movie.path }}{{ movieId }}" target="_blank">
+                    <button class="filter-button"><img src="images/photos.svg" />
+                        {{ settings.Plugins.Movie.translation }} {{ movieId }}
+                    </button>
+                </a>
+            {% endif %}
+        {% endif #}
+            
+
+        <!--<button class="filter-button"><img src="images/photos.svg" />Movie</button>-->
         
       </div>
 
@@ -119,6 +138,7 @@
   </div>
 </details>
 
+{% raw %}
 <script>
     // Initialize the map
     const map = new maplibregl.Map({
@@ -131,6 +151,7 @@
     // Add zoom and rotation controls
     map.addControl(new maplibregl.NavigationControl());
 </script>
+{% endraw %}
 
 <div class="days" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
   {% for day in trip_events %}
@@ -152,9 +173,9 @@
       
 
           {# Immich photos #}
-          {% if settings.Base.Immich == "Enabled" %}
+          {% if settings.Base.Immich == "Enabled" and day.OuterId not in settings.Base.ExcludeDayPhotos %}
 
-              <a href="?p=images:{{ day.OuterId }}:{{ day.Date }}">
+              <a href="?p=images:{{ day.OuterId }}:{{ day.Date }}" target="_blank">
                   <button type="button" class="filter-button" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
                       <img src="images/photos.svg" />
                   </button>
@@ -162,7 +183,51 @@
 
           {% endif %}
           
-        <!--<button class="filter-button"><img src="images/photos.svg" /></button>-->
+          {# Diary plugin #}
+
+          {% set_global day_year = day.Date | date(format="%G") %}
+          {% set_global day_week = day.Date | date(format="%V") %}
+          
+          {% if settings.Plugin.Diary.enabled %}
+            {% for file in settings.Plugin.Diary.filelist %}
+              {% if day_year in file and day_week in file %}
+              
+                <button onclick="document.getElementById('diary').showModal();" type="button" class="filter-button" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
+                    <img src="images/diary.svg" />
+                </button>
+                
+                <dialog id="diary">
+                  <h5>{{ file }}</h5>
+                  <p><img style="max-height:100%;max-width:100%;" src="{{ settings.Plugin.Diary.path }}{{ file }}"></p>
+                  <form method="dialog">
+                    <button>{{ translation.menu.close | default(value="Close") }}</button>
+                  </form>
+                </dialog>
+                
+              {% endif %}
+            {% endfor %}
+          {% endif %}
+          
+          {# Passport plugin #}
+          {% if settings.Plugin.Passport.enabled %}
+            {% for file in settings.Plugin.Passport.filelist %}
+              {% if day_year in file and day_week in file %}
+              
+                <button onclick="document.getElementById('passport').showModal();" type="button" class="filter-button" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
+                    <img src="images/passport.svg" />
+                </button>
+                
+                <dialog id="passport">
+                  <h5>{{ file }}</h5>
+                  <p><img style="max-height:100%;max-width:100%;" src="{{ settings.Plugin.Passport.path }}{{ file }}"></p>
+                  <form method="dialog">
+                    <button>{{ translation.menu.close | default(value="Close") }}</button>
+                  </form>
+                </dialog>
+
+              {% endif %}
+            {% endfor %}
+          {% endif %}
       
       </div>
             
@@ -173,27 +238,9 @@
 
 <!--
 
-            {# Optional Immich photo albums #}
-            {# if settings.Base.Immich == "Enabled" %}
-                {% for photoAlbum in trip_summary[0].PhotoAlbums %}
-                    <div type="button" class="btn btn-iib-ctt mb-3" data-iib-tripdomain="U"
-                         onclick="openAlbum('{{ photoAlbum }}', '{{ settings.Feature.ImmichApiUrl }}', '{{ settings.Feature.ImmichApiKey }}')">
-                        Immich {{ photoAlbum }}
-                    </div>
-                {% endfor %}
-            {% endif #}
+
     
-            {# Optional Movie plugin #}
-            {% if settings.Plugins.Movie.enabled %}
-                {% set movieId = settings.Plugins.Movie.mapping[trip_summary[0].OuterId] %}
-                {% if movieId is defined %}
-                    <a href="{{ settings.Plugins.Movie.path }}{{ movieId }}" target="_blank">
-                        <div type="button" class="btn btn-iib-ctt mb-3" data-iib-tripdomain="U">
-                            {{ settings.Plugins.Movie.translation }} {{ movieId }}
-                        </div>
-                    </a>
-                {% endif %}
-            {% endif %}
+
         </div>
     
         <div class="col-md">
@@ -208,112 +255,31 @@
                  data-translation-accommodations='{{ translation.trip.accommodations | default(value="Accommodations") }}'>
             </div>
             <div id="" style="min-height:400pt;height:100%;width:100%;"></div> #}
-        </div>-->
+        </div>
+        -->
 
 
 
 <!--
-            <table class="table">
-                {% for day in trip_events %}
-                <tr>
-                        
-                        {# Format the weekday in Rust before passing to Tera if needed #}
-                        
-                        {# Immich photos #}
-                        {# if settings.Base.Immich == "Enabled" and not settings.Base.ExcludeDayPhotos contains day.OuterId %}
-                            <a href="?p=images&id={{ day.OuterId }}&date={{ day.Date }}">
-                                <button type="button" class="btn mt-2 btn-iib-ctt" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
-                                    {{ translation.trip.photos | default(value="Photos") }}
-                                </button>
-                            </a>
-                        {% endif #}
                 
-                        {# Diary plugin #}
-                        {# if settings.Plugins.Diary.enabled %}
-                            {% for file in diaryFilesArray | select(day.Date) %}
-                                <button type="button" class="btn mt-2 btn-iib-ctt" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}"
-                                        data-bs-toggle="modal" data-bs-target="#fullScreenModal{{ file }}">
-                                    {{ settings.Plugins.Diary.translation | default(value="Diary") }}
-                                </button>
-                
-                                <div class="modal fade" id="fullScreenModal{{ file }}" tabindex="-1" aria-labelledby="fullScreenModalLabel" aria-hidden="true">
-                                    <div class="modal-dialog modal-fullscreen">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title" id="fullScreenModalLabel">{{ settings.Plugins.Diary.translation | default(value="Diary") }}</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <p><img style="max-height:100%;max-width:100%;" src="{{ settings.Plugins.Diary.path }}{{ file }}"></p>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ translation.menu.close | default(value="Close") }}</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            {% endfor %}
-                        {% endif #}
-                
-                        {# Passport plugin #}
-                        {# if settings.Plugins.Passport.enabled %}
-                            {% for file in passportFilesArray | select(day.Date) %}
-                                <button type="button" class="btn mt-2 btn-iib-ctt" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}"
-                                        data-bs-toggle="modal" data-bs-target="#fullScreenModal{{ file }}">
-                                    {{ settings.Plugins.Passport.translation | default(value="Passport") }}
-                                </button>
-                
-                                <div class="modal fade" id="fullScreenModal{{ file }}" tabindex="-1" aria-labelledby="fullScreenModalLabel" aria-hidden="true">
-                                    <div class="modal-dialog modal-fullscreen">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title" id="fullScreenModalLabel">{{ settings.Plugins.Passport.translation | default(value="Passport") }}</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <p><img style="max-height:100%;max-width:100%;" src="{{ settings.Plugins.Passport.path }}{{ file }}"></p>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ translation.menu.close | default(value="Close") }}</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            {% endfor %}
-                        {% endif #}
-
-                
-                    <td class="text-start p-3">
-                        <b>{{ translation.trip.day | default(value="Day") }} {{ loop.index }}: {{ day.Weekday | default(value="") }} {{ day.Date }}</b><br>
-                        <div class="trip-day-event">{{ day.Events }}</div> | parseCoordinateLink <br>
-                        <div class="mt-2">
-                            <a style="text-decoration:none;" target="_blank" href="{{ settings.Base.ExternalMapProvider }}{{ day.AccommodationCoordinates }}" class="iib-trip-tab" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
-                                <div class="acc-icon"></div>
-                                <span class="acc-text">{{ day.Accommodation }} – {{ day.AccommodationCountry }} – {{ day.AccommodationCoordinates }} {{ day.AccommodationCoordinateAccuracy | default(value="") }}</span>
-                            </a>
-                        </div>
-                
-                        {# Theme plugin }
-                        {% if settings.Plugins.Theme.enabled %}
-                            {% set parsedThemeLocations = day.Events | parseThemeLocationsEventString %}
-                            {% if parsedThemeLocations | length > 0 %}
-                                <div class="mt-2 sightseeing-text">
-                                    <div class="sightseeing-icon"></div>
-                                    <b>{{ settings.Plugins.Theme.translation }}</b>:
-                                    {% for item in parsedThemeLocations %}
-                                        <span>
-                                            <a class="sightseeing-text" href="{{ settings.Base.ExternalMapProvider }}{{ item.coordinates }}" target="_blank">
-                                                {{ item.place }}
-                                            </a>
-                                            {% if not loop.last %}, {% endif %}
-                                        </span>
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-                        {% endif #}
-                    </td>
-                </tr>
+    {# Theme plugin }
+    {% if settings.Plugins.Theme.enabled %}
+        {% set parsedThemeLocations = day.Events | parseThemeLocationsEventString %}
+        {% if parsedThemeLocations | length > 0 %}
+            <div class="mt-2 sightseeing-text">
+                <div class="sightseeing-icon"></div>
+                <b>{{ settings.Plugins.Theme.translation }}</b>:
+                {% for item in parsedThemeLocations %}
+                    <span>
+                        <a class="sightseeing-text" href="{{ settings.Base.ExternalMapProvider }}{{ item.coordinates }}" target="_blank">
+                            {{ item.place }}
+                        </a>
+                        {% if not loop.last %}, {% endif %}
+                    </span>
                 {% endfor %}
-            </table>
+            </div>
+        {% endif %}
+    {% endif #}
+  
 -->
 

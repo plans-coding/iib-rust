@@ -120,7 +120,7 @@ fn start() {
         //crender_structure["all"]["settings"] = serde_json::to_value(&settings_response["settings"]).unwrap();
         render_structure["all"]["settings"] = helper::transform_settings(&settings_response["settings"].as_array().unwrap());
         render_structure["all"]["translation"] = translation_content.expect("Error with translation data.");
-        //web_sys::console::log_1(&serde_json::to_string(&render_structure).unwrap().into());
+        web_sys::console::log_1(&serde_json::to_string(&render_structure["all"]["settings"]).unwrap().into());
         
         
         // RENDER TO 'MENU'  -----------------------------------------------------------------------

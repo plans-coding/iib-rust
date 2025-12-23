@@ -1,3 +1,4 @@
+<div class="gradient-bar-inactive"></div>
 <style>
 {% for tripDomain in common.common_trip_domains %}
 
