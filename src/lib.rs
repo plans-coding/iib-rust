@@ -71,8 +71,8 @@ fn start() {
             web_sys::console::log_1(&format!("DB size: {}", db_bytes.len()).into());
         } else {
             web_sys::console::log_1(&"No DB loaded.".into());
-            // Set query parameter 'p' to 'configure'
-            query_params::set_query_params(&json!({"path":"configure"}));
+            // Set query parameter 'p' to 'source'
+            query_params::set_query_params(&json!({"path":"source"}));
             // set page = configure -- needed?
         }
 
