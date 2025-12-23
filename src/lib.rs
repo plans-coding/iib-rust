@@ -107,7 +107,7 @@ fn start() {
         let json_obj: serde_json::Value = serde_json::to_value(&translation_filename).unwrap();
         let translation_filename_extracted = format!("languages/{}",json_obj["translation_filename"][0]["Value"].as_str().expect("Expected settings[0].Value to be a string"));
         web_sys::console::log_1(&translation_filename_extracted.as_str().into());
-        let translation_content = filecontent::fetch_json(&translation_filename_extracted).await;
+        let translation_content = filecontent::fetch_json(&translation_filename_extracted).await.unwrap_or(serde_json::Value::String("".to_string()));;
         //web_sys::console::log_1(&serde_json::to_string(&translation_content).unwrap().into());
 
         // Get all settings
@@ -119,7 +119,7 @@ fn start() {
 
         //crender_structure["all"]["settings"] = serde_json::to_value(&settings_response["settings"]).unwrap();
         render_structure["all"]["settings"] = helper::transform_settings(&settings_response["settings"].as_array().unwrap());
-        render_structure["all"]["translation"] = translation_content.expect("Error with translation data.");
+        render_structure["all"]["translation"] = translation_content;//.expect("Error with translation data.");
         web_sys::console::log_1(&serde_json::to_string(&render_structure["all"]["settings"]).unwrap().into());
         
         
