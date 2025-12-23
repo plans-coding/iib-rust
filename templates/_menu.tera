@@ -1,6 +1,41 @@
 <style>
 {% for tripDomain in common.common_trip_domains %}
-.day-foot[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}], details.trip[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}], .trip-details-field[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}] { background-color: {{ tripDomain.Color }}22; }
+
+details.trip summary[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}] { background-color: {{ tripDomain.Color }}; }
+
+details.trip[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}],
+.trip-details-field[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}] { background-color: {{ tripDomain.Color }}22; }
+
+.day[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}]:not(:last-child) { border-bottom: 1pt solid {{ tripDomain.Color }}22;  }
+
+.day-foot[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}], .day-foot a[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}] { color: {{ tripDomain.Color }}; }
+
+
+.acc-icon[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}] {
+    background-color:{{ tripDomain.Color }};
+    mask: url(images/house.svg) no-repeat center / contain;
+    -webkit-mask: url(images/house.svg) no-repeat center / contain;
+    width: 0.9em;
+    height: 0.9em;
+    display: inline-block;
+    transform: translateY(2px);
+}
+
+.day-icon[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}] {
+    background-color:{{ tripDomain.Color }};
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.3em;
+    height: 1.3em;
+    margin: 0 0.3em;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 0.7em;
+    font-weight: 600;
+    line-height: 1;
+    vertical-align: middle;
+}
 
 .iib-plain[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}] {
   background-color: {{ tripDomain.Color }};

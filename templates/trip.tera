@@ -106,6 +106,10 @@
           </label>
           <div class="trip-details-field" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">{{ trip_border_crossings[0].AllBorderCrossings }}</div>
         </div>
+        
+        <button class="filter-button"><img src="images/photos.svg" />Immich</button>
+        <button class="filter-button"><img src="images/photos.svg" />Movie</button>
+        
       </div>
 
     </div>
@@ -128,15 +132,41 @@
     map.addControl(new maplibregl.NavigationControl());
 </script>
 
-<div class="days">
+<div class="days" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
   {% for day in trip_events %}
-    <div class="day">
-      <div class="day-label">{{ translation.trip.day | default(value="Day") }} {{ loop.index }}: {{ day.Weekday | default(value="") }} {{ day.Date }}</div>
-      <div class="day-event">{{ day.Events }}</div>
-      <div class="day-foot" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}"><a style="text-decoration:none;" target="_blank" href="{{ settings.Base.ExternalMapProvider }}{{ day.AccommodationCoordinates }}" class="iib-trip-tab" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
-          <div class="acc-icon"></div>
-          <span class="acc-text">{{ day.Accommodation }} – {{ day.AccommodationCountry }} – {{ day.AccommodationCoordinates }} {{ day.AccommodationCoordinateAccuracy | default(value="") }}</span>
-      </a></div>
+    <div class="day" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
+    
+      <div class="day-left">
+      
+        <div class="day-event">{{ day.Events }}</div>
+        <div class="day-foot" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
+          <div class="day-label"><div class="day-icon" data-iib-tripDomain='{{ trip_summary[0].DomainAbbreviation }}'>{{ loop.index }}</div> {{ day.Weekday | default(value="") }} {{ day.Date }}</div>
+           &nbsp; <a style="text-decoration:none;" target="_blank" href="{{ settings.Base.ExternalMapProvider }}{{ day.AccommodationCoordinates }}" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
+              <div class="acc-icon" data-iib-tripDomain='{{ trip_summary[0].DomainAbbreviation }}'></div>
+              <span class="acc-text">{{ day.Accommodation }} – {{ day.AccommodationCountry }} – {{ day.AccommodationCoordinates }} {{ day.AccommodationCoordinateAccuracy | default(value="") }}</span>
+          </a>
+        </div>
+      
+      </div>
+      <div class="day-right">
+      
+
+          {# Immich photos #}
+          {% if settings.Base.Immich == "Enabled" %}
+
+              <a href="?p=images:{{ day.OuterId }}:{{ day.Date }}">
+                  <button type="button" class="filter-button" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
+                      <img src="images/photos.svg" />
+                  </button>
+              </a>
+
+          {% endif %}
+          
+        <!--<button class="filter-button"><img src="images/photos.svg" /></button>-->
+      
+      </div>
+            
+
     </div>
   {% endfor %}
 </div>
@@ -182,7 +212,7 @@
 
 
 
-
+<!--
             <table class="table">
                 {% for day in trip_events %}
                 <tr>
@@ -285,53 +315,5 @@
                 </tr>
                 {% endfor %}
             </table>
-
-
-<style>
-{% for tripDomain in common_trip_domains %}
-.iib-trip-tab.active[data-iib-tripDomain='{{ tripDomain.DomainAbbreviation }}'],
-summary[data-iib-tripDomain='{{ tripDomain.DomainAbbreviation }}'],
-:root[data-bs-theme="dark"] .btn-iib-ctt[data-iib-tripDomain='{{ tripDomain.DomainAbbreviation }}'] {
-    background-color: {{ tripDomain.Color }} !important;
-    color: #fff;
-    border-color: #ffffff33;
-}
-.iib-trip-tab[data-iib-tripDomain='{{ tripDomain.DomainAbbreviation }}']:not(.active) {
-    color: {{ tripDomain.Color }} !important;
-}
-{% if tripDomain.DomainAbbreviation == trip_summary[0].DomainAbbreviation %}
-.accommodationColor, .overviewColor { fill: {{ tripDomain.Color }}; }
-.polylineMap { stroke: {{ tripDomain.Color }}; }
-.acc-icon {
-    mask: url(images/house.svg) no-repeat center / contain;
-    -webkit-mask: url(images/house.svg) no-repeat center / contain;
-    width: 0.9em;
-    height: 0.9em;
-    display: inline-block;
-    transform: translateY(2px);
-}
-:root[data-bs-theme="light"] .acc-icon { background-color: {{ tripDomain.Color }}; }
-:root[data-bs-theme="dark"] .acc-icon { background-color: gold; }
-:root[data-bs-theme="dark"] .acc-text { color: gold; }
-{% endif %}
-{% endfor %}
-
-:root[data-bs-theme="dark"] .accommodationColor,
-:root[data-bs-theme="dark"] .overviewColor { fill: gold; }
-:root[data-bs-theme="dark"] .polylineMap { stroke: gold; }
-
-/* Plugin: Theme */
-.sightseeing-icon {
-    mask: url(img/bookmark-star-fill.svg) no-repeat center / contain;
-    -webkit-mask: url(img/bookmark-star-fill.svg) no-repeat center / contain;
-    width: 0.9em;
-    height: 0.9em;
-    display: inline-block;
-    transform: translateY(2px);
-}
-:root[data-bs-theme="light"] .sightseeing-text { color: #6f757e; }
-:root[data-bs-theme="light"] .sightseeing-icon { background-color: #6f757e; }
-:root[data-bs-theme="dark"] .sightseeing-icon { background-color: gold; }
-:root[data-bs-theme="dark"] .sightseeing-text { color: gold; }
-</style>
+-->
 
