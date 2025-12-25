@@ -1,6 +1,9 @@
 SELECT
-    PhotoStarttime,
+    DepartureDate,
+	ReturnDate,
+	PhotoStarttime,
     PhotoEndtime
+FROM
 FROM
     bewa_Overview
 WHERE

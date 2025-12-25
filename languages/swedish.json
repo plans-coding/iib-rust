@@ -81,7 +81,7 @@
   "images": {
     "title": "Resebilder",
     "back": "Tillbaka till",
-    "open-in": "Öppna i",
+    "open_in": "Öppna i",
     "previous-day": "Föregående dag",
     "next-day": "Nästa dag"
   },

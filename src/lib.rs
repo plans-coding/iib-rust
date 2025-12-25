@@ -72,7 +72,7 @@ fn start() {
         } else {
             web_sys::console::log_1(&"No DB loaded.".into());
             // Set query parameter 'p' to 'source'
-            query_params::set_query_params(&json!({"path":"source"}));
+            query_params::set_query_params(&json!({"path":"more:source"}));
             // set page = configure -- needed?
         }
 
@@ -308,14 +308,24 @@ fn start() {
                 }
                 
                 if let Some(suffix) = page.strip_prefix("images:") {
-                    render_structure["page"] = json!({
-                        "title": "Images",
-                        "template": TEMPLATE_IMAGES,
-                        "queries": [
-                            ["images_date_list", QUERY_IMAGES_DATE_LIST.to_string()],
-                            ["common_trip_domains", QUERY_COMMON_TRIP_DOMAINS.to_string()],
-                            ["images_photoTime", QUERY_IMAGES_PHOTO_TIME.to_string()],
-                    ]});
+                
+                    let mut parts = suffix.splitn(2, ':');
+                    
+                    if let (Some(trip_id), Some(trip_date)) = (parts.next(), parts.next()) {
+                        let trip_id = trip_id.to_string();
+                        let trip_date = trip_date.to_string();
+                
+                        render_structure["page"] = json!({
+                            "title": suffix,
+                            "template": TEMPLATE_IMAGES,
+                            "queries": [
+                                ["images_date_list", QUERY_IMAGES_DATE_LIST.replace("/*_OUTER_ID_*/",&trip_id)],
+                                ["common_trip_domains", QUERY_COMMON_TRIP_DOMAINS.to_string()],
+                                ["images_photo_time", QUERY_IMAGES_PHOTO_TIME.replace("/*_OUTER_ID_*/",&trip_id)],
+                        ]});
+                        render_structure["all"]["trip_date"] = json!(trip_date);
+                        render_structure["all"]["trip_id"] = json!(trip_id);
+                    }
                 }
                 
                 if let Some(suffix) = page.strip_prefix("map:") {

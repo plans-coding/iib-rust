@@ -11,7 +11,63 @@
         {% set_global filtered = filtered | concat(with=part) %}
     {% endif %}
 {% endfor %}
-          
+
+
+
+{% set_global theme_color = "" %}
+{% for item in common.common_trip_domains %}
+    {% if item.DomainAbbreviation == trip_summary[0].DomainAbbreviation %}
+        {% set_global theme_color = item.Color %}
+    {% endif %}
+{% endfor %}
+
+
+
+<script id="map-data" type="application/json">
+{
+  "type": "FeatureCollection",
+  "features": [
+  {% for day in trip_events %}
+    {% if day.AccommodationCoordinates %}
+    {% if not loop.first %}, {% endif %}{
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        {% set coords = day.AccommodationCoordinates | split(pat=(", ")) %}
+        "coordinates": [ {{ coords[1] }}, {{ coords[0] }} ]
+      },
+      "properties": {
+        "popup": "{{ day.Accommodation }}",
+        "layer": "layer-1"
+      }
+    }
+    {% endif %}
+  {% endfor %}
+    ,{
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        
+        "coordinates": [
+          {% for day in trip_events %}
+    {% if day.AccommodationCoordinates %}
+    {% if not loop.first %}, {% endif %}
+    {% set coords = day.AccommodationCoordinates | split(pat=(", ")) %}
+          [ {{ coords[1] }}, {{ coords[0] }} ]
+              {% endif %}
+  {% endfor %}
+        ]
+      },
+      "properties": {
+        "layer": "layer-1",
+        "color": "{{ theme_color }}"
+      }
+    }
+
+  ]
+}
+</script>
+
 <div class="prev_next"><a href="?path=trip:{{ trip_previous[0].OuterId }}"><img src="images/arrow-left.svg" /></a><a href="?path=trip:{{ trip_next[0].OuterId }}"><img src="images/arrow-right.svg" /></a></div>
 
 <div class="breadcrumb">
@@ -155,6 +211,7 @@
 
 <div class="days" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
   {% for day in trip_events %}
+  
     <div class="day" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
     
       <div class="day-left">
@@ -175,7 +232,7 @@
           {# Immich photos #}
           {% if settings.Base.Immich == "Enabled" and day.OuterId not in settings.Base.ExcludeDayPhotos %}
 
-              <a href="?p=images:{{ day.OuterId }}:{{ day.Date }}" target="_blank">
+              <a href="?path=images:{{ day.OuterId }}:{{ day.Date }}" target="_blank">
                   <button type="button" class="filter-button" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
                       <img src="images/photos.svg" />
                   </button>

@@ -493,47 +493,148 @@ dialog{width:100vw;height:100vh;}
             init(); // optional: can be awaited if async
         </script>
         
-        <script>
+<script>
 function initMap() {
-  if (document.getElementById('map')) {
-    var map = new maplibregl.Map({
-      container: 'map',
-      style: {
-        version: 8,
-        sources: {
-          "osm-tiles": {
-            type: "raster",
-            tiles: [
-              "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-            ],
-            tileSize: 256,
-            attribution: "© OpenStreetMap contributors"
-          }
-        },
-        layers: [
-          {
-            id: "osm-tiles",
-            type: "raster",
-            source: "osm-tiles",
-            minzoom: 0,
-            maxzoom: 19
-          }
-        ]
+  const mapEl = document.getElementById("map");
+  const dataEl = document.getElementById("map-data");
+
+  if (!mapEl || !dataEl) return;
+
+  const geojson = JSON.parse(dataEl.textContent);
+
+  const map = new maplibregl.Map({
+    container: "map",
+    style: {
+      version: 8,
+      sources: {
+        "osm-tiles": {
+          type: "raster",
+          tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
+          tileSize: 256,
+          attribution: "© OpenStreetMap contributors"
+        }
       },
-      center: [-74.5, 40],
-      zoom: 9
+      layers: [
+        {
+          id: "osm-tiles",
+          type: "raster",
+          source: "osm-tiles",
+          minzoom: 0,
+          maxzoom: 19
+        }
+      ]
+    },
+    //center: [18.07, 59.33],
+    zoom: 8,
+    attributionControl: false
+  });
+  
+  map.addControl(new maplibregl.NavigationControl(), "top-right");
+
+// Add fullscreen button
+map.addControl(new maplibregl.FullscreenControl(), "top-right");
+
+  map.on("load", () => {
+    /* single GeoJSON source */
+    map.addSource("map-data", {
+      type: "geojson",
+      data: geojson
     });
-    observer.disconnect(); // Stop observing once map is initialized
-  }
+
+    /* line layers */
+    ["layer-1", "layer-2", "layer-3"].forEach(id => {
+      map.addLayer({
+        id,
+        type: "line",
+        source: "map-data",
+        filter: ["all",
+          ["==", ["geometry-type"], "LineString"],
+          ["==", ["get", "layer"], id]
+        ],
+        paint: {
+          "line-color": ["get", "color"],
+          "line-width": 4
+        }
+      });
+    });
+
+    /* point layer */
+    map.addLayer({
+      id: "points",
+      type: "circle",
+      source: "map-data",
+      filter: ["==", ["geometry-type"], "Point"],
+      paint: {
+        "circle-radius": 6,
+        "circle-color": "#ffbf00",
+        "circle-stroke-color": "#000000",
+        "circle-stroke-width": 1
+      }
+    });
+
+    /* popups */
+    map.on("click", "points", e => {
+      const f = e.features[0];
+      if (!f.properties.popup) return;
+
+      new maplibregl.Popup()
+        .setLngLat(f.geometry.coordinates)
+        .setText(f.properties.popup)
+        .addTo(map);
+    });
+
+    map.on("mouseenter", "points", () => {
+      map.getCanvas().style.cursor = "pointer";
+    });
+    map.on("mouseleave", "points", () => {
+      map.getCanvas().style.cursor = "";
+    });
+    
+      /* auto-center & zoom to fit all features */
+const allCoords = geojson.features.flatMap(f => {
+    if (f.geometry.type === "Point") return [f.geometry.coordinates];
+    if (f.geometry.type === "LineString") return f.geometry.coordinates;
+    return [];
+});
+
+if (allCoords.length) {
+    // Compute bounds [minLng, minLat, maxLng, maxLat]
+    let minLng = allCoords[0][0],
+        minLat = allCoords[0][1],
+        maxLng = allCoords[0][0],
+        maxLat = allCoords[0][1];
+
+    allCoords.forEach(c => {
+        if (c[0] < minLng) minLng = c[0];
+        if (c[1] < minLat) minLat = c[1];
+        if (c[0] > maxLng) maxLng = c[0];
+        if (c[1] > maxLat) maxLat = c[1];
+    });
+
+    const bounds = [[minLng, minLat], [maxLng, maxLat]];
+
+    // Fit map to bounds with optional padding and exact zoom
+    map.fitBounds(bounds, {
+        padding: 20,
+        maxZoom: 12,  // <-- set your desired zoom level here
+        linear: true  // avoids zooming in animation beyond maxZoom
+    });
 }
 
-// Create a MutationObserver to watch for DOM changes
-var observer = new MutationObserver(initMap);
+  
+  });
+
+  observer.disconnect();
+}
+
+/* MutationObserver */
+const observer = new MutationObserver(initMap);
 observer.observe(document.body, { childList: true, subtree: true });
 
-// Try immediately in case the element already exists
 initMap();
 </script>
+
+
 
     </body>
 </html>

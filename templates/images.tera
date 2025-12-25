@@ -1,5 +1,5 @@
 <style>
-nav.menu, nav.filter, #iib-foot {display:none;}
+nav#menu, nav.filter, #iib-foot {display:none;}
 {% for tripDomain in common_trip_domains %}
 .btn-iib-ctt[data-iib-tripDomain='{{ tripDomain.DomainAbbreviation }}'] {
   background-color: {{ tripDomain.Color }} !important;
@@ -7,10 +7,10 @@ nav.menu, nav.filter, #iib-foot {display:none;}
 }
 {% endfor %}
 </style>
-Bilder
-{#
+
+
 <div style="display:flex;flex-direction:column;height:100%;">
-  <div class="iib-decade p-2" style="display:flex;">
+  <div class="iib-decade p-2" style="display:flex;flex-direction:row;">
 
     <div style="display: flex; align-items: center; flex: 1;">
       <button type="button" onclick="document.querySelector('#date_dd').selectedIndex = (document.querySelector('#date_dd').selectedIndex - 1 + document.querySelector('#date_dd').options.length) % document.querySelector('#date_dd').options.length;document.querySelector('#date_dd').dispatchEvent(new Event('change'));" class="btn btn-dark">
@@ -22,39 +22,39 @@ Bilder
     </div>
 
     <div style="flex:1;text-align:center;">
-      <a href="?p=trip&id={{ queryParams.id }}">
-        <button type="button" class="btn btn-iib-ctt" data-iib-tripDomain="{{ images_date_list[0][0].DomainAbbreviation }}">
-          <span class="prevnext">{{ translation.images.back | default(value="Back to trip") }}&nbsp;</span>{{ queryParams.id }}
+      <a href="?path=trip:{{ trip_id }}">
+        <button type="button" class="btn btn-iib-ctt" data-iib-tripDomain="{{ images_date_list[0].DomainAbbreviation }}">
+          <span class="prevnext">{{ translation.images.back | default(value="Back to trip") }}&nbsp;</span>{{ query_params.path }}
         </button>
       </a>
     </div>
 
     <div style="flex:1;text-align:center;">
-      <select name="date_dd" id="date_dd" class="iib-decade form-control text-center" data-image-trip-id="{{ queryParams.id }}">
-        {% for dateString in dateList[0] %}
-          <option value="{{ dateString.Date }}" {% if queryParams.date == dateString.Date %}selected{% endif %}>{{ dateString.Date }}</option>
+      <select name="date_dd" id="date_dd" class="iib-decade form-control text-center" data-image-trip-id="{{ query_params.path }}">
+        {% for dateString in images_date_list %}
+          <option value="{{ dateString.Date }}" {% if trip_date == dateString.Date %}selected{% endif %}>{{ dateString.Date }}</option>
         {% endfor %}
       </select>
     </div>
+   </div>
 
-    {% set photoStarttime = "00:00" %}
-    {% if photoTime[0][0].PhotoStarttime and photoTime[0][0].DepartureDate == queryParams.date %}
-      {% set photoStarttime = photoTime[0][0].PhotoStarttime %}
+    {% set_global photoStarttime = "00:00" %}
+    {% if images_photo_time[0].PhotoStarttime and images_photo_time[0].DepartureDate == trip_date %}
+      {% set_global photoStarttime = images_photo_time[0].PhotoStarttime %}
     {% endif %}
 
-    {% set photoEndtime = "23:59" %}
-    {% if photoTime[0][0].PhotoEndtime and photoTime[0][0].ReturnDate == queryParams.date %}
-      {% set photoEndtime = photoTime[0][0].PhotoEndtime %}
+    {% set_global photoEndtime = "23:59" %}
+    {% if images_photo_time[0].PhotoEndtime and images_photo_time[0].ReturnDate == trip_date %}
+      {% set_global photoEndtime = images_photo_time[0].PhotoEndtime %}
     {% endif %}
 
     <div style="flex:1;text-align:center;">
-      <a href="{{ settings.Feature.ImmichUrl }}search?query=%7B%22takenAfter%22%3A%22{{ queryParams.date }}T{{ photoStarttime }}%3A00.000Z%22%2C%22takenBefore%22%3A%22{{ queryParams.date }}T{{ photoEndtime }}%3A59.999Z%22%7D" target="_blank">
+      <a href="{{ settings.Feature.ImmichUrl }}search?query=%7B%22takenAfter%22%3A%22{{ trip_date }}T{{ photoStarttime }}%3A00.000Z%22%2C%22takenBefore%22%3A%22{{ trip_date }}T{{ photoEndtime }}%3A59.999Z%22%7D" target="_blank">
         <button type="button" class="btn btn-dark">
-          <span class="prevnext">{{ translation.images.open-in | default(value="Open in") }}&nbsp;</span>
+          <span class="prevnext">{{ translation.images.open_in | default(value="Open in") }}&nbsp;</span>
           <img id="openinLogoSmall" src="img/immich-logo-inline-dark-small.png" style="height:14pt;">
         </button>
       </a>
-    </div>
 
     <div style="flex:1;text-align:right;">
       <button type="button" onclick="document.querySelector('#date_dd').selectedIndex = (document.querySelector('#date_dd').selectedIndex + 1) % document.querySelector('#date_dd').options.length;document.querySelector('#date_dd').dispatchEvent(new Event('change'));" class="btn btn-dark">
@@ -68,7 +68,6 @@ Bilder
   </div>
 
   <div style="flex-grow:1;height:100%;">
-    <iframe style="width:100%;height:100%;display:block;border:0;" src="{{ settings.Feature.ImmichUrl }}search?query=%7B%22takenAfter%22%3A%22{{ queryParams.date }}T{{ photoStarttime }}%3A00.000Z%22%2C%22takenBefore%22%3A%22{{ queryParams.date }}T{{ photoEndtime }}%3A59.999Z%22%7D#search-chips"></iframe>
+    <iframe style="width:100%;height:100%;display:block;border:0;" src="{{ settings.Feature.ImmichUrl }}search?query=%7B%22takenAfter%22%3A%22{{ trip_date }}T{{ photoStarttime }}%3A00.000Z%22%2C%22takenBefore%22%3A%22{{ trip_date }}T{{ photoEndtime }}%3A59.999Z%22%7D#search-chips"></iframe>
   </div>
 </div>
-#}

@@ -1,8 +1,10 @@
 SELECT
-    SUBSTR(InnerId, 1, 1) AS DomainAbbreviation,
-    Date
+    bewa_Overview.OuterId,
+    SUBSTR(bewb_Events.InnerId, 1, 1) AS DomainAbbreviation,
+    bewb_Events.Date
 FROM
-    IIBb_Events
+    bewa_Overview
+LEFT JOIN bewb_Events ON bewb_Events.InnerId = bewa_Overview.InnerId
 WHERE
     OuterId = '/*_OUTER_ID_*/'
 ORDER BY
