@@ -241,7 +241,9 @@ fn start() {
                     "title": render_structure.pointer("/all/translation/statistics/visits").and_then(|v| v.as_str()).unwrap_or("Statistics: Visits"),
                     "template": TEMPLATE_STATISTICS_VISITS,
                     "queries": [
-                        ["statistics_visits", QUERY_STATISTICS_VISITS],
+                        ["statistics_visits", QUERY_STATISTICS_VISITS.replace("/*","").replace("*/","")
+                        .replace("(ParticipantGroup)", &participant_group)
+                        .replace("(TripDomain)", &trip_domain)]
                     ]});
             }
             "statistics:overnights" => {

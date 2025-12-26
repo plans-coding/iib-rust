@@ -1,4 +1,8 @@
 <style>
+section {width:100%!important;margin:0!important;}
+#app{flex:1;}
+#iib-foot{display:none;}
+
 nav#menu, nav.filter, #iib-foot {display:none;}
 {% for tripDomain in common_trip_domains %}
 .btn-iib-ctt[data-iib-tripDomain='{{ tripDomain.DomainAbbreviation }}'] {
@@ -9,18 +13,18 @@ nav#menu, nav.filter, #iib-foot {display:none;}
 </style>
 
 
-<div style="display:flex;flex-direction:column;height:100%;">
-  <div class="iib-decade p-2" style="display:flex;flex-direction:row;">
+<div style="display:flex;flex-direction:column;height:100%;padding:2pt;">
+  <div style="display:flex;flex-direction:row;">
 
     <div style="display: flex; align-items: center; flex: 1;">
-      <button type="button" onclick="document.querySelector('#date_dd').selectedIndex = (document.querySelector('#date_dd').selectedIndex - 1 + document.querySelector('#date_dd').options.length) % document.querySelector('#date_dd').options.length;document.querySelector('#date_dd').dispatchEvent(new Event('change'));" class="btn btn-dark">
+      <button type="button" onclick="document.querySelector('#date_dd').selectedIndex = (document.querySelector('#date_dd').selectedIndex - 1 + document.querySelector('#date_dd').options.length) % document.querySelector('#date_dd').options.length;document.querySelector('#date_dd').dispatchEvent(new Event('change'));" class="filter-button">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
           <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/>
         </svg>
         <span class="prevnext">{{ translation.menu.previous | default(value="Previous") }}</span>
       </button>
     </div>
-
+<!--
     <div style="flex:1;text-align:center;">
       <a href="?path=trip:{{ trip_id }}">
         <button type="button" class="btn btn-iib-ctt" data-iib-tripDomain="{{ images_date_list[0].DomainAbbreviation }}">
@@ -28,15 +32,14 @@ nav#menu, nav.filter, #iib-foot {display:none;}
         </button>
       </a>
     </div>
-
+-->
     <div style="flex:1;text-align:center;">
-      <select name="date_dd" id="date_dd" class="iib-decade form-control text-center" data-image-trip-id="{{ query_params.path }}">
+      <select name="date_dd" id="date_dd" class="form-control" data-image-trip-id="{{ query_params.path }}" onchange="window.location.href = '?path=images:{{ trip_id }}:'+this.value;">
         {% for dateString in images_date_list %}
           <option value="{{ dateString.Date }}" {% if trip_date == dateString.Date %}selected{% endif %}>{{ dateString.Date }}</option>
         {% endfor %}
       </select>
     </div>
-   </div>
 
     {% set_global photoStarttime = "00:00" %}
     {% if images_photo_time[0].PhotoStarttime and images_photo_time[0].DepartureDate == trip_date %}
@@ -50,14 +53,15 @@ nav#menu, nav.filter, #iib-foot {display:none;}
 
     <div style="flex:1;text-align:center;">
       <a href="{{ settings.Feature.ImmichUrl }}search?query=%7B%22takenAfter%22%3A%22{{ trip_date }}T{{ photoStarttime }}%3A00.000Z%22%2C%22takenBefore%22%3A%22{{ trip_date }}T{{ photoEndtime }}%3A59.999Z%22%7D" target="_blank">
-        <button type="button" class="btn btn-dark">
+        <button type="button" class="filter-button">
           <span class="prevnext">{{ translation.images.open_in | default(value="Open in") }}&nbsp;</span>
-          <img id="openinLogoSmall" src="img/immich-logo-inline-dark-small.png" style="height:14pt;">
+          <img id="openinLogoSmall" src="images/immich-logo-inline-dark-small.png" style="height:14pt;">
         </button>
       </a>
+   </div>
 
     <div style="flex:1;text-align:right;">
-      <button type="button" onclick="document.querySelector('#date_dd').selectedIndex = (document.querySelector('#date_dd').selectedIndex + 1) % document.querySelector('#date_dd').options.length;document.querySelector('#date_dd').dispatchEvent(new Event('change'));" class="btn btn-dark">
+      <button type="button" onclick="document.querySelector('#date_dd').selectedIndex = (document.querySelector('#date_dd').selectedIndex + 1) % document.querySelector('#date_dd').options.length;document.querySelector('#date_dd').dispatchEvent(new Event('change'));" class="filter-button">
         <span class="prevnext">{{ translation.menu.next | default(value="Next") }}</span>
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right" viewBox="0 0 16 16">
           <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8"/>

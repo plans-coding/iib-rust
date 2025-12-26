@@ -28,12 +28,15 @@
   </div>
 
   <div id="stat-trip-overview-chart-data"
-       data-json='{{ statistics_per_domain_year[0] | json_encode }}'
-       data-json-color='{{ common_trip_domains[0] | json_encode }}'>
+       data-json='{{ statistics_per_domain_year | json_encode }}'
+       data-json-color='{{ common_trip_domains | json_encode }}'>
   </div>
 
   <div class="m-3">
-    <canvas id="stat-trip-overview"></canvas>
+    
+    <canvas id="stat-trip-overview" style="width: 100%; height: 320px;"></canvas>
+    <canvas id="stat-trip-overview2" width="1993" height="996" style="display: block; box-sizing: border-box; height: 443px; width: 886px;"></canvas>
+    
     {{ translation.statistics.tripDomainYear
        | default(value="Trips per domain and year") }}
   </div>
