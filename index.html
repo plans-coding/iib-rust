@@ -11,6 +11,7 @@
         <!--<script src="bundle/bootstrap/bootstrap.bundle.5.3.8.min.js"></script>
         <link href="bundle/bootstrap/bootstrap.5.3.8.min.css" rel="stylesheet">
         <link href="bewegung.css" rel="stylesheet">-->
+        <script src="bundle/chartjs/chart.js"></script>
 
     <style>
 
@@ -21,9 +22,13 @@
     --color-hover-background-alpha: #6f757e22;
     --color-hover-text: #fff;
 
-    --color-filter: #fdf8ee;
+    --color-filter:#ffbf00;
+    --color-filter-alpha: #ffbf00bb;
+    --color-filter-background: #fdf8ee;
+    
+    
+    --color-submenu-background:#e2e3e5;
 }
-
 
 
 .table td {padding:5pt;}
@@ -139,136 +144,98 @@ body {
   flex-direction: column;
 }
 
-/* ===== Main menu bar ===== */
-#menu {
-    background-color: var(--color-background);
-    padding:0pt;
+
+/* ===== Menu ===== */
+
+.iib-menu {
+  display:flex;
+  flex-direction:column;
+  position: relative;
 }
 
-/* Flex layout for top-level menu */
-#menu > ul {
-    display: flex;
-    align-items: stretch;        /* forces equal height */
-    gap: 1.5rem;
-    list-style: none;
-    margin: 0;
-    padding: 0;
+
+.iib-menu:hover #filter {border-bottom-left-radius:0pt;border-bottom-right-radius:0pt;}
+#submenu-filter {background-color:var(--color-filter-background);padding:2pt;}
+#submenu-search {background-color:var(--color-hover-background);}
+#more, #search {cursor:pointer;}
+.iib-menu-over img {
+  height:1.2em;
 }
 
-/* All top-level items */
-#menu > ul > li {
-    display: flex;
-    align-items: stretch;
-    padding: 0;
+.iib-menu a {text-decoration:none;color:var(--color-text);}
+.iib-menu a:hover {color:var(--color-hover-text);background-color: var(--color-hover-background);}
+
+.iib-menu-over {
+  display:flex;
+  flex-direction:row;
 }
 
-#menu > ul > li:last-child {
-    margin-left: auto;
+.iib-menu-over > div,
+.iib-menu-under > div,
+.iib-menu-over > a,
+.iib-menu-under > a
+{
+  padding: 0.75rem;
 }
 
-#menu > ul > li:hover > a { background-color:var(--color-hover-background);color:var(--color-hover-text);}
-
-
-
-#menu > ul > a {padding:10pt;}
-
-
-/* ===== Top-level links (FIX) ===== */
-#menu > ul > li > a {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 0.75rem;
-    height: 100%;                /* fill the menu item */
-    text-decoration: none;
-    color: inherit;
-    white-space: nowrap;
-    cursor: pointer;
+.iib-menu-under {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right:0;
+  gap: 8px;
+  z-index: 10;
 }
 
-/* Non-link items (e.g. "Icon") */
-#menu > ul > li:not(.dropdown):not(:has(a)) {
-    padding: 4pt 10pt 4pt 10pt;
-    display: flex;
-    align-items: center;
+.iib-menu-under {
+  background-color: var(--color-submenu-background);
+  border-top: 1pt solid var(--color-hover-background);
+  border-bottom: 2pt solid var(--color-hover-background);
 }
 
-#menu > ul > li:not(:has(input)) {
-    padding:0pt;
+.iib-menu:has(#overview:hover) #submenu-overview,
+.iib-menu:has(#submenu-overview:hover) #submenu-overview,
+
+.iib-menu:has(#statistics:hover) #submenu-statistics,
+.iib-menu:has(#submenu-statistics:hover) #submenu-statistics,
+
+.iib-menu:has(#more:hover) #submenu-more,
+.iib-menu:has(#submenu-more:hover) #submenu-more,
+
+.iib-menu:has(#filter:hover) #submenu-filter,
+.iib-menu:has(#submenu-filter:hover) #submenu-filter,
+
+.iib-menu:has(#search:hover) #submenu-search,
+.iib-menu:has(#submenu-search:hover) #submenu-search
+
+{
+  display: flex;
 }
 
-/* ===== Dropdown ===== */
-.dropdown {
-    position: relative;
+
+.iib-menu:has(#overview:hover) #overview,
+.iib-menu:has(#submenu-overview:hover) #overview,
+.iib-menu:has(#statistics:hover) #statistics,
+.iib-menu:has(#submenu-statistics:hover) #statistics,
+.iib-menu:has(#submenu-more:hover) #more, #more:hover,
+.iib-menu:has(#submenu-search:hover) #search, #search:hover {
+  background-color: var(--color-hover-background);
+  color: var(--color-hover-text);
 }
 
-.dropdown-menu {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    min-width: 160px;
-    display: none;
-    background-color: var(--color-background);
-    border: 2pt solid var(--color-hover-background);
-    border-bottom-left-radius:10pt;
-    border-bottom-right-radius:10pt;
-    border-top-right-radius:10pt;
-    padding: 0;
-    margin: 0;
-    list-style: none;
-    z-index: 1000;
+
+#filter {background-color:#ffbf00;cursor:pointer;border-bottom-left-radius:10pt;border-bottom-right-radius:10pt;}
+#filter:hover {background-color:var(--color-filter-alpha);}
+
+.iib-menu:has(#submenu-filter:hover) #filter {
+  background: var(--color-filter-alpha);
 }
 
-.dropdown-menu > li:hover { background-color:var(--color-hover-background);color:var(--color-hover-text); }
-.dropdown-menu > li:hover:first-child { border-top-right-radius: 8pt; }
-.dropdown-menu > li:hover:last-child { border-bottom-right-radius: 8pt;border-bottom-left-radius: 8pt; }
 
+/* sections */
 
-/* Desktop: hover opens dropdown */
-@media (hover: hover) {
-    .dropdown:hover .dropdown-menu {
-        display: block;
-    }
-}
-
-/* Touch + keyboard: focus opens dropdown */
-.dropdown:focus-within .dropdown-menu {
-    display: block;
-}
-
-/* Disable hover click trap on touch */
-@media (hover: none) {
-    .dropdown-link {
-        pointer-events: none;
-    }
-}
-
-/* Dropdown items */
-.dropdown-menu li a {
-    display: block;
-    padding: 0.5rem 0.75rem;
-    text-decoration: none;
-    color: inherit;
-    white-space: nowrap;
-}
-
-/* ===== Secondary bars ===== */
-.filter {
-    background-color: var(--color-hover-background-alpha);
-    padding: 10pt;
-    margin:0 10pt 10pt 10pt;
-    border-radius:5pt;
-    border:2pt solid var(--color-hover-background);
-    /*box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;*/
-}
-
-.submenu {
-    padding: 10pt;
-    display:flex;
-    gap:10pt;
-}
-
-section {width:800pt;margin:auto;}
+section {max-width:800pt;margin:auto;}
 
 /* search */
 details.search {
@@ -397,6 +364,8 @@ a.tab-link:not(.active):hover {text-decoration:underline;}
 .breadcrumb-link:not(.active):hover {background-color:var(--color-hover-background-alpha);}
 .warning {background: linear-gradient(90deg, #1d655e, #1d655ecc, #82ec3e, #1d655e);}
 
+.breadcrumb-link svg {color:var(--color-hover-text);}
+
 .single-link {text-decoration:none;color:#1d655e;}
 
 .trip-day-event {font-size:1.1em;margin:5pt 0 5pt 0;}
@@ -471,10 +440,10 @@ dialog{width:100vw;height:100vh;}
 
 <script src='https://unpkg.com/maplibre-gl@latest/dist/maplibre-gl.js'></script>
 <link href='https://unpkg.com/maplibre-gl@latest/dist/maplibre-gl.css' rel='stylesheet' />
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
 
     </head>
     <body>
-
         <nav id="menu">
 
         </nav>
@@ -494,145 +463,177 @@ dialog{width:100vw;height:100vh;}
         </script>
         
 <script>
-function initMap() {
-  const mapEl = document.getElementById("map");
-  const dataEl = document.getElementById("map-data");
+(function () {
+  let mapInitialized = false;
 
-  if (!mapEl || !dataEl) return;
+  function initMap() {
+    if (mapInitialized) return;
 
-  const geojson = JSON.parse(dataEl.textContent);
+    const mapEl = document.getElementById("map");
+    const dataEl = document.getElementById("map-data");
 
-  const map = new maplibregl.Map({
-    container: "map",
-    style: {
-      version: 8,
-      sources: {
-        "osm-tiles": {
-          type: "raster",
-          tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
-          tileSize: 256,
-          attribution: "© OpenStreetMap contributors"
-        }
-      },
-      layers: [
-        {
+    if (!mapEl || !dataEl) return;
+
+    mapInitialized = true;
+
+    const geojson = JSON.parse(dataEl.textContent);
+
+    const map = new maplibregl.Map({
+      container: "map",
+      style: {
+        version: 8,
+        sources: {
+          "osm-tiles": {
+            type: "raster",
+            tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
+            tileSize: 256,
+            attribution: "© OpenStreetMap contributors"
+          }
+        },
+        layers: [{
           id: "osm-tiles",
           type: "raster",
           source: "osm-tiles",
           minzoom: 0,
           maxzoom: 19
-        }
-      ]
-    },
-    //center: [18.07, 59.33],
-    zoom: 8,
-    attributionControl: false
-  });
-  
-  map.addControl(new maplibregl.NavigationControl(), "top-right");
-
-// Add fullscreen button
-map.addControl(new maplibregl.FullscreenControl(), "top-right");
-
-  map.on("load", () => {
-    /* single GeoJSON source */
-    map.addSource("map-data", {
-      type: "geojson",
-      data: geojson
+        }]
+      },
+      zoom: 8,
+      attributionControl: false
     });
 
-    /* line layers */
-    ["layer-1", "layer-2", "layer-3"].forEach(id => {
+    map.addControl(new maplibregl.NavigationControl(), "top-right");
+    map.addControl(new maplibregl.FullscreenControl(), "top-right");
+
+    map.on("load", () => {
+      map.addSource("map-data", { type: "geojson", data: geojson });
+
+      ["layer-1", "layer-2", "layer-3"].forEach(id => {
+        map.addLayer({
+          id,
+          type: "line",
+          source: "map-data",
+          filter: ["all",
+            ["==", ["geometry-type"], "LineString"],
+            ["==", ["get", "layer"], id]
+          ],
+          paint: {
+            "line-color": ["get", "color"],
+            "line-width": 4
+          }
+        });
+      });
+
       map.addLayer({
-        id,
-        type: "line",
+        id: "points",
+        type: "circle",
         source: "map-data",
-        filter: ["all",
-          ["==", ["geometry-type"], "LineString"],
-          ["==", ["get", "layer"], id]
-        ],
+        filter: ["==", ["geometry-type"], "Point"],
         paint: {
-          "line-color": ["get", "color"],
-          "line-width": 4
+          "circle-radius": 6,
+          "circle-color": "#ffbf00",
+          "circle-stroke-color": "#000",
+          "circle-stroke-width": 1
         }
       });
-    });
 
-    /* point layer */
-    map.addLayer({
-      id: "points",
-      type: "circle",
-      source: "map-data",
-      filter: ["==", ["geometry-type"], "Point"],
-      paint: {
-        "circle-radius": 6,
-        "circle-color": "#ffbf00",
-        "circle-stroke-color": "#000000",
-        "circle-stroke-width": 1
+      map.on("click", "points", e => {
+        const f = e.features[0];
+        if (!f.properties.popup) return;
+        new maplibregl.Popup()
+          .setLngLat(f.geometry.coordinates)
+          .setText(f.properties.popup)
+          .addTo(map);
+      });
+
+      map.on("mouseenter", "points", () => map.getCanvas().style.cursor = "pointer");
+      map.on("mouseleave", "points", () => map.getCanvas().style.cursor = "");
+
+      // auto-fit bounds
+      const coords = geojson.features.flatMap(f =>
+        f.geometry.type === "Point" ? [f.geometry.coordinates] :
+        f.geometry.type === "LineString" ? f.geometry.coordinates : []
+      );
+
+      if (coords.length) {
+        const bounds = coords.reduce(
+          (b, c) => [
+            [Math.min(b[0][0], c[0]), Math.min(b[0][1], c[1])],
+            [Math.max(b[1][0], c[0]), Math.max(b[1][1], c[1])]
+          ],
+          [coords[0], coords[0]]
+        );
+
+        map.fitBounds(bounds, { padding: 20, maxZoom: 12, linear: true });
       }
     });
 
-    /* popups */
-    map.on("click", "points", e => {
-      const f = e.features[0];
-      if (!f.properties.popup) return;
+    mapObserver.disconnect();
+  }
 
-      new maplibregl.Popup()
-        .setLngLat(f.geometry.coordinates)
-        .setText(f.properties.popup)
-        .addTo(map);
-    });
+  const mapObserver = new MutationObserver(initMap);
+  mapObserver.observe(document.body, { childList: true, subtree: true });
+  initMap();
+})();
 
-    map.on("mouseenter", "points", () => {
-      map.getCanvas().style.cursor = "pointer";
-    });
-    map.on("mouseleave", "points", () => {
-      map.getCanvas().style.cursor = "";
-    });
-    
-      /* auto-center & zoom to fit all features */
-const allCoords = geojson.features.flatMap(f => {
-    if (f.geometry.type === "Point") return [f.geometry.coordinates];
-    if (f.geometry.type === "LineString") return f.geometry.coordinates;
-    return [];
-});
 
-if (allCoords.length) {
-    // Compute bounds [minLng, minLat, maxLng, maxLat]
-    let minLng = allCoords[0][0],
-        minLat = allCoords[0][1],
-        maxLng = allCoords[0][0],
-        maxLat = allCoords[0][1];
+(function() {
+  let initialized = false;
 
-    allCoords.forEach(c => {
-        if (c[0] < minLng) minLng = c[0];
-        if (c[1] < minLat) minLat = c[1];
-        if (c[0] > maxLng) maxLng = c[0];
-        if (c[1] > maxLat) maxLat = c[1];
-    });
+  function initChartIfReady() {
+    if (initialized) return;
 
-    const bounds = [[minLng, minLat], [maxLng, maxLat]];
+    const canvas = document.getElementById("stat-trip-overview");
+    const dataEl = document.getElementById("stat-trip-overview-chart-data");
 
-    // Fit map to bounds with optional padding and exact zoom
-    map.fitBounds(bounds, {
-        padding: 20,
-        maxZoom: 12,  // <-- set your desired zoom level here
-        linear: true  // avoids zooming in animation beyond maxZoom
-    });
-}
+    if (!canvas || !dataEl) return; // wait until both exist
+    if (typeof aggregateData !== "function") return;
 
-  
-  });
+    try {
+      const jsonData = JSON.parse(dataEl.dataset.json);
+      const colorData = JSON.parse(dataEl.dataset.jsonColor);
 
-  observer.disconnect();
-}
+      if (!Array.isArray(jsonData) || jsonData.length === 0) return;
 
-/* MutationObserver */
-const observer = new MutationObserver(initMap);
-observer.observe(document.body, { childList: true, subtree: true });
+      const aggregatedData = aggregateData(jsonData, colorData);
+      const ctx = canvas.getContext("2d");
 
-initMap();
+      new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: aggregatedData.labels,
+          datasets: aggregatedData.datasets
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: { stacked: true },
+            y: { stacked: true, beginAtZero: true }
+          }
+        }
+      });
+
+      initialized = true;
+      observer.disconnect();
+      clearInterval(interval);
+
+    } catch (err) {
+      console.error("Failed to initialize chart:", err);
+    }
+  }
+
+  // Watch for dynamic DOM changes
+  const observer = new MutationObserver(initChartIfReady);
+  observer.observe(document.body, { childList: true, subtree: true });
+
+  // Fallback polling every 50ms in case MutationObserver misses something
+  const interval = setInterval(initChartIfReady, 50);
+})();
+
+
 </script>
+
+
 
 
 
