@@ -6,6 +6,8 @@
   -->
 </div>
 
+<input type="search" placeholder="{{ translation.menu.searchTrip | default(value="Search trip") }}" class="form-control" onkeydown="if(event.key==='Enter'){window.location.href='?path=search:'+encodeURIComponent(this.value);}" />
+<br />
 <div class="card-container">
 {% for row in explore %}
 
@@ -29,6 +31,7 @@
 
 {% endfor %}
 </div>
+ 
 <br />
 <h2>{{ translation.explore.seeAllTripsPer | default(value="See all trips per") }}</h2>
 

@@ -48,6 +48,7 @@ details.trip[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}],
   padding: 3pt 5pt 3pt 5pt;
   margin:2pt 0 2pt 0;
   color:#fff;
+  text-decoration:none;
 }
 .btn-filter-domain[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}] {
   background-color: {{ tripDomain.Color }};
@@ -66,68 +67,66 @@ details.trip[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}],
 {% endfor %}
 </style>
 
-<ul>
-<li><a href="?path=explore" class="dropdown-link"><img src="https://online.bewegung.app/img/frog.svg" alt="Logo" width="24" height="auto" class="d-inline-block align-text-center"></a></li>
-<li class="dropdown">
-    <a href="?path=overview:year" class="dropdown-link">{{ translation.overview.title | default(value="Overview") }} +</a>
-    <ul class="dropdown-menu">
-    <li><a href="?path=overview:year">{{ translation.overview.year | default(value="Year") }}</a></li>
-    <li><a href="?path=overview:country">{{ translation.overview.country | default(value="Country") }}</a></li>
-    <li><a href="?path=overview:plain">{{ translation.overview.plain | default(value="Plain") }}</a></li>
-    </ul>
-</li>
-<li>
-    <a href="?path=map" class="dropdown-link">{{ translation.map.title | default(value="Map") }}</a>
-</li>
-<li class="dropdown">
-    <a href="?path=statistics:summary" class="dropdown-link">{{ translation.statistics.title | default(value="Statistics") }} +</a>
-    <ul class="dropdown-menu">
-    <li><a href="?path=statistics:summary">{{ translation.statistics.summary | default(value="Summary") }}</a></li>
-    <li><a href="?path=statistics:visits">{{ translation.statistics.visits | default(value="Visits") }}</a></li>
-    <li><a href="?path=statistics:overnights">{{ translation.statistics.overnights | default(value="Overnights") }}</a></li>
-    </ul>
-</li>
-<li class="">
-    <a href="?path=dataset" class="dropdown-link">{{ translation.menu.dataset | default(value="Dataset") }}</a>
-</li>
-<li class="dropdown">
-    <a href="" class="dropdown-link">≡</a>
-    <ul class="dropdown-menu">
-        <li><a href="?path=more:report">{{ translation.menu.report | default(value="Report") }} <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-arrow-up-right" viewBox="0 0 16 16">
-  <path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5"></path>
-  <path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0z"></path>
-</svg>
-</a></li>
-        <li><a href="?path=more:toolbox">{{ translation.menu.toolbox | default(value="Toolbox") }} <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-arrow-up-right" viewBox="0 0 16 16">
-  <path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5"></path>
-  <path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0z"></path>
-</svg>
-</a></li>
-        <li><a href="?path=more:source">{{ translation.source.title | default(value="Source") }}</a></li>
-        <li><a href="?path=more:about">{{ translation.about.title | default(value="About") }}</a></li>
-    </ul>
-</li>
-<li><input type="search" placeholder="{{ translation.menu.searchTrip | default(value="Search trip") }}" class="form-control" onkeydown="if(event.key==='Enter'){window.location.href='?path=search:'+encodeURIComponent(this.value);}" /></li>
-</ul>
+<div class="iib-menu">
 
-<nav class="filter">
-    <img src="images/funnel.svg" />
-
-    <select id="TripDomain" class="form-select" multiple size="1">
-      {% for tripDomain in common.common_trip_domains %}
-        <option value="{{ tripDomain.DomainAbbreviation }}">{{ tripDomain.DomainDescription }}</option>
-      {% endfor %}
-    </select>
-
-    <select id="ParticipantGroup" class="form-select" multiple size="1">
-      {% for participantGroup in common.common_participant_groups %}
-        <option value="{{ participantGroup.ParticipantGroup }}">{{ participantGroup.ParticipantGroup }}</option>
-      {% endfor %}
-    </select>
+    <div class="iib-menu-over">
+        <a href="?path=explore"><img src="https://online.bewegung.app/img/frog.svg"></a>
+        <a id="overview" href="?path=overview:year">{{ translation.overview.title | default(value="Overview") }}&nbsp;+</a>
+        <a href="?path=map">{{ translation.map.title | default(value="Map") }}</a>
+        <a id="statistics" href="?path=statistics:summary">{{ translation.statistics.title | default(value="Statistics") }}&nbsp;+</a>
+        <div id="filter">Filter</div>
+        <div id="search">Search</div>
+        <div id="more">☰</div>
+    </div>
     
-    <button class="filter-button" onclick="navigator.storage.getDirectory().then(dir => dir.removeEntry('filter.json').catch(()=>{})).then(() => window.location.reload())">
-      {{ translation.menu.clearFilter | default(value="Clear filter") }}
-    </button>
+    <div class="iib-menu-under" id="submenu-overview">
+        <a href="?path=overview:year">{{ translation.overview.year | default(value="Year") }}</a>
+        <a href="?path=overview:country">{{ translation.overview.country | default(value="Country") }}</a>
+        <a href="?path=overview:plain">{{ translation.overview.plain | default(value="Plain") }}</a>
+    </div>
+    <div class="iib-menu-under" id="submenu-statistics">
+        <a href="?path=statistics:summary">{{ translation.statistics.summary | default(value="Summary") }}</a>
+        <a href="?path=statistics:visits">{{ translation.statistics.visits | default(value="Visits") }}</a>
+        <a href="?path=statistics:overnights">{{ translation.statistics.overnights | default(value="Overnights") }}</a>
+    </div>
+    <div class="iib-menu-under" id="submenu-more">
+        <a href="?path=dataset">{{ translation.menu.dataset | default(value="Dataset") }}</a>
+        <a href="?path=more:report">{{ translation.menu.report | default(value="Report") }} <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-arrow-up-right" viewBox="0 0 16 16">
+          <path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5"></path>
+          <path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0z"></path>
+        </svg>
+        </a>
+        <a href="?path=more:toolbox">{{ translation.menu.toolbox | default(value="Toolbox") }} <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-arrow-up-right" viewBox="0 0 16 16">
+          <path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5"></path>
+          <path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0z"></path>
+        </svg>
+        </a>
+        <a href="?path=more:source">{{ translation.source.title | default(value="Source") }}</a>
+        <a href="?path=more:about">{{ translation.about.title | default(value="About") }}</a>
+    </div>
+    <div class="iib-menu-under" id="submenu-filter">
 
+        <img src="images/funnel.svg" />
     
-</nav>
+        <select id="TripDomain" multiple size="1">
+          {% for tripDomain in common.common_trip_domains %}
+            <option value="{{ tripDomain.DomainAbbreviation }}">{{ tripDomain.DomainDescription }}</option>
+          {% endfor %}
+        </select>
+    
+        <select id="ParticipantGroup" multiple size="1">
+          {% for participantGroup in common.common_participant_groups %}
+            <option value="{{ participantGroup.ParticipantGroup }}">{{ participantGroup.ParticipantGroup }}</option>
+          {% endfor %}
+        </select>
+        
+        <button class="filter-button" onclick="navigator.storage.getDirectory().then(dir => dir.removeEntry('filter.json').catch(()=>{})).then(() => window.location.reload())">
+          {{ translation.menu.clearFilter | default(value="Clear filter") }}
+        </button>
+
+    </div>
+    <div class="iib-menu-under" id="submenu-search">
+        <input type="search" placeholder="{{ translation.menu.searchTrip | default(value="Search trip") }}" style="border:0!important;border-radius:0!important;" class="form-control" onkeydown="if(event.key==='Enter'){window.location.href='?path=search:'+encodeURIComponent(this.value);}" />
+    </div>
+    
+</div>

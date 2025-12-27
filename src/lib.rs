@@ -107,7 +107,7 @@ fn start() {
         let json_obj: serde_json::Value = serde_json::to_value(&translation_filename).unwrap();
         let translation_filename_extracted = format!("languages/{}",json_obj["translation_filename"][0]["Value"].as_str().expect("Expected settings[0].Value to be a string"));
         web_sys::console::log_1(&translation_filename_extracted.as_str().into());
-        let translation_content = filecontent::fetch_json(&translation_filename_extracted).await.unwrap_or(serde_json::Value::String("".to_string()));;
+        let translation_content = filecontent::fetch_json(&translation_filename_extracted).await.unwrap_or(serde_json::Value::String("".to_string()));
         //web_sys::console::log_1(&serde_json::to_string(&translation_content).unwrap().into());
 
         // Get all settings
@@ -235,6 +235,7 @@ fn start() {
                         .replace("(TripDomain)", &trip_domain)],
                         ["common_trip_domains", QUERY_COMMON_TRIP_DOMAINS.to_string()],
                     ]});
+                //draw_chart();
             }
             "statistics:visits" => {
                 render_structure["page"] = json!({
@@ -423,5 +424,41 @@ pub async fn prepare_rendering(db_bytes: Vec<u8>, render_structure: serde_json::
     
     helper::apply_filter_from_opfs_to_selects();
     helper::attach_select_listener();
+    
+    
 
 }
+/*
+use charming::{
+    component::Legend,
+    element::ItemStyle,
+    series::{Pie, PieRoseType},
+    Chart, WasmRenderer
+};
+
+pub fn draw_chart() {
+    
+        let chart = Chart::new()
+        .legend(Legend::new().top("bottom"))
+        .series(
+            Pie::new()
+                .name("Nightingale Chart")
+                .rose_type(PieRoseType::Radius)
+                .radius(vec!["50", "150"])
+                .center(vec!["50%", "50%"])
+                .item_style(ItemStyle::new().border_radius(8))
+                .data(vec![
+                    (40.0, "rose 1"),
+                    (38.0, "rose 2"),
+                    (32.0, "rose 3"),
+                    (30.0, "rose 4"),
+                    (28.0, "rose 5"),
+                    (26.0, "rose 6"),
+                    (22.0, "rose 7"),
+                    (18.0, "rose 8"),
+                ]),
+        );
+
+    let renderer = WasmRenderer::new(1000, 800);
+    renderer.render("stat-trip-overview", &chart).unwrap();
+}*/

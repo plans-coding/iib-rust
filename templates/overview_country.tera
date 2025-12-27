@@ -9,7 +9,7 @@
 
 <table class="table-overview-country">
 
-  {% set last_continent = "" %}
+  {% set_global last_continent = "" %}
   {% set last_country = "" %}
 
   {% for row in overviewCountry %}
@@ -19,7 +19,7 @@
       <tr>
         <td colspan="2">{{ row.Continent }}</td>
       </tr>
-      {% set last_continent = row.Continent %}
+      {% set_global last_continent = row.Continent %}
     {% endif %}
 
     {# --- Country row (and close previous country's trips cell/row) --- #}
@@ -41,15 +41,13 @@
 
           {% for trip in countryOuterId %}
             {% set i = loop.index0 %}
-            <a href="?path=trip:{{ countryOuterId[i] }}">
-              <div
+            <a href="?path=trip:{{ countryOuterId[i] }}"
                 style="display:inline-block;"
                 class="iib-decade iib-item"
                 data-iib-participantGroup="{{ countryParticipantGroup[i] }}"
                 data-iib-tripDomain="{{ countryInnerId[i] | truncate(length=1, end="") }}"
               >
                 {{ countryOuterId[i] }} {{ countryOverallDestination[i] }}
-              </div>
             </a>
           {% endfor %}
 
