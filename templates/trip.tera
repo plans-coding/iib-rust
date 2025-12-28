@@ -83,7 +83,7 @@
     {{ trip_summary[0].TripDescription }}
   </summary>
 
-  <div style="display:grid;grid-template-columns: 1fr 1fr; gap: 4pt;">
+  <div class="trip-layout">
 
     <!-- Left Column -->
     <div style="display:flex;flex-direction:column; gap: 2pt;">

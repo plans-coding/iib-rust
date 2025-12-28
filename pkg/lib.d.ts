@@ -21,10 +21,10 @@ export interface InitOutput {
   readonly rust_sqlite_wasm_realloc: (a: number, b: number) => number;
   readonly sqlite3_os_end: () => number;
   readonly sqlite3_os_init: () => number;
-  readonly wasm_bindgen__convert__closures_____invoke__h287c14aff19c8166: (a: number, b: number, c: any) => void;
-  readonly wasm_bindgen__closure__destroy__hbeb953b7a7c54932: (a: number, b: number) => void;
   readonly wasm_bindgen__convert__closures_____invoke__h3afcb9cace96ef0d: (a: number, b: number) => void;
   readonly wasm_bindgen__closure__destroy__h3c30d884b410c426: (a: number, b: number) => void;
+  readonly wasm_bindgen__convert__closures_____invoke__h287c14aff19c8166: (a: number, b: number, c: any) => void;
+  readonly wasm_bindgen__closure__destroy__hbeb953b7a7c54932: (a: number, b: number) => void;
   readonly __wbindgen_malloc: (a: number, b: number) => number;
   readonly __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
   readonly __wbindgen_exn_store: (a: number) => void;
