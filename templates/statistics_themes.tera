@@ -1,19 +1,23 @@
-<div class="breadcrumb">
+hej
+{#<div class="breadcrumb">
   <img class="icon-color" src="images/database.svg" />
-  <div>{{ translation.statistics.title | default(value="Summary") }}</div>
+  <div>{{ settings.Plugin.Theme.translation | default(value="Themes") }}</div>
   <img src="images/arrow-right.svg" />
   <a href="?path=statistics:summary" class="breadcrumb-link {% if query_params.path == 'statistics:summary' %}active{% endif %}">{{ translation.statistics.summary | default(value="Summary") }}</a>
   <a href="?path=statistics:visits" class="breadcrumb-link {% if query_params.path == 'statistics:visits' %}active{% endif %}">{{ translation.statistics.visits | default(value="Visits") }}</a>
   <a href="?path=statistics:overnights" class="breadcrumb-link {% if query_params.path == 'statistics:overnights' %}active{% endif %}">{{ translation.statistics.overnights | default(value="Overnights") }}</a>
+  {% if settings.Plugin.Theme.enabled == true %}
+    <a href="?path=statistics:themes" class="breadcrumb-link {% if query_params.path == 'statistics:themes' %}active{% endif %}">{{ settings.Plugin.Theme.translation | default(value="Themes") }}</a>
+  {% endif %}
 </div>
-
-{% if settings.Plugins.Theme.enabled %}
+{{ statistics_theme_count }}
+ if settings.Plugin.Theme.enabled == true %}
 
 <table class="table table-hover">
     <thead style="position:sticky;top:0;background-color:;">
         <tr>
             <td>
-                <b>{{ settings.Plugins.Theme.translation }}</b>
+                <b>{{ settings.Plugin.Theme.translation }}</b>
             </td>
             <td>
                 <b>{{ translation.statistics.count | default(value="Count") }}</b>
@@ -21,7 +25,7 @@
         </tr>
     </thead>
 
-    {% for item in settings.Plugins.Theme.mapping %}
+    {% for item in settings.Plugin.Theme.mapping %}
         {# Find the first match in statistics_theme_count[0] where key == item.key #}
         {% set match = statistics_theme_count[0]
                        | filter(v => v.key == item.key)
@@ -40,4 +44,4 @@
 
 Themes not activated.
 
-{% endif %}
+{% endif #}

@@ -62,6 +62,19 @@ const QUERY_TRIP_NEXT: &str = include_str!("../queries/simple/trip_next.sql");
 static DB_BYTES: OnceCell<Vec<u8>> = OnceCell::new();
 static RENDER_STRUCTURE: OnceCell<Mutex<Value>> = OnceCell::new();
 
+// -----------------------------------------------------------------------
+// MAKE JAVASCRIPT FUNCTIONS AVAILABLE FOR RUST
+// -----------------------------------------------------------------------
+#[wasm_bindgen]
+extern "C" {
+    fn load_trip_map();
+    fn initializeChart();
+    fn initializeChartOvernights();
+}
+
+// -----------------------------------------------------------------------
+// REAL WASM START
+// -----------------------------------------------------------------------
 #[wasm_bindgen(start)]
 fn start() {
     wasm_bindgen_futures::spawn_local(async {
@@ -76,13 +89,41 @@ fn start() {
     });
 }
 
+// -----------------------------------------------------------------------
+// MAKE RUST FUNCTIONS AVAILABLE FOR JAVASCRIPT
+// -----------------------------------------------------------------------
 #[wasm_bindgen]
 pub fn page_load() {
     wasm_bindgen_futures::spawn_local(async {
         page_load_internal().await;
     });
 }
+// NOT IN USE (for user manual sql requests)  -----------------------------------------------------------------------
+/*#[wasm_bindgen]
+pub fn user_run_sql(sql: String) {
+    wasm_bindgen_futures::spawn_local(async {
+        user_run_sql_internal(sql).await;
+    });
+}
 
+async fn user_run_sql_internal(sql: String) {
+    let db_bytes = DB_BYTES.get().expect("DB not initialized");
+    
+        let combined_query = vec![
+            ("user_sql".to_string(), sql.to_string())
+        ];
+        
+    let query_response: serde_json::Value = sqlite_query::get_query_data(&db_bytes, combined_query).await;
+    
+    helper::render_json_table(&query_response["user_sql"]);
+    
+    //web_sys::console::log_1(&serde_json::to_string(&query_response).unwrap().into());
+    //web_sys::window().unwrap().document().unwrap().get_element_by_id("sql-output").unwrap().dyn_into::<web_sys::HtmlElement>().unwrap().set_inner_text(&query_response.to_string());
+}*/
+
+// -----------------------------------------------------------------------
+// INITIATE SESSION
+// -----------------------------------------------------------------------
 async fn session_load() -> (Vec<u8>, serde_json::Value) {
 
     // -----------------------------------------------------------------------
@@ -158,6 +199,9 @@ async fn session_load() -> (Vec<u8>, serde_json::Value) {
 
 }
 
+// -----------------------------------------------------------------------
+// HOT RELOAD
+// -----------------------------------------------------------------------
 async fn page_load_internal() {
     let db_bytes = DB_BYTES.get().expect("DB not initialized");
     let render_structure_mutex = RENDER_STRUCTURE.get().expect("Render structure missing");
@@ -169,6 +213,15 @@ async fn page_load_internal() {
     // Presume ?p=overview if not set at all
     let page = match &query_params["path"] { serde_json::Value::String(s) if !s.is_empty() => s.as_str(), _ => "explore", };
     web_sys::console::log_1(&format!("Loading page: {}",page).into());
+
+    render_structure["all"]["query_params"] = query_params.clone();
+
+    // If "path" is missing or empty, set it to "overview"
+    let p_is_empty = render_structure["all"]["query_params"]["path"].as_str().map(|s| s.is_empty()).unwrap_or(true);
+    if p_is_empty { render_structure["all"]["query_params"]["path"] = json!("explore"); }
+
+    render_structure["all"]["time"] = helper::build_time_json();
+    web_sys::console::log_1(&serde_json::to_string(&render_structure["all"]).unwrap().into());
 
     // READ APPLIED FILTERS  -----------------------------------------------------------------------
     
@@ -273,7 +326,6 @@ async fn page_load_internal() {
                         .replace("(TripDomain)", &trip_domain)],
                         ["common_trip_domains", QUERY_COMMON_TRIP_DOMAINS.to_string()],
                     ]});
-                //draw_chart();
             }
             "statistics:visits" => {
                 render_structure["page"] = json!({
@@ -297,10 +349,10 @@ async fn page_load_internal() {
             }
             "statistics:themes" => {
                 render_structure["page"] = json!({
-                    "title": render_structure.pointer("/all/translation/themes/title").and_then(|v| v.as_str()).unwrap_or("Themes"),
+                    "title": render_structure.pointer("/all/settings/Plugin/Theme/translation").and_then(|v| v.as_str()).unwrap_or("Themes"),
                     "template": TEMPLATE_STATISTICS_THEMES,
                     "queries": [
-                         ["statistics_theme_count", QUERY_STATISTICS_THEME_COUNT],
+                         ["statistics_theme_count", QUERY_STATISTICS_THEME_COUNT.to_string()],
                     ]});
             }
             "dataset" => {
@@ -452,12 +504,6 @@ async fn page_load_internal() {
         
         load_trip_map();
         initializeChart();
+        initializeChartOvernights();
 
-}
-
-// Use functions in index.html
-#[wasm_bindgen]
-extern "C" {
-    fn load_trip_map();
-    fn initializeChart();
 }

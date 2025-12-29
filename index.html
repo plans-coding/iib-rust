@@ -178,6 +178,7 @@ body {
   display:flex;
   flex-direction:row;
   border-bottom: 1pt solid var(--color-hover-background);
+  box-shadow: 0 3pt 0 rgba(0, 0, 0, 0.15);
 }
 
 .iib-menu-over img, .iib-menu-over svg, #more {
@@ -256,7 +257,7 @@ body {
 
 /* sections */
 
-section {max-width:800pt;margin:auto;width:100%;}
+section {max-width:800pt;margin:10pt auto auto;width:100%; }
 
 /* search */
 details.search {
@@ -476,12 +477,14 @@ dialog{width:100vw;height:100vh;}
 
     </style>
 
+
 <script src='https://unpkg.com/maplibre-gl@latest/dist/maplibre-gl.js'></script>
 <link href='https://unpkg.com/maplibre-gl@latest/dist/maplibre-gl.css' rel='stylesheet' />
 <script src='https://unpkg.com/chart.js@4.5.1/dist/chart.umd.min.js'></script>
 
     </head>
     <body>
+    
         <nav id="menu">
 
         </nav>
@@ -492,8 +495,8 @@ dialog{width:100vw;height:100vh;}
 
         </section>
 
-                        <div id="iib-foot" style="text-align:center;font-size:32pt;padding-top:20pt;padding-bottom:30pt;"><span class="immer-in-font-uc">II</span><span class="bewegung-font-uc">B</span>
-                <!--<br/><div style="font-size:12pt;font-family: 'Francois+One', sans-serif;">Revisit your travel memories</div>--></div>
+        <div id="iib-foot" style="text-align:center;font-size:32pt;padding-top:20pt;padding-bottom:30pt;"><span class="immer-in-font-uc">II</span><span class="bewegung-font-uc">B</span>
+        <!--<br/><div style="font-size:12pt;font-family: 'Francois+One', sans-serif;">Revisit your travel memories</div>--></div>
 
         <script type="module">
             import init, { page_load } from "./pkg/lib.js";
@@ -512,217 +515,261 @@ dialog{width:100vw;height:100vh;}
             });
             
             window.addEventListener("popstate", page_load);
+            
+            //window.user_run_sql = user_run_sql; // load above if needed
 
         </script>
         
-<script>
-
-function load_trip_map() {
-
-  let mapInitialized = false;
-
-    if (mapInitialized) return;
-
-    const mapEl = document.getElementById("map");
-    const dataEl = document.getElementById("map-data");
-
-    if (!mapEl || !dataEl) return;
-
-    mapInitialized = true;
-
-    const geojson = JSON.parse(dataEl.textContent);
-
-    const map = new maplibregl.Map({
-      container: "map",
-      style: {
-        version: 8,
-        sources: {
-          "osm-tiles": {
-            type: "raster",
-            tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
-            tileSize: 256,
-            attribution: "© OpenStreetMap contributors"
-          }
-        },
-        layers: [{
-          id: "osm-tiles",
-          type: "raster",
-          source: "osm-tiles",
-          minzoom: 0,
-          maxzoom: 19
-        }]
-      },
-      zoom: 8,
-      attributionControl: false
-    });
-
-    map.addControl(new maplibregl.NavigationControl(), "top-right");
-    map.addControl(new maplibregl.FullscreenControl(), "top-right");
-
-    map.on("load", () => {
-      map.addSource("map-data", { type: "geojson", data: geojson });
-
-      ["layer-1", "layer-2", "layer-3"].forEach(id => {
-        map.addLayer({
-          id,
-          type: "line",
-          source: "map-data",
-          filter: ["all",
-            ["==", ["geometry-type"], "LineString"],
-            ["==", ["get", "layer"], id]
-          ],
-          paint: {
-            "line-color": ["get", "color"],
-            "line-width": 4
-          }
-        });
-      });
-
-      map.addLayer({
-        id: "points",
-        type: "circle",
-        source: "map-data",
-        filter: ["==", ["geometry-type"], "Point"],
-        paint: {
-          "circle-radius": 6,
-          "circle-color": "#ffbf00",
-          "circle-stroke-color": "#000",
-          "circle-stroke-width": 1
-        }
-      });
-
-      map.on("click", "points", e => {
-        const f = e.features[0];
-        if (!f.properties.popup) return;
-        new maplibregl.Popup()
-          .setLngLat(f.geometry.coordinates)
-          .setText(f.properties.popup)
-          .addTo(map);
-      });
-
-      map.on("mouseenter", "points", () => map.getCanvas().style.cursor = "pointer");
-      map.on("mouseleave", "points", () => map.getCanvas().style.cursor = "");
-
-      // auto-fit bounds
-      const coords = geojson.features.flatMap(f =>
-        f.geometry.type === "Point" ? [f.geometry.coordinates] :
-        f.geometry.type === "LineString" ? f.geometry.coordinates : []
-      );
-
-      if (coords.length) {
-        const bounds = coords.reduce(
-          (b, c) => [
-            [Math.min(b[0][0], c[0]), Math.min(b[0][1], c[1])],
-            [Math.max(b[1][0], c[0]), Math.max(b[1][1], c[1])]
-          ],
-          [coords[0], coords[0]]
-        );
-
-        map.fitBounds(bounds, { padding: 20, maxZoom: 12, linear: true });
-      }
-    });
-
-}
-
-function initializeChart() {
-    const canvas = document.getElementById('stat-trip-overview');
-    if (canvas) {
-        // Get the div containing the chart data
-        const chartDataDiv = document.getElementById('stat-trip-overview-chart-data');
-
-        // Extract JSON data for main content and colors from the div's data attributes
-        const jsonData = JSON.parse(chartDataDiv.getAttribute('data-json'));
-        const colorData = JSON.parse(chartDataDiv.getAttribute('data-json-color'));
-
-        // Ensure jsonData and colorData are valid
-        if (Array.isArray(jsonData) && jsonData.length > 0 && Array.isArray(colorData)) {
-            // Aggregate the data
-            const aggregatedData = aggregateData(jsonData, colorData);
-            // Get the canvas context
-            const ctx = canvas.getContext('2d');
-
-            // Create the chart using the aggregated data
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: aggregatedData.labels,
-                    datasets: aggregatedData.datasets
+        <script>
+        
+        function load_trip_map() {
+        
+          let mapInitialized = false;
+        
+            if (mapInitialized) return;
+        
+            const mapEl = document.getElementById("map");
+            const dataEl = document.getElementById("map-data");
+        
+            if (!mapEl || !dataEl) return;
+        
+            mapInitialized = true;
+        
+            const geojson = JSON.parse(dataEl.textContent);
+        
+            const map = new maplibregl.Map({
+              container: "map",
+              style: {
+                version: 8,
+                sources: {
+                  "osm-tiles": {
+                    type: "raster",
+                    tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
+                    tileSize: 256,
+                    attribution: "© OpenStreetMap contributors"
+                  }
                 },
-                options: {
-                    responsive: true,
-                    scales: {
-                        x: {
-                            stacked: true
-                        },
-                        y: {
-                            stacked: true,
-                            beginAtZero: true
-                        }
-                    }
-                }
+                layers: [{
+                  id: "osm-tiles",
+                  type: "raster",
+                  source: "osm-tiles",
+                  minzoom: 0,
+                  maxzoom: 19
+                }]
+              },
+              zoom: 8,
+              attributionControl: false
             });
-        } else {
-            console.error("Invalid or empty jsonData or colorData:", jsonData, colorData);
+        
+            map.addControl(new maplibregl.NavigationControl(), "top-right");
+            map.addControl(new maplibregl.FullscreenControl(), "top-right");
+        
+            map.on("load", () => {
+              map.addSource("map-data", { type: "geojson", data: geojson });
+        
+              ["layer-1", "layer-2", "layer-3"].forEach(id => {
+                map.addLayer({
+                  id,
+                  type: "line",
+                  source: "map-data",
+                  filter: ["all",
+                    ["==", ["geometry-type"], "LineString"],
+                    ["==", ["get", "layer"], id]
+                  ],
+                  paint: {
+                    "line-color": ["get", "color"],
+                    "line-width": 4
+                  }
+                });
+              });
+        
+              map.addLayer({
+                id: "points",
+                type: "circle",
+                source: "map-data",
+                filter: ["==", ["geometry-type"], "Point"],
+                paint: {
+                  "circle-radius": 6,
+                  "circle-color": "#ffbf00",
+                  "circle-stroke-color": "#000",
+                  "circle-stroke-width": 1
+                }
+              });
+        
+              map.on("click", "points", e => {
+                const f = e.features[0];
+                if (!f.properties.popup) return;
+                new maplibregl.Popup()
+                  .setLngLat(f.geometry.coordinates)
+                  .setText(f.properties.popup)
+                  .addTo(map);
+              });
+        
+              map.on("mouseenter", "points", () => map.getCanvas().style.cursor = "pointer");
+              map.on("mouseleave", "points", () => map.getCanvas().style.cursor = "");
+        
+              // auto-fit bounds
+              const coords = geojson.features.flatMap(f =>
+                f.geometry.type === "Point" ? [f.geometry.coordinates] :
+                f.geometry.type === "LineString" ? f.geometry.coordinates : []
+              );
+        
+              if (coords.length) {
+                const bounds = coords.reduce(
+                  (b, c) => [
+                    [Math.min(b[0][0], c[0]), Math.min(b[0][1], c[1])],
+                    [Math.max(b[1][0], c[0]), Math.max(b[1][1], c[1])]
+                  ],
+                  [coords[0], coords[0]]
+                );
+        
+                map.fitBounds(bounds, { padding: 20, maxZoom: 12, linear: true });
+              }
+            });
+        
         }
-    } else {
-        // If the canvas is not found yet, try again after a short delay
-        setTimeout(initializeChart, 100);
-    }
-}
-
-// Function to aggregate data by Year and DomainAbbreviation
-function aggregateData(jsonData, colorData) {
-    const dataMap = {};
-
-    // Initialize the dataMap with years and domain abbreviations
-    jsonData.forEach(item => {
-        const year = item.Year;
-        const domainDesc = item.DomainDescription;
-        const count = item.AbbreviationCount;
-
-        if (!dataMap[year]) {
-            dataMap[year] = {};
+        
+        function initializeChart() {
+            const canvas = document.getElementById('stat-trip-overview');
+            if (canvas) {
+                const chartDataDiv = document.getElementById('stat-trip-overview-chart-data');
+        
+                const jsonData = JSON.parse(chartDataDiv.getAttribute('data-json'));
+                const colorData = JSON.parse(chartDataDiv.getAttribute('data-json-color'));
+        
+                if (Array.isArray(jsonData) && jsonData.length > 0 && Array.isArray(colorData)) {
+                    const aggregatedData = aggregateData(jsonData, colorData);
+                    const ctx = canvas.getContext('2d');
+                    
+                    const existingChart = Chart.getChart(canvas);
+                    if (existingChart) {
+                        existingChart.destroy();
+                    }
+        
+                    new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: aggregatedData.labels,
+                            datasets: aggregatedData.datasets
+                        },
+                        options: {
+                            responsive: true,
+                            scales: {
+                                x: {
+                                    stacked: true
+                                },
+                                y: {
+                                    stacked: true,
+                                    beginAtZero: true
+                                }
+                            }
+                        }
+                    });
+                } else {
+                    console.error("Invalid or empty jsonData or colorData:", jsonData, colorData);
+                }
+            } else {
+                setTimeout(initializeChart, 100);
+            }
         }
-        if (!dataMap[year][domainDesc]) {
-            dataMap[year][domainDesc] = 0;
+        
+        // Function to aggregate data by Year and DomainAbbreviation
+        function aggregateData(jsonData, colorData) {
+            const dataMap = {};
+        
+            // Initialize the dataMap with years and domain abbreviations
+            jsonData.forEach(item => {
+                const year = item.Year;
+                const domainDesc = item.DomainDescription;
+                const count = item.AbbreviationCount;
+        
+                if (!dataMap[year]) {
+                    dataMap[year] = {};
+                }
+                if (!dataMap[year][domainDesc]) {
+                    dataMap[year][domainDesc] = 0;
+                }
+                dataMap[year][domainDesc] += count;
+            });
+        
+            // Prepare labels and datasets for chart
+            const years = Object.keys(dataMap);
+            const domainAbbrs = new Set(jsonData.map(item => item.DomainDescription));
+        
+            // Map the colors to their domain abbreviations
+            const domainColors = colorData.reduce((acc, { DomainDescription, Color }) => {
+                acc[DomainDescription] = Color;
+                return acc;
+            }, {});
+        
+            const datasets = Array.from(domainAbbrs).map(domain => {
+                return {
+                    label: domain,
+                    data: years.map(year => dataMap[year][domain] || 0),
+                    backgroundColor: domainColors[domain] || "#cccccc",
+                    borderColor: domainColors[domain] || "#cccccc",
+                    borderWidth: 1
+                };
+            });
+        
+            return {
+                labels: years,
+                datasets: datasets
+            };
         }
-        dataMap[year][domainDesc] += count;
-    });
-
-    // Prepare labels and datasets for chart
-    const years = Object.keys(dataMap);
-    const domainAbbrs = new Set(jsonData.map(item => item.DomainDescription));
-
-    // Map the colors to their domain abbreviations
-    const domainColors = colorData.reduce((acc, { DomainDescription, Color }) => {
-        acc[DomainDescription] = Color;
-        return acc;
-    }, {});
-
-    const datasets = Array.from(domainAbbrs).map(domain => {
-        return {
-            label: domain,
-            data: years.map(year => dataMap[year][domain] || 0),
-            backgroundColor: domainColors[domain] || "#cccccc",
-            borderColor: domainColors[domain] || "#cccccc",
-            borderWidth: 1
-        };
-    });
-
-    return {
-        labels: years,
-        datasets: datasets
-    };
-}
-
-
-
-
-</script>
-
-
-
-
+        
+        // Function to initialize the second chart (for overnights)
+        function initializeChartOvernights() {
+            const canvasOvernights = document.getElementById('stat-trip-overnights');
+        
+            // If the canvas is found, initialize the chart
+            if (canvasOvernights) {
+                const chartDataOvernights = JSON.parse(document.getElementById("stat-trip-overnights-chart-data").getAttribute('data-json'));
+                const ctxOvernights = canvasOvernights.getContext('2d');
+        
+                const labels = chartDataOvernights.map(item => item.AccommodationCountry);
+                const data = chartDataOvernights.map(item => item.Overnights);
+                
+                const existingChart = Chart.getChart(canvasOvernights);
+                if (existingChart) {
+                    existingChart.destroy();
+                }
+        
+                new Chart(ctxOvernights, {
+                    type: 'bar',
+                    data: {
+                        labels: labels, // Labels for the x-axis
+                        datasets: [{
+                            label: '',
+                            data: data, // Data values
+                            backgroundColor: 'rgba(111, 117, 126, 0.8)',
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        indexAxis: 'y',
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false  // Hide the legend
+                            }
+                    }
+        
+                }
+                });
+        
+            } else {
+                // If the canvas is not found yet, retry after a short delay
+                setTimeout(initializeChartOvernights, 100);
+            }
+        }
+        
+        </script>
 
     </body>
 </html>

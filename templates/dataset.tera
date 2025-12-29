@@ -1,1 +1,40 @@
+<style>
+section {width:100%!important;margin:0!important;}
+#app{flex:1;}
+#iib-foot{display:none;}
+
+/*
+#sql-output table {color:red;}
+
+#sql-output {
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+}
+
+#sql-output table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+#sql-output thead th {
+  position: sticky;
+  top: 0;
+  background: #f0f0f0;
+  z-index: 1;
+  border-bottom: 1px solid #ccc;
+}
+
+#sql-output th, td {
+  padding: 8px 12px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+*/
+</style>
+
 <iframe style="width:100%;height:100%;border:0;display: block;" src="{{ settings.Feature.DatasetEditorUrl }}"></iframe>
+
+<!--<textarea id="sql-input"></textarea>
+<button onclick="user_run_sql(document.getElementById('sql-input').value)">RUN</button>
+<div id="sql-output"></div>-->

@@ -227,3 +227,57 @@ impl SqlFilterReplace for String {
         self
     }
 }
+
+
+// NOT IN USE (for user manual sql requests)  -----------------------------------------------------------------------
+/*
+use web_sys::HtmlElement;
+
+pub fn render_json_table(query_response: &Value) {
+    let document = web_sys::window().unwrap().document().unwrap();
+    let container = document
+        .get_element_by_id("sql-output")
+        .unwrap()
+        .dyn_into::<HtmlElement>()
+        .unwrap();
+
+    let rows = match query_response.as_array() {
+        Some(arr) => arr,
+        None => {
+            container.set_inner_text("Invalid JSON data: not an array");
+            return;
+        }
+    };
+
+    let mut headers: Vec<String> = Vec::new();
+    for row in rows {
+        if let Some(obj) = row.as_object() {
+            for key in obj.keys() {
+                if !headers.contains(key) {
+                    headers.push(key.clone());
+                }
+            }
+        }
+    }
+
+    let mut html = String::from("<table><thead><tr>");
+    for header in &headers {
+        html.push_str(&format!("<th>{}</th>", header));
+    }
+    html.push_str("</tr></thead><tbody>");
+
+    for row in rows {
+        html.push_str("<tr>");
+        if let Some(obj) = row.as_object() {
+            for header in &headers {
+                let cell = obj.get(header).map(|v| v.to_string()).unwrap_or_default();
+                html.push_str(&format!("<td>{}</td>", cell));
+            }
+        }
+        html.push_str("</tr>");
+    }
+
+    html.push_str("</tbody></table>");
+
+    container.set_inner_html(&html);
+}*/
