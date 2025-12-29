@@ -59,13 +59,18 @@ const QUERY_TRIP_NEXT: &str = include_str!("../queries/simple/trip_next.sql");
 
 #[wasm_bindgen(start)]
 fn start() {
-
     wasm_bindgen_futures::spawn_local(async {
+        let (db_bytes, render_structure) = session_load().await;
+        page_load(db_bytes, render_structure).await;
+    });
+}
+
+async fn session_load() -> (Vec<u8>, serde_json::Value) {
 
     // -----------------------------------------------------------------------
     // First: Get sqlite database binary
     // -----------------------------------------------------------------------
-
+    
         let db_bytes = filecontent::get_sqlite_binary().await;
         if !db_bytes.is_empty() {
             web_sys::console::log_1(&format!("DB size: {}", db_bytes.len()).into());
@@ -75,30 +80,30 @@ fn start() {
             query_params::set_query_params(&json!({"path":"more:source"}));
             // set page = configure -- needed?
         }
-
+    
     // -----------------------------------------------------------------------
     // Second: Handle query parameters
     // -----------------------------------------------------------------------
-
+    
         let query_params = query_params::get_query_params();
         // Presume ?p=overview if not set at all
         let page = match &query_params["path"] { serde_json::Value::String(s) if !s.is_empty() => s.as_str(), _ => "explore", };
         web_sys::console::log_1(&format!("Loading page: {}",page).into());
-
+    
     // -----------------------------------------------------------------------
     // Third: Common data for all pages
     // -----------------------------------------------------------------------
-
+    
         let mut render_structure = json!({});
         render_structure["all"]["query_params"] = query_params.clone();
-
+    
         // If "path" is missing or empty, set it to "overview"
         let p_is_empty = render_structure["all"]["query_params"]["path"].as_str().map(|s| s.is_empty()).unwrap_or(true);
         if p_is_empty { render_structure["all"]["query_params"]["path"] = json!("explore"); }
-
+    
         render_structure["all"]["time"] = helper::build_time_json();
         web_sys::console::log_1(&serde_json::to_string(&render_structure["all"]).unwrap().into());
-
+    
         // Get translation
         let translation_query = vec![
             ("translation_filename".to_string(), "SELECT Value FROM bewxx_Settings WHERE AttributeGroup = 'Base' AND Attribute = 'LanguageFile';".to_string())
@@ -109,14 +114,14 @@ fn start() {
         web_sys::console::log_1(&translation_filename_extracted.as_str().into());
         let translation_content = filecontent::fetch_json(&translation_filename_extracted).await.unwrap_or(serde_json::Value::String("".to_string()));
         //web_sys::console::log_1(&serde_json::to_string(&translation_content).unwrap().into());
-
+    
         // Get all settings
         let settings_query = vec![
             ("settings".to_string(), "SELECT * FROM bewxx_Settings;".to_string())
         ];
         let settings_response = sqlite_query::get_query_data(&db_bytes, settings_query).await;
-
-
+    
+    
         //crender_structure["all"]["settings"] = serde_json::to_value(&settings_response["settings"]).unwrap();
         render_structure["all"]["settings"] = helper::transform_settings(&settings_response["settings"].as_array().unwrap());
         render_structure["all"]["translation"] = translation_content;//.expect("Error with translation data.");
@@ -131,30 +136,40 @@ fn start() {
         render_structure["all"]["common"] = sqlite_query::get_query_data(&db_bytes, common_data).await;
         let _ = render::render2dom(TEMPLATE_MENU, &render_structure["all"], "menu");
         
-        // READ APPLIED FILTERS  -----------------------------------------------------------------------
-        
-        let filters_value = filecontent::load_filter_from_opfs()
-        .await
-        .and_then(|bytes| String::from_utf8(bytes).ok())
-        .and_then(|s| serde_json::from_str::<serde_json::Value>(&s).ok())
-        .unwrap_or(serde_json::Value::Null);
-    
-        web_sys::console::log_1(&"----------------------".into());
-        render_structure["all"]["filters"] = filters_value;
-        web_sys::console::log_1(&serde_json::to_string(&render_structure["all"]["filters"]).unwrap().into());
-        
-        // Prepare filters
-        let participant_group = if render_structure["all"]["filters"]["ParticipantGroup"].as_array().map_or(true, |a| a.is_empty()) {
-            "(ParticipantGroup)".to_string()
-        } else {
-            format!("({})", render_structure["all"]["filters"]["ParticipantGroup"].as_array().unwrap().iter().filter_map(|v| v.as_str()).map(|s| format!("'{}'", s)).collect::<Vec<_>>().join(","))
-        };
-        let trip_domain = if render_structure["all"]["filters"]["TripDomain"].as_array().map_or(true, |a| a.is_empty()) {
-            "(TripDomain)".to_string()
-        } else {
-            format!("({})", render_structure["all"]["filters"]["TripDomain"].as_array().unwrap().iter().filter_map(|v| v.as_str()).map(|s| format!("'{}'", s)).collect::<Vec<_>>().join(","))
-        };
+        (db_bytes, render_structure)
 
+}
+
+async fn page_load(db_bytes: Vec<u8>, mut render_structure: serde_json::Value) {
+
+    let query_params = query_params::get_query_params();
+    // Presume ?p=overview if not set at all
+    let page = match &query_params["path"] { serde_json::Value::String(s) if !s.is_empty() => s.as_str(), _ => "explore", };
+    web_sys::console::log_1(&format!("Loading page: {}",page).into());
+
+    // READ APPLIED FILTERS  -----------------------------------------------------------------------
+    
+    let filters_value = filecontent::load_filter_from_opfs()
+    .await
+    .and_then(|bytes| String::from_utf8(bytes).ok())
+    .and_then(|s| serde_json::from_str::<serde_json::Value>(&s).ok())
+    .unwrap_or(serde_json::Value::Null);
+
+    web_sys::console::log_1(&"----------------------".into());
+    render_structure["all"]["filters"] = filters_value;
+    web_sys::console::log_1(&serde_json::to_string(&render_structure["all"]["filters"]).unwrap().into());
+    
+    // Prepare filters
+    let participant_group = if render_structure["all"]["filters"]["ParticipantGroup"].as_array().map_or(true, |a| a.is_empty()) {
+        "(ParticipantGroup)".to_string()
+    } else {
+        format!("({})", render_structure["all"]["filters"]["ParticipantGroup"].as_array().unwrap().iter().filter_map(|v| v.as_str()).map(|s| format!("'{}'", s)).collect::<Vec<_>>().join(","))
+    };
+    let trip_domain = if render_structure["all"]["filters"]["TripDomain"].as_array().map_or(true, |a| a.is_empty()) {
+        "(TripDomain)".to_string()
+    } else {
+        format!("({})", render_structure["all"]["filters"]["TripDomain"].as_array().unwrap().iter().filter_map(|v| v.as_str()).map(|s| format!("'{}'", s)).collect::<Vec<_>>().join(","))
+    };
 
     // -----------------------------------------------------------------------
     // Fourth: Page specific data
@@ -354,7 +369,7 @@ fn start() {
                     render_structure["page"] = json!({
                         "title": suffix,
                         "template": TEMPLATE_SEARCH,
-                        "settings": serde_json::to_value(&settings_response["settings"]).unwrap(),
+                        "settings": serde_json::to_value(&render_structure["all"]["settings"]).unwrap(),
                         "queries": [
                             ["search_trip", QUERY_SEARCH_TRIP.to_string().replace("/*_STRING_*/", suffix)],
                             ["search_event", QUERY_SEARCH_EVENT.to_string().replace("/*_STRING_*/", suffix)],
@@ -365,100 +380,51 @@ fn start() {
         }
 
     // -----------------------------------------------------------------------
-    // Fourth: Render content
+    // Fifth: Render content
     // -----------------------------------------------------------------------
 
         web_sys::console::log_1(&serde_json::to_string(&render_structure["page"]).unwrap().into());
-        prepare_rendering(db_bytes, render_structure).await;
-
-    });
-
-}
-
-pub async fn prepare_rendering(db_bytes: Vec<u8>, render_structure: serde_json::Value) {
-
-
-    // SET TITLE  -----------------------------------------------------------------------
-
-    //web_sys::console::log_1(&"----------------------".into());
-    let title = render_structure["page"]["title"].as_str().unwrap_or("Default Title");
-    web_sys::window().unwrap().document().unwrap().set_title(&format!("{title} - Immer in Bewegung"));
-    //web_sys::console::log_1(&serde_json::to_string(&render_structure["page"]["title"]).unwrap().into());
-
-    // RUN SQLITE QUERIES  -----------------------------------------------------------------------
-
-    //web_sys::console::log_1(&"----------------------".into());
-    let combined_query: Vec<(String, String)> = render_structure["page"]["queries"]
-    .as_array().unwrap_or(&Vec::new()).iter().map(|row| {
-        // Each row: [key, value]
-        let k = row[0].as_str().unwrap_or("").to_string();
-        let v = row[1].as_str().unwrap_or("").to_string();
-        (k, v)
-    })
-    .collect();
-
-    let query_response: serde_json::Value = sqlite_query::get_query_data(&db_bytes, combined_query).await;
-    //web_sys::console::log_1(&serde_json::to_string(&query_response).unwrap().into());
-
-    // Start with a clone of the "all" section from render_structure
-    let mut merged_structure = render_structure["all"].clone();
-
-    // Merge if both are objects
-    match (&mut merged_structure, query_response) {
-        (serde_json::Value::Object(ref mut target), serde_json::Value::Object(source)) => {
-            for (k, v) in source {
-                target.insert(k, v);
+        
+        // SET TITLE  -----------------------------------------------------------------------
+    
+        //web_sys::console::log_1(&"----------------------".into());
+        let title = render_structure["page"]["title"].as_str().unwrap_or("Default Title");
+        web_sys::window().unwrap().document().unwrap().set_title(&format!("{title} - Immer in Bewegung"));
+        //web_sys::console::log_1(&serde_json::to_string(&render_structure["page"]["title"]).unwrap().into());
+    
+        // RUN SQLITE QUERIES  -----------------------------------------------------------------------
+    
+        //web_sys::console::log_1(&"----------------------".into());
+        let combined_query: Vec<(String, String)> = render_structure["page"]["queries"]
+        .as_array().unwrap_or(&Vec::new()).iter().map(|row| {
+            // Each row: [key, value]
+            let k = row[0].as_str().unwrap_or("").to_string();
+            let v = row[1].as_str().unwrap_or("").to_string();
+            (k, v)
+        })
+        .collect();
+    
+        let query_response: serde_json::Value = sqlite_query::get_query_data(&db_bytes, combined_query).await;
+        //web_sys::console::log_1(&serde_json::to_string(&query_response).unwrap().into());
+    
+        let mut merged_structure = render_structure["all"].clone();
+    
+        // Merge if both are objects
+        match (&mut merged_structure, query_response) {
+            (serde_json::Value::Object(ref mut target), serde_json::Value::Object(source)) => {
+                for (k, v) in source {
+                    target.insert(k, v);
+                }
+            }
+            (_, other) => {
+                merged_structure = other;
             }
         }
-        // If either is not an object, fallback to keeping query_response as is
-        (_, other) => {
-            merged_structure = other;
-        }
-    }
-
-    // RENDER TO 'APP'  -----------------------------------------------------------------------
-    let _ = render::render2dom(&render_structure["page"]["template"].as_str().expect("template must be a string"), &merged_structure, "app");
-    //web_sys::console::log_1(&serde_json::to_string(&render_structure["page"]["latest_version"]).unwrap().into());
-    //helper::apply_preselected(&render_structure["all"]["query_params"]["f"]);
-    //helper::attach_select_listeners();
     
-    helper::apply_filter_from_opfs_to_selects();
-    helper::attach_select_listener();
-    
-    
+        // RENDER TO 'APP'  -----------------------------------------------------------------------
+        let _ = render::render2dom(&render_structure["page"]["template"].as_str().expect("template must be a string"), &merged_structure, "app");
+        
+        helper::apply_filter_from_opfs_to_selects();
+        helper::attach_select_listener();
 
 }
-/*
-use charming::{
-    component::Legend,
-    element::ItemStyle,
-    series::{Pie, PieRoseType},
-    Chart, WasmRenderer
-};
-
-pub fn draw_chart() {
-    
-        let chart = Chart::new()
-        .legend(Legend::new().top("bottom"))
-        .series(
-            Pie::new()
-                .name("Nightingale Chart")
-                .rose_type(PieRoseType::Radius)
-                .radius(vec!["50", "150"])
-                .center(vec!["50%", "50%"])
-                .item_style(ItemStyle::new().border_radius(8))
-                .data(vec![
-                    (40.0, "rose 1"),
-                    (38.0, "rose 2"),
-                    (32.0, "rose 3"),
-                    (30.0, "rose 4"),
-                    (28.0, "rose 5"),
-                    (26.0, "rose 6"),
-                    (22.0, "rose 7"),
-                    (18.0, "rose 8"),
-                ]),
-        );
-
-    let renderer = WasmRenderer::new(1000, 800);
-    renderer.render("stat-trip-overview", &chart).unwrap();
-}*/
