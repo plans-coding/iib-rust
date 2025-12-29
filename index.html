@@ -11,7 +11,6 @@
         <!--<script src="bundle/bootstrap/bootstrap.bundle.5.3.8.min.js"></script>
         <link href="bundle/bootstrap/bootstrap.5.3.8.min.css" rel="stylesheet">
         <link href="bewegung.css" rel="stylesheet">-->
-        <script src="bundle/chartjs/chart.js"></script>
 
     <style>
 
@@ -223,7 +222,8 @@ body {
 .iib-menu:has(select:focus-within) #submenu-filter,
 
 .iib-menu:has(#search:hover) #submenu-search,
-.iib-menu:has(#submenu-search:hover) #submenu-search
+.iib-menu:has(#submenu-search:hover) #submenu-search,
+.iib-menu:has(#submenu-search:focus) #submenu-search
 
 {
   display: flex;
@@ -478,7 +478,7 @@ dialog{width:100vw;height:100vh;}
 
 <script src='https://unpkg.com/maplibre-gl@latest/dist/maplibre-gl.js'></script>
 <link href='https://unpkg.com/maplibre-gl@latest/dist/maplibre-gl.css' rel='stylesheet' />
-<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<script src='https://unpkg.com/chart.js@4.5.1/dist/chart.umd.min.js'></script>
 
     </head>
     <body>
@@ -496,15 +496,31 @@ dialog{width:100vw;height:100vh;}
                 <!--<br/><div style="font-size:12pt;font-family: 'Francois+One', sans-serif;">Revisit your travel memories</div>--></div>
 
         <script type="module">
-            import init from "./pkg/lib.js"; // <- match crate name
-            init(); // optional: can be awaited if async
+            import init, { page_load } from "./pkg/lib.js";
+            await init();
+            
+            document.addEventListener("click", e => {
+              const a = e.target.closest("a");
+              if (!a) return;
+            
+              const href = a.getAttribute("href");
+              if (!href || !href.startsWith("?")) return;
+            
+              e.preventDefault();
+              history.pushState({}, "", href);
+              page_load();
+            });
+            
+            window.addEventListener("popstate", page_load);
+
         </script>
         
 <script>
-(function () {
+
+function load_trip_map() {
+
   let mapInitialized = false;
 
-  function initMap() {
     if (mapInitialized) return;
 
     const mapEl = document.getElementById("map");
@@ -606,67 +622,100 @@ dialog{width:100vw;height:100vh;}
       }
     });
 
-    mapObserver.disconnect();
-  }
+}
 
-  const mapObserver = new MutationObserver(initMap);
-  mapObserver.observe(document.body, { childList: true, subtree: true });
-  initMap();
-})();
+function initializeChart() {
+    const canvas = document.getElementById('stat-trip-overview');
+    if (canvas) {
+        // Get the div containing the chart data
+        const chartDataDiv = document.getElementById('stat-trip-overview-chart-data');
 
+        // Extract JSON data for main content and colors from the div's data attributes
+        const jsonData = JSON.parse(chartDataDiv.getAttribute('data-json'));
+        const colorData = JSON.parse(chartDataDiv.getAttribute('data-json-color'));
 
-(function() {
-  let initialized = false;
+        // Ensure jsonData and colorData are valid
+        if (Array.isArray(jsonData) && jsonData.length > 0 && Array.isArray(colorData)) {
+            // Aggregate the data
+            const aggregatedData = aggregateData(jsonData, colorData);
+            // Get the canvas context
+            const ctx = canvas.getContext('2d');
 
-  function initChartIfReady() {
-    if (initialized) return;
-
-    const canvas = document.getElementById("stat-trip-overview");
-    const dataEl = document.getElementById("stat-trip-overview-chart-data");
-
-    if (!canvas || !dataEl) return; // wait until both exist
-    if (typeof aggregateData !== "function") return;
-
-    try {
-      const jsonData = JSON.parse(dataEl.dataset.json);
-      const colorData = JSON.parse(dataEl.dataset.jsonColor);
-
-      if (!Array.isArray(jsonData) || jsonData.length === 0) return;
-
-      const aggregatedData = aggregateData(jsonData, colorData);
-      const ctx = canvas.getContext("2d");
-
-      new Chart(ctx, {
-        type: "bar",
-        data: {
-          labels: aggregatedData.labels,
-          datasets: aggregatedData.datasets
-        },
-        options: {
-          responsive: true,
-          scales: {
-            x: { stacked: true },
-            y: { stacked: true, beginAtZero: true }
-          }
+            // Create the chart using the aggregated data
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: aggregatedData.labels,
+                    datasets: aggregatedData.datasets
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            stacked: true
+                        },
+                        y: {
+                            stacked: true,
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        } else {
+            console.error("Invalid or empty jsonData or colorData:", jsonData, colorData);
         }
-      });
-
-      initialized = true;
-      observer.disconnect();
-      clearInterval(interval);
-
-    } catch (err) {
-      console.error("Failed to initialize chart:", err);
+    } else {
+        // If the canvas is not found yet, try again after a short delay
+        setTimeout(initializeChart, 100);
     }
-  }
+}
 
-  // Watch for dynamic DOM changes
-  const observer = new MutationObserver(initChartIfReady);
-  observer.observe(document.body, { childList: true, subtree: true });
+// Function to aggregate data by Year and DomainAbbreviation
+function aggregateData(jsonData, colorData) {
+    const dataMap = {};
 
-  // Fallback polling every 50ms in case MutationObserver misses something
-  const interval = setInterval(initChartIfReady, 50);
-})();
+    // Initialize the dataMap with years and domain abbreviations
+    jsonData.forEach(item => {
+        const year = item.Year;
+        const domainDesc = item.DomainDescription;
+        const count = item.AbbreviationCount;
+
+        if (!dataMap[year]) {
+            dataMap[year] = {};
+        }
+        if (!dataMap[year][domainDesc]) {
+            dataMap[year][domainDesc] = 0;
+        }
+        dataMap[year][domainDesc] += count;
+    });
+
+    // Prepare labels and datasets for chart
+    const years = Object.keys(dataMap);
+    const domainAbbrs = new Set(jsonData.map(item => item.DomainDescription));
+
+    // Map the colors to their domain abbreviations
+    const domainColors = colorData.reduce((acc, { DomainDescription, Color }) => {
+        acc[DomainDescription] = Color;
+        return acc;
+    }, {});
+
+    const datasets = Array.from(domainAbbrs).map(domain => {
+        return {
+            label: domain,
+            data: years.map(year => dataMap[year][domain] || 0),
+            backgroundColor: domainColors[domain] || "#cccccc",
+            borderColor: domainColors[domain] || "#cccccc",
+            borderWidth: 1
+        };
+    });
+
+    return {
+        labels: years,
+        datasets: datasets
+    };
+}
+
+
 
 
 </script>

@@ -1,6 +1,7 @@
 use chrono::Local;
 use serde_json::{json, Value, Map};
 use crate::filecontent;
+use crate::page_load_internal;
 
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast; // needed for `unchecked_into`
@@ -54,7 +55,7 @@ pub fn attach_select_listener() {
             let value = json_str.clone();
             spawn_local(async move {
                 match filecontent::save_filter2opfs(&value).await {
-                    Ok(()) => web_sys::console::log_1(&"filter.json saved".into()),
+                    Ok(()) => {web_sys::console::log_1(&"filter.json saved".into()); },
                     Err(e) => web_sys::console::log_1(&format!("save failed: {e}").into()),
                 }
             });

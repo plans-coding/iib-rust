@@ -2,6 +2,9 @@ use wasm_bindgen::prelude::*;
 use serde_json::json;
 use helper::SqlFilterReplace;
 use filecontent::load_filter_from_opfs;
+use once_cell::sync::OnceCell;
+use std::sync::Mutex;
+use serde_json::Value;
 
 mod filecontent;
 mod sqlite_query;
@@ -56,12 +59,27 @@ const QUERY_TRIP_SUMMARY: &str = include_str!("../queries/simple/trip_summary.sq
 const QUERY_TRIP_PREVIOUS: &str = include_str!("../queries/simple/trip_previous.sql");
 const QUERY_TRIP_NEXT: &str = include_str!("../queries/simple/trip_next.sql");
 
+static DB_BYTES: OnceCell<Vec<u8>> = OnceCell::new();
+static RENDER_STRUCTURE: OnceCell<Mutex<Value>> = OnceCell::new();
 
 #[wasm_bindgen(start)]
 fn start() {
     wasm_bindgen_futures::spawn_local(async {
         let (db_bytes, render_structure) = session_load().await;
-        page_load(db_bytes, render_structure).await;
+
+        DB_BYTES.set(db_bytes).expect("DB already initialized");
+        RENDER_STRUCTURE
+            .set(Mutex::new(render_structure))
+            .expect("Render structure already initialized");
+
+        page_load_internal().await;
+    });
+}
+
+#[wasm_bindgen]
+pub fn page_load() {
+    wasm_bindgen_futures::spawn_local(async {
+        page_load_internal().await;
     });
 }
 
@@ -140,8 +158,13 @@ async fn session_load() -> (Vec<u8>, serde_json::Value) {
 
 }
 
-async fn page_load(db_bytes: Vec<u8>, mut render_structure: serde_json::Value) {
+async fn page_load_internal() {
+    let db_bytes = DB_BYTES.get().expect("DB not initialized");
+    let render_structure_mutex = RENDER_STRUCTURE.get().expect("Render structure missing");
 
+    // Lock the Mutex to get a mutable reference
+    let mut render_structure = render_structure_mutex.lock().unwrap();
+        
     let query_params = query_params::get_query_params();
     // Presume ?p=overview if not set at all
     let page = match &query_params["path"] { serde_json::Value::String(s) if !s.is_empty() => s.as_str(), _ => "explore", };
@@ -426,5 +449,15 @@ async fn page_load(db_bytes: Vec<u8>, mut render_structure: serde_json::Value) {
         
         helper::apply_filter_from_opfs_to_selects();
         helper::attach_select_listener();
+        
+        load_trip_map();
+        initializeChart();
 
+}
+
+// Use functions in index.html
+#[wasm_bindgen]
+extern "C" {
+    fn load_trip_map();
+    fn initializeChart();
 }
