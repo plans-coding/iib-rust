@@ -70,6 +70,7 @@ extern "C" {
     fn load_trip_map();
     fn initializeChart();
     fn initializeChartOvernights();
+    fn initializeMapContours();
 }
 
 // -----------------------------------------------------------------------
@@ -352,7 +353,7 @@ async fn page_load_internal() {
                     "title": render_structure.pointer("/all/settings/Plugin/Theme/translation").and_then(|v| v.as_str()).unwrap_or("Themes"),
                     "template": TEMPLATE_STATISTICS_THEMES,
                     "queries": [
-                         ["statistics_theme_count", QUERY_STATISTICS_THEME_COUNT.to_string()],
+                         ["statistics_theme_count", QUERY_STATISTICS_THEME_COUNT.to_string()]
                     ]});
             }
             "dataset" => {
@@ -421,9 +422,9 @@ async fn page_load_internal() {
                     }
                 }
                 
-                if let Some(suffix) = page.strip_prefix("map:") {
+                if let Some(suffix) = page.strip_prefix("map") {
                 
-                    if let Some(country) = suffix.strip_prefix("country:") {
+                    if let Some(country) = suffix.strip_prefix(":country:") {
                     
                     }
                     // Title med outer id + dagbok + pass
@@ -458,7 +459,7 @@ async fn page_load_internal() {
     // Fifth: Render content
     // -----------------------------------------------------------------------
 
-        web_sys::console::log_1(&serde_json::to_string(&render_structure["page"]).unwrap().into());
+        //web_sys::console::log_1(&serde_json::to_string(&render_structure["page"]).unwrap().into());
         
         // SET TITLE  -----------------------------------------------------------------------
     
@@ -480,7 +481,7 @@ async fn page_load_internal() {
         .collect();
     
         let query_response: serde_json::Value = sqlite_query::get_query_data(&db_bytes, combined_query).await;
-        //web_sys::console::log_1(&serde_json::to_string(&query_response).unwrap().into());
+        web_sys::console::log_1(&serde_json::to_string(&query_response).unwrap().into());
     
         let mut merged_structure = render_structure["all"].clone();
     
@@ -505,5 +506,6 @@ async fn page_load_internal() {
         load_trip_map();
         initializeChart();
         initializeChartOvernights();
+        initializeMapContours();
 
 }

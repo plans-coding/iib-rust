@@ -1,47 +1,40 @@
-hej
-{#<div class="breadcrumb">
+<div class="breadcrumb">
   <img class="icon-color" src="images/database.svg" />
-  <div>{{ settings.Plugin.Theme.translation | default(value="Themes") }}</div>
+  <div>{{ translation.statistics.title | default(value="Themes") }}</div>
   <img src="images/arrow-right.svg" />
   <a href="?path=statistics:summary" class="breadcrumb-link {% if query_params.path == 'statistics:summary' %}active{% endif %}">{{ translation.statistics.summary | default(value="Summary") }}</a>
   <a href="?path=statistics:visits" class="breadcrumb-link {% if query_params.path == 'statistics:visits' %}active{% endif %}">{{ translation.statistics.visits | default(value="Visits") }}</a>
   <a href="?path=statistics:overnights" class="breadcrumb-link {% if query_params.path == 'statistics:overnights' %}active{% endif %}">{{ translation.statistics.overnights | default(value="Overnights") }}</a>
-  {% if settings.Plugin.Theme.enabled == true %}
+  {% if settings.Plugin.Theme.enabled %}
     <a href="?path=statistics:themes" class="breadcrumb-link {% if query_params.path == 'statistics:themes' %}active{% endif %}">{{ settings.Plugin.Theme.translation | default(value="Themes") }}</a>
   {% endif %}
 </div>
-{{ statistics_theme_count }}
- if settings.Plugin.Theme.enabled == true %}
 
-<table class="table table-hover">
-    <thead style="position:sticky;top:0;background-color:;">
-        <tr>
-            <td>
-                <b>{{ settings.Plugin.Theme.translation }}</b>
-            </td>
-            <td>
-                <b>{{ translation.statistics.count | default(value="Count") }}</b>
-            </td>
-        </tr>
-    </thead>
 
-    {% for item in settings.Plugin.Theme.mapping %}
-        {# Find the first match in statistics_theme_count[0] where key == item.key #}
-        {% set match = statistics_theme_count[0]
-                       | filter(v => v.key == item.key)
-                       | first %}
+{% if settings.Plugin.Theme.enabled %}
 
-        {% if match is defined %}
-            <tr>
-                <td>{{ item.label }}</td>
-                <td style="text-align:center;">{{ match.total_count }}</td>
-            </tr>
-        {% endif %}
-    {% endfor %}
-</table>
+  <table class="table table-hover" style="width:100%;">
+      <thead style="position:sticky;top:0;background-color:;">
+          <tr>
+              <td>
+                  <b>{{ settings.Plugin.Theme.translation }}</b>
+              </td>
+              <td style="text-align:center;">
+                  <b>{{ settings.Plugin.Theme.translation_count | default(value="Count") }}</b>
+              </td>
+          </tr>
+      </thead>
+  
+      {% for theme_row in statistics_theme_count %}
+              <tr>
+                  <td>{{ theme_row.ThemeDescription }}</td>
+                  <td style="text-align:center;">{{ theme_row.ThemeCount }}</td>
+              </tr>
+      {% endfor %}
+  </table>
 
-{% elif %}
+{% else %}
 
-Themes not activated.
-
-{% endif #}
+  Themes not activated.
+  
+{% endif %}

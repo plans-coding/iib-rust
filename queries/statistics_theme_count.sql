@@ -1,17 +1,31 @@
 SELECT
-    json_extract(j.value, '$.key') AS key,
+    kv.key   AS ThemeAbbreviation,
+    kv.value AS ThemeDescription,
     SUM(
-        (LENGTH(e.AdditionalNotes) - LENGTH(REPLACE(e.AdditionalNotes, '| ' || json_extract(j.value, '$.key'), '')))
-        / LENGTH('| ' || json_extract(j.value, '$.key'))
-    ) AS total_count
+        (LENGTH(e.AdditionalNotes)
+         - LENGTH(REPLACE(e.AdditionalNotes, '| ' || kv.key, '')))
+        / LENGTH('| ' || kv.key)
+    ) AS ThemeCount
 FROM
     bewb_Events AS e
 CROSS JOIN
-    (SELECT j.value
-    FROM bewxx_Settings AS s,
+    (
+        SELECT
+            kv.key,
+            kv.value
+        FROM
+            bewxx_Settings AS s
+        JOIN
             json_each(s.Value, '$.mapping') AS j
-    WHERE s.Attribute = 'Theme') AS j
+        JOIN
+            json_each(j.value) AS kv
+        WHERE
+            s.Attribute = 'Theme'
+    ) AS kv
 WHERE
-    e.AdditionalNotes LIKE '%| ' || json_extract(j.value, '$.key') || '%'
+    e.AdditionalNotes LIKE '%| ' || kv.key || '%'
 GROUP BY
-    key;
+    kv.key,
+    kv.value
+ORDER BY
+	ThemeCount DESC;

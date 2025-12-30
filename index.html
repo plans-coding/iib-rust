@@ -462,6 +462,7 @@ button.source-button:hover {background-color:#dc3545cc;}
 
 .day {display: grid;grid-template-columns: 1fr 20pt;padding:10pt;gap:5pt;}
 .day:not(:first-child){}
+.day:hover{background-color:var(--color-hover-background-alpha);}
 
 .day-left {display:flex;flex-direction:column;}
 .day-right {display:flex;flex-direction:column;gap:2pt;}
@@ -474,6 +475,15 @@ button.source-button:hover {background-color:#dc3545cc;}
 .day-foot {display:flex;flex-direction:row;margin-top:5pt;align-items: center;}
 
 dialog{width:100vw;height:100vh;}
+
+.participantGroup {
+  background-color: #000;
+  padding: 3pt 5pt 3pt 5pt;
+  color:#fff;
+  text-align:center;
+}
+
+#image-viewer-dialog {border-radius:10pt;border:5pt solid var(--color-hover-background);}
 
     </style>
 
@@ -497,6 +507,13 @@ dialog{width:100vw;height:100vh;}
 
         <div id="iib-foot" style="text-align:center;font-size:32pt;padding-top:20pt;padding-bottom:30pt;"><span class="immer-in-font-uc">II</span><span class="bewegung-font-uc">B</span>
         <!--<br/><div style="font-size:12pt;font-family: 'Francois+One', sans-serif;">Revisit your travel memories</div>--></div>
+        
+        
+        <dialog id="image-viewer-dialog" style="top:10;bottom:10;padding:0;overflow:hidden;">
+            <button id="close-dialog" style="position:absolute;">Close</button>
+          <iframe id="image-viewer-content" style="width:100%;height:100%;overflow:y-scroll;" frameborder="0"></iframe>
+          
+        </dialog>
 
         <script type="module">
             import init, { page_load } from "./pkg/lib.js";
@@ -505,6 +522,13 @@ dialog{width:100vw;height:100vh;}
             document.addEventListener("click", e => {
               const a = e.target.closest("a");
               if (!a) return;
+            
+              if (a.classList.contains("to-image-viewer")) {
+                e.preventDefault();
+                iframe.src = a.href;
+                dialog.showModal();
+                return;
+              }
             
               const href = a.getAttribute("href");
               if (!href || !href.startsWith("?")) return;
@@ -518,6 +542,23 @@ dialog{width:100vw;height:100vh;}
             
             window.page_load = page_load;
             //window.user_run_sql = user_run_sql; // load above if needed
+            
+            // Image viewer
+            const links = document.querySelectorAll('.to-image-viewer');
+            const dialog = document.getElementById('image-viewer-dialog');
+            const iframe = document.getElementById('image-viewer-content');
+            const closeBtn = document.getElementById('close-dialog');
+            links.forEach(link => {
+              link.addEventListener('click', (e) => {
+                e.preventDefault(); // prevent navigation
+                iframe.src = link.href; // set iframe src to the link href
+                dialog.showModal(); // show dialog
+              });
+            });
+            closeBtn.addEventListener('click', () => {
+              dialog.close();
+              iframe.src = ''; // optional: clear iframe
+            });
 
         </script>
         
@@ -769,6 +810,113 @@ dialog{width:100vw;height:100vh;}
                 setTimeout(initializeChartOvernights, 100);
             }
         }
+        
+        
+        function initializeMapContours() {
+    const mapContainer = document.getElementById('map');
+    const mapPinDataContainer = document.getElementById('map-pin-data');
+
+    if (!mapContainer || !mapPinDataContainer) {
+        setTimeout(initializeMapContours, 100);
+        return;
+    }
+
+    const map = new maplibregl.Map({
+        container: 'map',
+        center: [-0.09, 51.505], // [lon, lat]
+        zoom: 6,
+        style: {
+            version: 8,
+            sources: {
+                osm: {
+                    type: 'raster',
+                    tiles: [
+                        'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                        'https://b.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                        'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png'
+                    ],
+                    tileSize: 256,
+                    attribution: '&copy; OpenStreetMap contributors'
+                }
+            },
+            layers: [
+                {
+                    id: 'osm',
+                    type: 'raster',
+                    source: 'osm'
+                }
+            ]
+        }
+    });
+
+    map.addControl(new maplibregl.FullscreenControl());
+    map.addControl(new maplibregl.NavigationControl());
+
+    try {
+        const rawData = mapPinDataContainer.getAttribute('data-map');
+        const jsonData = JSON.parse(rawData);
+
+        // BIND ALL TRIP ACCOMMODATION POINTS TOGETHER
+        const allCoordinates = [];
+
+        jsonData.forEach(pin => {
+            const { MergedAccommodationCoordinates } = pin;
+
+            const coordinates = MergedAccommodationCoordinates
+                .split('|')
+                .map(coord => {
+                    const [lat, lon] = coord.split(',').map(parseFloat);
+
+                    if (isNaN(lat) || isNaN(lon)) {
+                        console.warn(`Invalid coordinates: ${coord}`);
+                        return null;
+                    }
+
+                    return [lon, lat]; // MapLibre requires [lon, lat]
+                })
+                .filter(Boolean);
+
+            allCoordinates.push(...coordinates);
+        });
+
+        if (allCoordinates.length === 0) {
+            return;
+        }
+
+        map.on('load', () => {
+            map.addSource('contour-line', {
+                type: 'geojson',
+                data: {
+                    type: 'Feature',
+                    geometry: {
+                        type: 'LineString',
+                        coordinates: allCoordinates
+                    }
+                }
+            });
+
+            map.addLayer({
+                id: 'contour-line',
+                type: 'line',
+                source: 'contour-line',
+                paint: {
+                    'line-color': '#0066cc',
+                    'line-width': 3
+                }
+            });
+
+            const bounds = allCoordinates.reduce(
+                (b, coord) => b.extend(coord),
+                new maplibregl.LngLatBounds(allCoordinates[0], allCoordinates[0])
+            );
+
+            map.fitBounds(bounds, { padding: 40 });
+        });
+
+    } catch (error) {
+        console.error('JSON Parse Error:', error);
+    }
+}
         
         </script>
 
