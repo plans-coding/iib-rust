@@ -460,7 +460,7 @@ button.source-button:hover {background-color:#dc3545cc;}
   
 }
 
-.day {display: grid;grid-template-columns: 1fr 20pt;padding:10pt;gap:2pt;}
+.day {display: grid;grid-template-columns: 1fr 20pt;padding:10pt;gap:5pt;}
 .day:not(:first-child){}
 
 .day-left {display:flex;flex-direction:column;}
@@ -516,6 +516,7 @@ dialog{width:100vw;height:100vh;}
             
             window.addEventListener("popstate", page_load);
             
+            window.page_load = page_load;
             //window.user_run_sql = user_run_sql; // load above if needed
 
         </script>
