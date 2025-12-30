@@ -1,5 +1,5 @@
 <style>
-section {width:100%!important;margin:0!important;}
+section {max-width:100%!important;width:100%!important;margin:0!important;}
 #app{flex:1;}
 #iib-foot{display:none;}
 
@@ -13,8 +13,8 @@ nav#menu, nav.filter, #iib-foot {display:none;}
 </style>
 
 
-<div style="display:flex;flex-direction:column;height:100%;padding:2pt;">
-  <div style="display:flex;flex-direction:row;">
+<div style="display:flex;flex-direction:column;height:100%;">
+  <div style="display:flex;flex-direction:row;padding:2pt;">
 
     <div style="display: flex; align-items: center; flex: 1;">
       <button type="button" onclick="document.querySelector('#date_dd').selectedIndex = (document.querySelector('#date_dd').selectedIndex - 1 + document.querySelector('#date_dd').options.length) % document.querySelector('#date_dd').options.length;document.querySelector('#date_dd').dispatchEvent(new Event('change'));" class="filter-button">
@@ -33,8 +33,9 @@ nav#menu, nav.filter, #iib-foot {display:none;}
       </a>
     </div>
 -->
+
     <div style="flex:1;text-align:center;">
-      <select name="date_dd" id="date_dd" class="form-control" data-image-trip-id="{{ query_params.path }}" onchange="window.location.href = '?path=images:{{ trip_id }}:'+this.value;">
+      <select name="date_dd" id="date_dd" class="form-control" data-image-trip-id="{{ query_params.path }}" onchange="history.pushState(null,'','?path=images:{{ trip_id }}:'+this.value);page_load();">
         {% for dateString in images_date_list %}
           <option value="{{ dateString.Date }}" {% if trip_date == dateString.Date %}selected{% endif %}>{{ dateString.Date }}</option>
         {% endfor %}

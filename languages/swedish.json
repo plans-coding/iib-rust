@@ -49,6 +49,7 @@
     "plain": "Tabell"
   },
   "trip": {
+    "trip": "Resa",
     "allTrips": "Alla resor",
     "to": "till",
     "summary": "Summering",

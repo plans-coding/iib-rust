@@ -5,12 +5,17 @@
   padding: 3pt 5pt 3pt 5pt;
   margin:2pt 0 2pt 0;
   color:#fff;
+  text-align:center;
+  text-decoration:none;
 }
-.participantGroup {
-  background-color: #000;
+
+.iib-search-date {
+  background-color: var(--color-hover-background);
   padding: 3pt 5pt 3pt 5pt;
+  margin:2pt 0 2pt 0;
   color:#fff;
 }
+
 .iib-search-accommodation[data-iib-tripDomain='{{ tripDomain.DomainAbbreviation }}']{
   color: {{ tripDomain.Color }}!important;
 }
@@ -19,8 +24,8 @@
   color:#fff;
 }
 .acc-icon[data-iib-tripDomain='{{ tripDomain.DomainAbbreviation }}'] {
-  mask: url(img/house.svg) no-repeat center / contain;
-  -webkit-mask: url(img/house.svg) no-repeat center / contain;
+  mask: url(images/house.svg) no-repeat center / contain;
+  -webkit-mask: url(images/house.svg) no-repeat center / contain;
   width: 0.9em;
   height: 0.9em;
   display:inline-block;
@@ -28,13 +33,15 @@
 :root[data-bs-theme="light"] .acc-icon[data-iib-tripDomain='{{ tripDomain.DomainAbbreviation }}'] { background-color: {{ tripDomain.Color }}; }
 :root[data-bs-theme="dark"] .acc-icon[data-iib-tripDomain='{{ tripDomain.DomainAbbreviation }}'] { background-color: gold; }
 :root[data-bs-theme="dark"] .acc-text[data-iib-tripDomain='{{ tripDomain.DomainAbbreviation }}'] { color: gold; }
+
+
 {% endfor %}
 </style>
 
 
 <div class="breadcrumb">
   <img class="icon-color" src="images/database.svg" />
-  <div>{{ translation.search.title | default(value="Search") }}</div>
+  <div>{{ translation.menu.search | default(value="Search") }}</div>
   <img src="images/arrow-right.svg" />
   <div class="breadcrumb-link active">{{ query_params.path | split(pat=":") | last }}</div>
 </div>
@@ -58,14 +65,14 @@
       {% for trip in search_trip %}
         <tr>
           <td class="text-start">
-            <a href="?path=trip:{{ trip.OuterId }}">
-              <div class="iib-search-domain" data-iib-tripDomain="{{ trip.InnerId | split(pat="") | nth(n=0) }}">
+            <a href="?path=trip:{{ trip.OuterId }}" class="iib-search-domain" data-iib-tripDomain="{{ trip.DomainAbbreviation }}">
+              
                 {{ trip.OuterId }} {{ trip.OverallDestination }}
-              </div>
+              
             </a>
           </td>
           <td class="text-start align-middle">
-            {{ trip.TripDescription }} {{ trip.DepartureDate }} {{ trip.ReturnDate }}
+            {{ trip.TripDescription }} {{ trip.DepartureDate }} {{ translation.trip.to | default(value="until")  }} {{ trip.ReturnDate }}
           </td>
           <td>
             <div class="participantGroup">{{ trip.ParticipantGroup }}</div>
@@ -78,52 +85,91 @@
 <br />
 <details open class="search">
     <summary>{{ translation.search.dayNotes | default(value="Day Notes") }} ({{ search_event | length }})</summary>
-    <table class="table" style="width:100%;">
-      {% set eventCount = search_event | length %}
-      {% if eventCount == 0 %}
-        <tr>
-          <td class="text-center align-middle p-3 icon-color">
-            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" class="bi bi-calendar2-x" viewBox="0 0 16 16">
-              <path d="M6.146 8.146a.5.5 0 0 1 .708 0L8 9.293l1.146-1.147a.5.5 0 1 1 .708.708L8.707 10l1.147 1.146a.5.5 0 0 1-.708.708L8 10.707l-1.146 1.147a.5.5 0 0 1-.708-.708L7.293 10 6.146 8.854a.5.5 0 0 1 0-.708"/>
-              <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5M2 2a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1z"/>
-              <path d="M2.5 4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5H3a.5.5 0 0 1-.5-.5z"/>
-            </svg>
-          </td>
-        </tr>
-      {% endif %}
-
-      {% for day in search_event %}
-        <tr>
-          <td>
-            <a href="?path=trip:{{ day.OuterId }}" style="text-decoration:none;">
-              <div class="text-nowrap iib-search-domain" data-iib-tripDomain="{{ day.InnerId | split(pat="") | nth(n=0) }}">{{ day.OuterId }}</div>
+    
+    <div class="" style="padding:5pt;"><!-- class: days -->
+    {% for day in search_event %}
+    
+      <div class="day" data-iib-tripDomain="{{ day.DomainAbbreviation }}">
+      
+        <div class="day-left">
+        
+          <div class="day-event">
+            <a class="iib-search-domain" href="?path=trip:{{ day.OuterId }}" style="text-decoration:none;display:inline-block;margin:2pt;" data-iib-tripDomain="{{ day.DomainAbbreviation }}">{{ day.OuterId }}</a>
+            <span class="day-label">{{ day.Weekday | default(value="") }} <span class="iib-search-date">{{ day.Date }}</span></span><br>{{ day.Events }}
+          </div>
+          <div class="day-foot" data-iib-tripDomain="{{ day.DomainAbbreviation }}">
+             &nbsp; <a style="text-decoration:none;" target="_blank" href="{{ settings.Base.ExternalMapProvider }}{{ day.AccommodationCoordinates }}" data-iib-tripDomain="{{ day.DomainAbbreviation }}">
+                <div class="acc-icon" data-iib-tripDomain='{{ day.DomainAbbreviation }}'></div>
+                <span class="acc-text">{{ day.Accommodation }} – {{ day.AccommodationCountry }} – {{ day.AccommodationCoordinates }} {{ day.AccommodationCoordinateAccuracy | default(value="") }}</span>
             </a>
-          </td>
-          <td style="white-space: nowrap;">
-            <b>{{ day.Date | date(format="%Y-%m-%d") }}</b><br/>
-            {{ day.Date | date(format="%A") }}<br/>
-            {% if settings.Base.Immich == "Enabled" %}
-              {% if day.OuterId not in settings.Base.ExcludeDayPhotos %}
-                <a href="?path=images:{{ day.OuterId }}:{{ day.Date }}">
-                  <button type="button" class="btn mt-2 iib-search-photos" data-iib-tripDomain="{{ day.InnerId | split(pat="") | nth(n=0) }}">
-                    {{ translation.search.photos | default(value="Photos") }}
-                  </button>
+          </div>
+        
+        </div>
+        <div class="day-right">
+        
+  
+            {# Immich photos #}
+            {% if settings.Base.Immich == "Enabled" and day.OuterId not in settings.Base.ExcludeDayPhotos %}
+  
+                <a class="to-image-viewer" href="?path=images:{{ day.OuterId }}:{{ day.Date }}" target="_blank">
+                    <button type="button" class="filter-button" data-iib-tripDomain="{{ day.DomainAbbreviation }}">
+                        <img src="images/photos.svg" />
+                    </button>
                 </a>
-              {% endif %}
+  
             {% endif %}
-          </td>
-          <td class="text-start">
-            {{ day.Events }}<br/>
-            <div class="mt-2">
-              <a style="text-decoration:none;" target="_blank" href="https://www.google.com/maps/?q={{ day.AccommodationCoordinates }}" class="iib-search-accommodation" data-iib-tripDomain="{{ day.InnerId | split(pat="") | nth(n=0) }}">
-                <div class="acc-icon" data-iib-tripDomain="{{ day.InnerId | split(pat="") | nth(n=0) }}"></div>
-                <span class="acc-text" data-iib-tripDomain="{{ day.InnerId | split(pat="") | nth(n=0) }}">
-                  {{ day.Accommodation }} - {{ day.AccommodationCountry }} {{ day.AccommodationCoordinates }} {{ day.AccommodationCoordinateAccuracy | default(value="") }}
-                </span>
-              </a>
-            </div>
-          </td>
-        </tr>
-      {% endfor %}
-    </table>
+            
+            {# Diary plugin #}
+  
+            {% set_global day_year = day.Date | date(format="%G") %}
+            {% set_global day_week = day.Date | date(format="%V") %}
+            
+            {% if settings.Plugin.Diary.enabled %}
+              {% for file in settings.Plugin.Diary.filelist %}
+                {% if day_year in file and day_week in file %}
+                
+                  <button onclick="document.getElementById('diary').showModal();" type="button" class="filter-button" data-iib-tripDomain="{{ day.DomainAbbreviation }}">
+                      <img src="images/diary.svg" />
+                  </button>
+                  
+                  <dialog id="diary">
+                    <h5>{{ file }}</h5>
+                    <p><img style="max-height:100%;max-width:100%;" src="{{ settings.Plugin.Diary.path }}{{ file }}"></p>
+                    <form method="dialog">
+                      <button>{{ translation.menu.close | default(value="Close") }}</button>
+                    </form>
+                  </dialog>
+                  
+                {% endif %}
+              {% endfor %}
+            {% endif %}
+            
+            {# Passport plugin #}
+            {% if settings.Plugin.Passport.enabled %}
+              {% for file in settings.Plugin.Passport.filelist %}
+                {% if day_year in file and day_week in file %}
+                
+                  <button onclick="document.getElementById('passport').showModal();" type="button" class="filter-button" data-iib-tripDomain="{{ day.DomainAbbreviation }}">
+                      <img src="images/passport.svg" />
+                  </button>
+                  
+                  <dialog id="passport">
+                    <h5>{{ file }}</h5>
+                    <p><img style="max-height:100%;max-width:100%;" src="{{ settings.Plugin.Passport.path }}{{ file }}"></p>
+                    <form method="dialog">
+                      <button>{{ translation.menu.close | default(value="Close") }}</button>
+                    </form>
+                  </dialog>
+  
+                {% endif %}
+              {% endfor %}
+            {% endif %}
+        
+        </div>
+              
+  
+      </div>
+    {% endfor %}
+  </div>
+      
 </details>

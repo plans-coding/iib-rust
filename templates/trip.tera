@@ -72,7 +72,7 @@
 
 <div class="breadcrumb">
   <img class="icon-color" src="images/database.svg" />
-  <div>{{ translation.trip.title | default(value="Trip") }}</div>
+  <div>{{ translation.trip.trip | default(value="Trip") }}</div>
   <img src="images/arrow-right.svg" />
   <div class="breadcrumb-link active">{{ trip_summary[0].OuterId }} {{ translation.trip.to | default(value="to") }} {{ trip_summary[0].OverallDestination }}</div>
 </div>
@@ -232,7 +232,7 @@
           {# Immich photos #}
           {% if settings.Base.Immich == "Enabled" and day.OuterId not in settings.Base.ExcludeDayPhotos %}
 
-              <a href="?path=images:{{ day.OuterId }}:{{ day.Date }}" target="_blank">
+              <a class="to-image-viewer" href="?path=images:{{ day.OuterId }}:{{ day.Date }}" target="_blank">
                   <button type="button" class="filter-button" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
                       <img src="images/photos.svg" />
                   </button>

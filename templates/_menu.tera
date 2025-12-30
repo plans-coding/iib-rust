@@ -84,7 +84,7 @@ details.trip[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}],
 </svg> <span>{{ translation.statistics.title | default(value="Statistics") }}</span></a>
         <div id="filter">
             <img src="images/funnel.svg"> Filter
-            <button class="remove-filter" onclick="navigator.storage.getDirectory().then(dir => dir.removeEntry('filter.json').catch(()=>{})).then(() => window.location.reload())">
+            <button class="remove-filter" onclick="navigator.storage.getDirectory().then(dir => dir.removeEntry('filter.json').catch(()=>{})).then(() => page_load())">
               <img src="images/remove.svg" />
             </button>
         </div>
@@ -113,17 +113,21 @@ details.trip[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}],
 
     <div class="iib-menu-under" id="submenu-filter">
     
+        <img src="images/layers.svg" />
         <select id="TripDomain" multiple size="1">
           {% for tripDomain in common.common_trip_domains %}
             <option value="{{ tripDomain.DomainAbbreviation }}">{{ tripDomain.DomainDescription }}</option>
           {% endfor %}
         </select>
     
+        <img src="images/persons.svg" />
         <select id="ParticipantGroup" multiple size="1">
           {% for participantGroup in common.common_participant_groups %}
             <option value="{{ participantGroup.ParticipantGroup }}">{{ participantGroup.ParticipantGroup }}</option>
           {% endfor %}
         </select>
+        
+        <img src="images/reload.svg" onclick="page_load();" style="cursor:pointer;">
 
     </div>
     <div class="iib-menu-under" id="submenu-search">
