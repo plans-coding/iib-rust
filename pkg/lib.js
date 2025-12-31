@@ -233,12 +233,12 @@ if (!('encodeInto' in cachedTextEncoder)) {
 
 let WASM_VECTOR_LEN = 0;
 
-function wasm_bindgen__convert__closures_____invoke__hb6303756b209a30d(arg0, arg1) {
-    wasm.wasm_bindgen__convert__closures_____invoke__hb6303756b209a30d(arg0, arg1);
-}
-
 function wasm_bindgen__convert__closures_____invoke__h287c14aff19c8166(arg0, arg1, arg2) {
     wasm.wasm_bindgen__convert__closures_____invoke__h287c14aff19c8166(arg0, arg1, arg2);
+}
+
+function wasm_bindgen__convert__closures_____invoke__hb6303756b209a30d(arg0, arg1) {
+    wasm.wasm_bindgen__convert__closures_____invoke__hb6303756b209a30d(arg0, arg1);
 }
 
 export function page_load() {
@@ -465,6 +465,9 @@ function __wbg_get_imports() {
     };
     imports.wbg.__wbg_initializeChart_d8c9bfef4de85c37 = function() {
         initializeChart();
+    };
+    imports.wbg.__wbg_initializeMapContours_0ea21f9364295637 = function() {
+        initializeMapContours();
     };
     imports.wbg.__wbg_instanceof_Response_cd74d1c2ac92cb0b = function(arg0) {
         let result;
