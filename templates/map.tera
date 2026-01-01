@@ -1,5 +1,5 @@
 <style>
-section {width:100%!important;margin:0!important;}
+section {max-width:100%!important;width:100%!important;margin:0!important;}
 #app{flex:1;}
 #iib-foot{display:none;}
 
@@ -20,31 +20,36 @@ section {width:100%!important;margin:0!important;}
 :root[data-bs-theme="dark"] .polylineMap { stroke: gold; }
 </style>
 
-<div style="margin-top:10pt;z-index:900; position:absolute; width:100%; text-align:center;" class="p-2">
-    <select id="alltrip" class="form-control text-center" style="max-width:200pt; display:inline-block;" onchange="document.location='?path=map:country:' + this.value;">
+<div style="margin-top:10pt;z-index:900; position:absolute; width:100%; text-align:center;">
+
+    <select id="alltrip" class="form-control text-center" style="max-width:200pt; display:inline-block;" onchange="document.location='?path=map' + this.value;">
         <option value="">{{ translation.map.overallRoute | default(value="Overall route for all trips") }}</option>
         {% for trip in map_country_list %}
-            <option value="{{ trip.AccommodationCountry }}" {% if query_params.path is containing("country:") %}{% if query_params.path | split(pat="country:") | last == trip.AccommodationCountry %}selected{% endif %}{% endif %}>
+            <option value=":country:{{ trip.AccommodationCountry }}" {% if query_params.path is containing("country:") %}{% if query_params.path | split(pat="country:") | last == trip.AccommodationCountry %}selected{% endif %}{% endif %}>
                 {{ trip.AccommodationCountry }}
             </option>
         {% endfor %}
     </select>
 
-    {# if settings.Plugin.Theme.enabled %}
-        <select id="themeSelector" class="form-control text-center" style="max-width:200pt; display:inline-block;" onchange="document.location='?path=map:theme:' + this.value;">
-            <option value="">{{ settings.Plugins.Theme.translation }}</option>
-            {% for item in settings.Plugin.Theme.mapping %}
-                <option value="{{ item.key }}" {% if query_params.theme == item.key %}selected{% endif %}>
-                    {{ item.label }}
+    {% if settings.Plugin.Theme.enabled %}
+    <select id="themeSelector" class="form-control text-center" style="max-width:200pt; display:inline-block;" onchange="document.location='?path=map:theme:' + this.value;">
+        <option value="">{{ settings.Plugin.Theme.translation }}</option>
+        {% for item in settings.Plugin.Theme.mapping %}
+            {% for key, value in item %}
+                {% set theme_key = query_params.path | replace(from=("map:theme:"), to=("")) %}
+                <option value="{{ key }}" {% if theme_key == key %}selected{% endif %}>
+                    {{ value }}
                 </option>
             {% endfor %}
-        </select>
-    {% endif #}
+        {% endfor %}
+    </select>
+    {% endif %}
+
 </div>
 
 <div id="map" style="height:100%; width:100%;"></div>
 
-<div id="map-pin-data" data-map='{{ map_contour[0] | json_encode }}' data-settings-assets='{{ settings | json_encode }}'></div>
+<div id="map-pin-data" data-map='{{ map_contour | json_encode }}' data-settings-assets='{{ settings | json_encode }}'></div>
 
 
 

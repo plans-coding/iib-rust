@@ -159,6 +159,7 @@ body {
   display:flex;
   flex-direction:column;
   position: relative;
+  z-index:1000;
 }
 
 
@@ -564,21 +565,9 @@ dialog{width:100vw;height:100vh;}
         
         <script>
         
-        function load_trip_map() {
+        // MAP SCRIPT  -----------------------------------------------------------------------
         
-          let mapInitialized = false;
-        
-            if (mapInitialized) return;
-        
-            const mapEl = document.getElementById("map");
-            const dataEl = document.getElementById("map-data");
-        
-            if (!mapEl || !dataEl) return;
-        
-            mapInitialized = true;
-        
-            const geojson = JSON.parse(dataEl.textContent);
-        
+        function initiate_map() {
             const map = new maplibregl.Map({
               container: "map",
               style: {
@@ -605,6 +594,17 @@ dialog{width:100vw;height:100vh;}
         
             map.addControl(new maplibregl.NavigationControl(), "top-right");
             map.addControl(new maplibregl.FullscreenControl(), "top-right");
+            
+            return map
+        }
+        
+        function load_trip_map() {
+        
+            let map = initiate_map();
+            
+            const mapEl = document.getElementById("map");
+            const dataEl = document.getElementById("map-data");
+            const geojson = JSON.parse(dataEl.textContent);
         
             map.on("load", () => {
               map.addSource("map-data", { type: "geojson", data: geojson });
@@ -670,6 +670,166 @@ dialog{width:100vw;height:100vh;}
             });
         
         }
+        
+        
+        function load_contour_map() {
+        
+            let map = initiate_map();
+            
+            const mapContainer = document.getElementById('map');
+            const mapPinDataContainer = document.getElementById('map-pin-data');
+        
+            try {
+                const rawData = mapPinDataContainer.getAttribute('data-map');
+                const jsonData = JSON.parse(rawData);
+                
+                console.log(jsonData);
+        
+                // BIND ALL TRIP ACCOMMODATION POINTS TOGETHER
+                const allCoordinates = [];
+        
+                jsonData.forEach(pin => {
+                    const { MergedAccommodationCoordinates } = pin;
+        
+                    const coordinates = MergedAccommodationCoordinates
+                        .split('|')
+                        .map(coord => {
+                            const [lat, lon] = coord.split(',').map(parseFloat);
+        
+                            if (isNaN(lat) || isNaN(lon)) {
+                                console.warn(`Invalid coordinates: ${coord}`);
+                                return null;
+                            }
+        
+                            return [lon, lat]; // MapLibre requires [lon, lat]
+                        })
+                        .filter(Boolean);
+        
+                    allCoordinates.push(...coordinates);
+                });
+        
+                if (allCoordinates.length === 0) {
+                    return;
+                }
+        
+                map.on('load', () => {
+                    map.addSource('contour-line', {
+                        type: 'geojson',
+                        data: {
+                            type: 'Feature',
+                            geometry: {
+                                type: 'LineString',
+                                coordinates: allCoordinates
+                            }
+                        }
+                    });
+        
+                    map.addLayer({
+                        id: 'contour-line',
+                        type: 'line',
+                        source: 'contour-line',
+                        paint: {
+                            'line-color': '#ffbf00',
+                            'line-width': 3
+                        }
+                    });
+        
+                    const bounds = allCoordinates.reduce(
+                        (b, coord) => b.extend(coord),
+                        new maplibregl.LngLatBounds(allCoordinates[0], allCoordinates[0])
+                    );
+        
+                    map.fitBounds(bounds, { padding: 40, maxZoom: 12, linear: true });
+                });
+        
+            } catch (error) {
+                console.error('JSON Parse Error:', error);
+            }
+        }
+
+
+function load_country_map() {
+
+    let map = initiate_map();
+
+    const mapContainer = document.getElementById('map');
+    const mapPinDataContainer = document.getElementById('map-pin-data');
+
+
+    try {
+        const rawData = mapPinDataContainer.getAttribute('data-map');
+        const jsonData = JSON.parse(rawData);
+
+        if (!jsonData.length) return;
+
+        const bounds = new maplibregl.LngLatBounds();
+
+        jsonData.forEach(pin => {
+            const { InnerId, OuterId, OverallDestination, AccommodationCoordinates, AccommodationCoordinatesAccuracy, Accommodation, ParticipantGroup, TravelParticipants, Date } = pin;
+
+            // Split coordinates [lat, lon] -> [lng, lat] for MapLibre
+            const [lat, lon] = AccommodationCoordinates.split(',').map(coord => parseFloat(coord.trim()));
+            const coordinates = [lon, lat];
+
+            // Popup HTML
+            let popupContent = `
+                <b>${Accommodation}</b> <br>
+                ${ParticipantGroup} ${TravelParticipants} <br>
+                ${Date} <br>
+                <a href="?p=trip&id=${OuterId}">
+                    <div class="iib-map-ref" data-iib-tripDomain="${InnerId.charAt(0)}">
+                        ${OuterId} ${OverallDestination}
+                    </div>
+                </a> <br>
+            `;
+            if (AccommodationCoordinatesAccuracy) {
+                popupContent += `<b>Coordinate Accuracy:</b> ${AccommodationCoordinatesAccuracy} <br>`;
+            }
+
+            // Create a custom SVG marker element
+            const el = document.createElement('div');
+            el.className = 'custom-icon';
+            el.innerHTML = `
+                <svg class="iib-trip-tab" width="32" height="32" viewBox="0 0 460.298 460.297">
+                    <g>
+                        <g>
+                            <path class="accommodationColor" d="M230.149,120.939L65.986,256.274c0,0.191-0.048,0.472-0.144,0.855c-0.094,0.38-0.144,0.656-0.144,0.852v137.041
+                            c0,4.948,1.809,9.236,5.426,12.847c3.616,3.613,7.898,5.431,12.847,5.431h109.63V303.664h73.097v109.64h109.629
+                            c4.948,0,9.236-1.814,12.847-5.435c3.617-3.607,5.432-7.898,5.432-12.847V257.981c0-0.76-0.104-1.334-0.288-1.707L230.149,120.939
+                            z"/>
+                            <path class="accommodationColor" d="M457.122,225.438L394.6,173.476V56.989c0-2.663-0.856-4.853-2.574-6.567c-1.704-1.712-3.894-2.568-6.563-2.568h-54.816
+                            c-2.666,0-4.855,0.856-6.57,2.568c-1.711,1.714-2.566,3.905-2.566,6.567v55.673l-69.662-58.245
+                            c-6.084-4.949-13.318-7.423-21.694-7.423c-8.375,0-15.608,2.474-21.698,7.423L3.172,225.438c-1.903,1.52-2.946,3.566-3.14,6.136
+                            c-0.193,2.568,0.472,4.811,1.997,6.713l17.701,21.128c1.525,1.712,3.521,2.759,5.996,3.142c2.285,0.192,4.57-0.476,6.855-1.998
+                            L230.149,95.817l197.57,164.741c1.526,1.328,3.521,1.991,5.996,1.991h0.858c2.471-0.376,4.463-1.43,5.996-3.138l17.703-21.125
+                            c1.522-1.906,2.189-4.145,1.991-6.716C460.068,229.007,459.021,226.961,457.122,225.438z"/>
+                        </g>
+                    </g>
+                </svg>
+            `;
+
+            // Add marker with popup
+            new maplibregl.Marker(el)
+                .setLngLat(coordinates)
+                .setPopup(new maplibregl.Popup({ offset: 25 }).setHTML(popupContent))
+                .addTo(map);
+
+            bounds.extend(coordinates);
+        });
+
+        // Fit map to markers
+        map.fitBounds(bounds, { padding: 50 });
+
+        console.log("Map initialized with auto-zoom");
+    } catch (error) {
+        console.error("JSON Parse Error:", error);
+    }
+}
+
+
+
+
+        // CHART SCRIPT  -----------------------------------------------------------------------
         
         function initializeChart() {
             const canvas = document.getElementById('stat-trip-overview');
@@ -810,113 +970,6 @@ dialog{width:100vw;height:100vh;}
                 setTimeout(initializeChartOvernights, 100);
             }
         }
-        
-        
-        function initializeMapContours() {
-    const mapContainer = document.getElementById('map');
-    const mapPinDataContainer = document.getElementById('map-pin-data');
-
-    if (!mapContainer || !mapPinDataContainer) {
-        setTimeout(initializeMapContours, 100);
-        return;
-    }
-
-    const map = new maplibregl.Map({
-        container: 'map',
-        center: [-0.09, 51.505], // [lon, lat]
-        zoom: 6,
-        style: {
-            version: 8,
-            sources: {
-                osm: {
-                    type: 'raster',
-                    tiles: [
-                        'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                        'https://b.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                        'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png'
-                    ],
-                    tileSize: 256,
-                    attribution: '&copy; OpenStreetMap contributors'
-                }
-            },
-            layers: [
-                {
-                    id: 'osm',
-                    type: 'raster',
-                    source: 'osm'
-                }
-            ]
-        }
-    });
-
-    map.addControl(new maplibregl.FullscreenControl());
-    map.addControl(new maplibregl.NavigationControl());
-
-    try {
-        const rawData = mapPinDataContainer.getAttribute('data-map');
-        const jsonData = JSON.parse(rawData);
-
-        // BIND ALL TRIP ACCOMMODATION POINTS TOGETHER
-        const allCoordinates = [];
-
-        jsonData.forEach(pin => {
-            const { MergedAccommodationCoordinates } = pin;
-
-            const coordinates = MergedAccommodationCoordinates
-                .split('|')
-                .map(coord => {
-                    const [lat, lon] = coord.split(',').map(parseFloat);
-
-                    if (isNaN(lat) || isNaN(lon)) {
-                        console.warn(`Invalid coordinates: ${coord}`);
-                        return null;
-                    }
-
-                    return [lon, lat]; // MapLibre requires [lon, lat]
-                })
-                .filter(Boolean);
-
-            allCoordinates.push(...coordinates);
-        });
-
-        if (allCoordinates.length === 0) {
-            return;
-        }
-
-        map.on('load', () => {
-            map.addSource('contour-line', {
-                type: 'geojson',
-                data: {
-                    type: 'Feature',
-                    geometry: {
-                        type: 'LineString',
-                        coordinates: allCoordinates
-                    }
-                }
-            });
-
-            map.addLayer({
-                id: 'contour-line',
-                type: 'line',
-                source: 'contour-line',
-                paint: {
-                    'line-color': '#0066cc',
-                    'line-width': 3
-                }
-            });
-
-            const bounds = allCoordinates.reduce(
-                (b, coord) => b.extend(coord),
-                new maplibregl.LngLatBounds(allCoordinates[0], allCoordinates[0])
-            );
-
-            map.fitBounds(bounds, { padding: 40 });
-        });
-
-    } catch (error) {
-        console.error('JSON Parse Error:', error);
-    }
-}
         
         </script>
 

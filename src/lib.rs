@@ -67,10 +67,13 @@ static RENDER_STRUCTURE: OnceCell<Mutex<Value>> = OnceCell::new();
 // -----------------------------------------------------------------------
 #[wasm_bindgen]
 extern "C" {
-    fn load_trip_map();
+    // Charts
     fn initializeChart();
     fn initializeChartOvernights();
-    fn initializeMapContours();
+    // Maps
+    fn load_trip_map();
+    fn load_contour_map();
+    fn load_country_map();
 }
 
 // -----------------------------------------------------------------------
@@ -79,6 +82,7 @@ extern "C" {
 #[wasm_bindgen(start)]
 fn start() {
     wasm_bindgen_futures::spawn_local(async {
+    
         let (db_bytes, render_structure) = session_load().await;
 
         DB_BYTES.set(db_bytes).expect("DB already initialized");
@@ -206,6 +210,7 @@ async fn session_load() -> (Vec<u8>, serde_json::Value) {
 async fn page_load_internal() {
     let db_bytes = DB_BYTES.get().expect("DB not initialized");
     let render_structure_mutex = RENDER_STRUCTURE.get().expect("Render structure missing");
+    let mut map_request = "";
 
     // Lock the Mutex to get a mutable reference
     let mut render_structure = render_structure_mutex.lock().unwrap();
@@ -304,11 +309,10 @@ async fn page_load_internal() {
                     "template": TEMPLATE_MAP,
                     "queries": [
                         ["map_country_list", QUERY_MAP_COUNTRY_LIST.to_string()],
-                        ["map_theme", QUERY_MAP_THEME.to_string()],
                         ["map_contour", QUERY_MAP_CONTOUR.to_string()],
-                        ["map_country", QUERY_MAP_COUNTRY.to_string()],
                         ["common_trip_domains", QUERY_COMMON_TRIP_DOMAINS.to_string()],
                     ]});
+                map_request = "contour";
                 // See later in code for special cases
             }
             "statistics:summary" => {
@@ -399,6 +403,7 @@ async fn page_load_internal() {
                             ["trip_previous", QUERY_TRIP_PREVIOUS.replace("/*_OUTER_ID_*/",suffix)],
                             ["trip_next", QUERY_TRIP_NEXT.replace("/*_OUTER_ID_*/",suffix)],
                     ]});
+                    map_request = "trip";
                 }
                 
                 if let Some(suffix) = page.strip_prefix("images:") {
@@ -422,22 +427,36 @@ async fn page_load_internal() {
                     }
                 }
                 
-                if let Some(suffix) = page.strip_prefix("map") {
+                if let Some(suffix) = page.strip_prefix("map:") {
                 
-                    if let Some(country) = suffix.strip_prefix(":country:") {
+                    if let Some(country) = suffix.strip_prefix("country:") {
+                    
+                        // Title med outer id + dagbok + pass
+                        render_structure["page"] = json!({
+                            "title": render_structure.pointer("/all/translation/map/title").and_then(|v| v.as_str()).unwrap_or("Map"),
+                            "template": TEMPLATE_MAP,
+                            "queries": [
+                                ["map_country_list", QUERY_MAP_COUNTRY_LIST.to_string()],
+                                ["map_country", QUERY_MAP_COUNTRY.to_string()],
+                                ["common_trip_domains", QUERY_COMMON_TRIP_DOMAINS.to_string()],
+                            ]});
+                        map_request = "country";
+                    
+                    } else if let Some(theme) = suffix.strip_prefix("theme:") {
+                    
+                        // Title med outer id + dagbok + pass
+                        render_structure["page"] = json!({
+                            "title": render_structure.pointer("/all/translation/map/title").and_then(|v| v.as_str()).unwrap_or("Map"),
+                            "template": TEMPLATE_MAP,
+                            "queries": [
+                                ["map_country_list", QUERY_MAP_COUNTRY_LIST.to_string()],
+                                ["map_theme", QUERY_MAP_THEME.to_string()],
+                                ["common_trip_domains", QUERY_COMMON_TRIP_DOMAINS.to_string()],
+                            ]});
+                        map_request = "theme";
                     
                     }
-                    // Title med outer id + dagbok + pass
-                    render_structure["page"] = json!({
-                        "title": render_structure.pointer("/all/translation/map/title").and_then(|v| v.as_str()).unwrap_or("Map"),
-                        "template": TEMPLATE_MAP,
-                        "queries": [
-                            ["map_country_list", QUERY_MAP_COUNTRY_LIST.to_string()],
-                            ["map_contour", QUERY_MAP_CONTOUR.to_string()],
-                            ["map_country", QUERY_MAP_COUNTRY.to_string()],
-                            ["map_theme", QUERY_MAP_THEME.to_string()],
-                            ["common_trip_domains", QUERY_COMMON_TRIP_DOMAINS.to_string()],
-                        ]});
+
                 }
                 
                 if let Some(suffix) = page.strip_prefix("search:") {
@@ -503,9 +522,17 @@ async fn page_load_internal() {
         helper::apply_filter_from_opfs_to_selects();
         helper::attach_select_listener();
         
-        load_trip_map();
+        // POST CODE  -----------------------------------------------------------------------
+        if map_request == "trip" {
+            load_trip_map();
+        } else if map_request == "contour" {
+            load_contour_map();
+        } else if map_request == "country" {
+            load_country_map();
+        } else if map_request == "theme" {
+            //load_theme_map();
+        }    
         initializeChart();
         initializeChartOvernights();
-        initializeMapContours();
 
 }

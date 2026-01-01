@@ -233,12 +233,12 @@ if (!('encodeInto' in cachedTextEncoder)) {
 
 let WASM_VECTOR_LEN = 0;
 
-function wasm_bindgen__convert__closures_____invoke__h287c14aff19c8166(arg0, arg1, arg2) {
-    wasm.wasm_bindgen__convert__closures_____invoke__h287c14aff19c8166(arg0, arg1, arg2);
-}
-
 function wasm_bindgen__convert__closures_____invoke__hb6303756b209a30d(arg0, arg1) {
     wasm.wasm_bindgen__convert__closures_____invoke__hb6303756b209a30d(arg0, arg1);
+}
+
+function wasm_bindgen__convert__closures_____invoke__h287c14aff19c8166(arg0, arg1, arg2) {
+    wasm.wasm_bindgen__convert__closures_____invoke__h287c14aff19c8166(arg0, arg1, arg2);
 }
 
 export function page_load() {
@@ -466,9 +466,6 @@ function __wbg_get_imports() {
     imports.wbg.__wbg_initializeChart_d8c9bfef4de85c37 = function() {
         initializeChart();
     };
-    imports.wbg.__wbg_initializeMapContours_0ea21f9364295637 = function() {
-        initializeMapContours();
-    };
     imports.wbg.__wbg_instanceof_Response_cd74d1c2ac92cb0b = function(arg0) {
         let result;
         try {
@@ -504,6 +501,12 @@ function __wbg_get_imports() {
     imports.wbg.__wbg_length_a94b4b693903bab0 = function(arg0) {
         const ret = arg0.length;
         return ret;
+    };
+    imports.wbg.__wbg_load_contour_map_43fecdbe19a16a14 = function() {
+        load_contour_map();
+    };
+    imports.wbg.__wbg_load_country_map_f63d4e7451510e0f = function() {
+        load_country_map();
     };
     imports.wbg.__wbg_load_trip_map_6c877e1aeea842e1 = function() {
         load_trip_map();
