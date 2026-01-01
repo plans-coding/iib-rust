@@ -1,0 +1,15 @@
+{
+  "name": "bewegung",
+  "type": "module",
+  "version": "2.9.9",
+  "files": [
+    "bewegung_bg.wasm",
+    "bewegung.js",
+    "bewegung.d.ts"
+  ],
+  "main": "bewegung.js",
+  "types": "bewegung.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}
