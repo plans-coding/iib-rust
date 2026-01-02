@@ -1,6 +1,8 @@
 /* tslint:disable */
 /* eslint-disable */
 
+export function chart_js(): string;
+
 export function page_load(): void;
 
 export function slugify(s: string): string;
@@ -11,6 +13,7 @@ export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembl
 
 export interface InitOutput {
   readonly memory: WebAssembly.Memory;
+  readonly chart_js: () => [number, number];
   readonly page_load: () => void;
   readonly start: () => void;
   readonly slugify: (a: number, b: number) => [number, number];
@@ -24,10 +27,10 @@ export interface InitOutput {
   readonly rust_sqlite_wasm_realloc: (a: number, b: number) => number;
   readonly sqlite3_os_end: () => number;
   readonly sqlite3_os_init: () => number;
-  readonly wasm_bindgen__convert__closures_____invoke__h287c14aff19c8166: (a: number, b: number, c: any) => void;
-  readonly wasm_bindgen__closure__destroy__hbeb953b7a7c54932: (a: number, b: number) => void;
   readonly wasm_bindgen__convert__closures_____invoke__h4cadc49277d87a9d: (a: number, b: number) => void;
   readonly wasm_bindgen__closure__destroy__hc617e72aa8685d77: (a: number, b: number) => void;
+  readonly wasm_bindgen__convert__closures_____invoke__h287c14aff19c8166: (a: number, b: number, c: any) => void;
+  readonly wasm_bindgen__closure__destroy__hbeb953b7a7c54932: (a: number, b: number) => void;
   readonly __wbindgen_malloc: (a: number, b: number) => number;
   readonly __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
   readonly __wbindgen_exn_store: (a: number) => void;

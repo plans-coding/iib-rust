@@ -1,7 +1,6 @@
 use wasm_bindgen::prelude::*;
 use serde_json::json;
 use helper::SqlFilterReplace;
-use filecontent::load_filter_from_opfs;
 use once_cell::sync::OnceCell;
 use std::sync::Mutex;
 use serde_json::Value;
@@ -39,7 +38,7 @@ const QUERY_STATISTICS_VISITS: &str = include_str!("../queries/statistics_visits
 const QUERY_STATISTICS_OVERNIGHTS: &str = include_str!("../queries/statistics_overnights.sql");
 const QUERY_STATISTICS_PER_DOMAIN_YEAR: &str = include_str!("../queries/statistics_per_domain_year.sql");
 const QUERY_STATISTICS_THEME_COUNT: &str = include_str!("../queries/statistics_theme_count.sql");
-const QUERY_TRIP_MAP_PINS: &str = include_str!("../queries/trip_map_pins.sql");
+const QUERY_TRIP_MAP_PINS_OVERALL: &str = include_str!("../queries/trip_map_pins_overall.sql");
 
 // Simple queries
 const QUERY_COMMON_PARTICIPANT_GROUPS: &str = include_str!("../queries/simple/common_participant_groups.sql");
@@ -62,6 +61,12 @@ const QUERY_TRIP_NEXT: &str = include_str!("../queries/simple/trip_next.sql");
 static DB_BYTES: OnceCell<Vec<u8>> = OnceCell::new();
 static RENDER_STRUCTURE: OnceCell<Mutex<Value>> = OnceCell::new();
 
+// Other files
+static CHART_JS: &str = include_str!("../bundle/chartjs/chart.js");
+//static MAPLIBRE_JS: &str = include_str!("../bundle/maplibre-gl/maplibre-gl.js");
+//static MAPLIBRE_CSS: &str = include_str!("../bundle/maplibre-gl/maplibre-gl.css");
+//static BEWGUNG_CSS: &str = include_str!("../bewegung.css");
+
 // -----------------------------------------------------------------------
 // MAKE JAVASCRIPT FUNCTIONS AVAILABLE FOR RUST
 // -----------------------------------------------------------------------
@@ -74,6 +79,8 @@ extern "C" {
     fn load_trip_map();
     fn load_contour_map();
     fn load_country_map();
+    fn load_theme_map();
+    //fn inject_css(css: &str);
 }
 
 // -----------------------------------------------------------------------
@@ -103,33 +110,21 @@ pub fn page_load() {
         page_load_internal().await;
     });
 }
-// NOT IN USE (for user manual sql requests)  -----------------------------------------------------------------------
-/*#[wasm_bindgen]
-pub fn user_run_sql(sql: String) {
-    wasm_bindgen_futures::spawn_local(async {
-        user_run_sql_internal(sql).await;
-    });
+#[wasm_bindgen]
+pub fn chart_js() -> String {
+    CHART_JS.to_string()
 }
-
-async fn user_run_sql_internal(sql: String) {
-    let db_bytes = DB_BYTES.get().expect("DB not initialized");
-    
-        let combined_query = vec![
-            ("user_sql".to_string(), sql.to_string())
-        ];
-        
-    let query_response: serde_json::Value = sqlite_query::get_query_data(&db_bytes, combined_query).await;
-    
-    helper::render_json_table(&query_response["user_sql"]);
-    
-    //web_sys::console::log_1(&serde_json::to_string(&query_response).unwrap().into());
-    //web_sys::window().unwrap().document().unwrap().get_element_by_id("sql-output").unwrap().dyn_into::<web_sys::HtmlElement>().unwrap().set_inner_text(&query_response.to_string());
+/*#[wasm_bindgen]
+pub fn maplibre_js() -> String {
+    MAPLIBRE_JS.to_string()
 }*/
 
 // -----------------------------------------------------------------------
 // INITIATE SESSION
 // -----------------------------------------------------------------------
 async fn session_load() -> (Vec<u8>, serde_json::Value) {
+
+        //inject_css(MAPLIBRE_CSS);
 
     // -----------------------------------------------------------------------
     // First: Get sqlite database binary
@@ -309,7 +304,7 @@ async fn page_load_internal() {
                     "template": TEMPLATE_MAP,
                     "queries": [
                         ["map_country_list", QUERY_MAP_COUNTRY_LIST.to_string()],
-                        ["map_contour", QUERY_MAP_CONTOUR.to_string()],
+                        ["map_data", QUERY_MAP_CONTOUR.to_string()], //contour
                         ["common_trip_domains", QUERY_COMMON_TRIP_DOMAINS.to_string()],
                     ]});
                 map_request = "contour";
@@ -387,21 +382,25 @@ async fn page_load_internal() {
             
                 web_sys::console::log_1(&"Second tier.".into());
                 
-                if let Some(suffix) = page.strip_prefix("trip:") {
+                if let Some(outer_id) = page.strip_prefix("trip:") {
                     // Title med outer id + dagbok + pass
                     render_structure["page"] = json!({
-                        "title": suffix,
+                        "title": outer_id,
                         "template": TEMPLATE_TRIP,
                         "queries": [
-                            ["trip_summary", QUERY_TRIP_SUMMARY.to_string().replace("/*_OUTER_ID_*/",suffix)],
-                            ["trip_events", QUERY_TRIP_EVENTS.to_string().replace("/*_OUTER_ID_*/",suffix)],
+                            ["trip_summary", QUERY_TRIP_SUMMARY.to_string().replace("/*_OUTER_ID_*/",outer_id)],
+                            ["trip_events", QUERY_TRIP_EVENTS.to_string().replace("/*_OUTER_ID_*/",outer_id)],
                             ["trip_all_trips", QUERY_TRIP_ALL_TRIPS.to_string()],
                             ["common_trip_domains", QUERY_COMMON_TRIP_DOMAINS.to_string()],
                             // Lägg till filter
-                            ["trip_border_crossings", QUERY_TRIP_BORDER_CROSSINGS.replace("/*","").replace("*/","").replace("_OUTER_ID_",suffix)],
-                            ["trip_map_pins", QUERY_TRIP_MAP_PINS.replace("/*","").replace("*/","").replace("_OUTER_ID_",suffix)],
-                            ["trip_previous", QUERY_TRIP_PREVIOUS.replace("/*_OUTER_ID_*/",suffix)],
-                            ["trip_next", QUERY_TRIP_NEXT.replace("/*_OUTER_ID_*/",suffix)],
+                            ["trip_border_crossings", QUERY_TRIP_BORDER_CROSSINGS.replace("/*","").replace("*/","").replace("_OUTER_ID_",outer_id)],
+                            ["trip_map_pins_overall", QUERY_TRIP_MAP_PINS_OVERALL.replace("/*","").replace("*/","").replace("_OUTER_ID_",outer_id)],
+                            ["trip_previous", QUERY_TRIP_PREVIOUS.replace("_OUTER_ID_",outer_id)
+                                .replace("(ParticipantGroup)", &participant_group)
+                                .replace("(TripDomain)", &trip_domain)],
+                            ["trip_next", QUERY_TRIP_NEXT.replace("_OUTER_ID_",outer_id)
+                                .replace("(ParticipantGroup)", &participant_group)
+                                .replace("(TripDomain)", &trip_domain)],
                     ]});
                     map_request = "trip";
                 }
@@ -437,7 +436,7 @@ async fn page_load_internal() {
                             "template": TEMPLATE_MAP,
                             "queries": [
                                 ["map_country_list", QUERY_MAP_COUNTRY_LIST.to_string()],
-                                ["map_country", QUERY_MAP_COUNTRY.to_string()],
+                                ["map_data", QUERY_MAP_COUNTRY.replace("/*","").replace("*/","").replace("_COUNTRY_",country)], //country
                                 ["common_trip_domains", QUERY_COMMON_TRIP_DOMAINS.to_string()],
                             ]});
                         map_request = "country";
@@ -450,7 +449,7 @@ async fn page_load_internal() {
                             "template": TEMPLATE_MAP,
                             "queries": [
                                 ["map_country_list", QUERY_MAP_COUNTRY_LIST.to_string()],
-                                ["map_theme", QUERY_MAP_THEME.to_string()],
+                                ["map_data", QUERY_MAP_THEME.replace("/*","").replace("*/","").replace("_THEME_",theme)], //theme
                                 ["common_trip_domains", QUERY_COMMON_TRIP_DOMAINS.to_string()],
                             ]});
                         map_request = "theme";
@@ -530,7 +529,7 @@ async fn page_load_internal() {
         } else if map_request == "country" {
             load_country_map();
         } else if map_request == "theme" {
-            //load_theme_map();
+            load_theme_map();
         }    
         initializeChart();
         initializeChartOvernights();

@@ -1,15 +1,12 @@
 use chrono::Local;
 use serde_json::{json, Value, Map};
 use crate::filecontent;
-use crate::page_load_internal;
 
-use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast; // needed for `unchecked_into`
 use wasm_bindgen::closure::Closure; // needed for event listener closures
-use web_sys::{HtmlSelectElement, HtmlOptionElement, window, console};
+use web_sys::{HtmlSelectElement, HtmlOptionElement, window};
 use wasm_bindgen_futures::spawn_local;
 
-use js_sys::Array;
 
 pub fn attach_select_listener() {
     let document = window().unwrap().document().unwrap();
@@ -228,6 +225,28 @@ impl SqlFilterReplace for String {
     }
 }
 
+// NOT IN USE (for user manual sql requests)  -----------------------------------------------------------------------
+/*#[wasm_bindgen]
+pub fn user_run_sql(sql: String) {
+    wasm_bindgen_futures::spawn_local(async {
+        user_run_sql_internal(sql).await;
+    });
+}
+
+async fn user_run_sql_internal(sql: String) {
+    let db_bytes = DB_BYTES.get().expect("DB not initialized");
+    
+        let combined_query = vec![
+            ("user_sql".to_string(), sql.to_string())
+        ];
+        
+    let query_response: serde_json::Value = sqlite_query::get_query_data(&db_bytes, combined_query).await;
+    
+    helper::render_json_table(&query_response["user_sql"]);
+    
+    //web_sys::console::log_1(&serde_json::to_string(&query_response).unwrap().into());
+    //web_sys::window().unwrap().document().unwrap().get_element_by_id("sql-output").unwrap().dyn_into::<web_sys::HtmlElement>().unwrap().set_inner_text(&query_response.to_string());
+}*/
 
 // NOT IN USE (for user manual sql requests)  -----------------------------------------------------------------------
 /*

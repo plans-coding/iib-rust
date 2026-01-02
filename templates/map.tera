@@ -8,6 +8,7 @@ section {max-width:100%!important;width:100%!important;margin:0!important;}
   background-color: {{ tripDomain.Color }} !important;
   color: #fff;
   padding: 3pt 5pt;
+  text-decoration:none;
 }
 {% endfor %}
 
@@ -22,7 +23,7 @@ section {max-width:100%!important;width:100%!important;margin:0!important;}
 
 <div style="margin-top:10pt;z-index:900; position:absolute; width:100%; text-align:center;">
 
-    <select id="alltrip" class="form-control text-center" style="max-width:200pt; display:inline-block;" onchange="document.location='?path=map' + this.value;">
+    <select id="alltrip" class="form-control text-center" style="max-width:200pt; display:inline-block;" onchange="history.pushState(null,'','?path=map'+this.value);page_load();">
         <option value="">{{ translation.map.overallRoute | default(value="Overall route for all trips") }}</option>
         {% for trip in map_country_list %}
             <option value=":country:{{ trip.AccommodationCountry }}" {% if query_params.path is containing("country:") %}{% if query_params.path | split(pat="country:") | last == trip.AccommodationCountry %}selected{% endif %}{% endif %}>
@@ -32,7 +33,7 @@ section {max-width:100%!important;width:100%!important;margin:0!important;}
     </select>
 
     {% if settings.Plugin.Theme.enabled %}
-    <select id="themeSelector" class="form-control text-center" style="max-width:200pt; display:inline-block;" onchange="document.location='?path=map:theme:' + this.value;">
+    <select id="themeSelector" class="form-control text-center" style="max-width:200pt; display:inline-block;" onchange="history.pushState(null,'','?path=map:theme:'+this.value);page_load();">
         <option value="">{{ settings.Plugin.Theme.translation }}</option>
         {% for item in settings.Plugin.Theme.mapping %}
             {% for key, value in item %}
@@ -49,7 +50,7 @@ section {max-width:100%!important;width:100%!important;margin:0!important;}
 
 <div id="map" style="height:100%; width:100%;"></div>
 
-<div id="map-pin-data" data-map='{{ map_contour | json_encode }}' data-settings-assets='{{ settings | json_encode }}'></div>
+<div id="map-pin-data" data-map='{{ map_data | json_encode }}' data-settings-assets='{{ settings | json_encode }}'></div>
 
 
 
