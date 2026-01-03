@@ -2,6 +2,10 @@
 <style>
 {% for tripDomain in common.common_trip_domains %}
 
+.days[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}] .theme-link {color:{{ tripDomain.Color }};background-color:{{ tripDomain.Color }}22;text-decoration:underline;}
+.card[data-trip-domain={{ tripDomain.DomainAbbreviation }}] {text-decoration:none;color:#000;border-radius:5pt; border:2pt solid var(--color-hover-background);border-top:5pt solid {{ tripDomain.Color }};padding:5pt;}
+.explore-cover[data-trip-domain={{ tripDomain.DomainAbbreviation }}] {background-color:{{ tripDomain.Color }}22;}
+
 details.trip summary[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}] { background-color: {{ tripDomain.Color }}; }
 
 details.trip[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}],
@@ -10,7 +14,6 @@ details.trip[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}],
 .day[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}]:not(:last-child) { border-bottom: 1pt solid {{ tripDomain.Color }}22;  }
 
 .day-foot[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}], .day-foot a[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}] { color: {{ tripDomain.Color }}; }
-
 
 .acc-icon[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}] {
     background-color:{{ tripDomain.Color }};

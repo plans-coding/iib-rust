@@ -1,4 +1,5 @@
 use tera::{Value, Context, Tera};
+use regex::Regex;
 
 pub fn render2dom(
     template_content: &str,
@@ -10,7 +11,27 @@ pub fn render2dom(
 
     let rendered = Tera::one_off(template_content, &context, true)
         .map_err(|e| format!("Tera render error: {e:?}"))?;
+        
+    
+    // Convert text to link
+    let external_map_provider = json_object
+    .get("settings")
+    .and_then(|s| s.get("Base"))
+    .and_then(|b| b.get("ExternalMapProvider"))
+    .and_then(|v| v.as_str())
+    .ok_or("Missing ExternalMapProvider")?;
+        
+    let re = Regex::new(r"\{([^}]*)\}\(([^)]*)\)\[([^\]]*)\]")
+        .map_err(|e| format!("Regex error: {e:?}"))?;
 
+    let rendered = re
+        .replace_all(&rendered, |caps: &regex::Captures| {
+            format!("<a target=\"_blank\" class=\"theme-link\" href=\"{}{}\">{}</a>", &external_map_provider, &caps[2], &caps[1])
+        })
+        .into_owned();
+        
+        
+        
     let window = web_sys::window()
         .ok_or("No window available")?;
 

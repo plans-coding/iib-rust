@@ -380,12 +380,11 @@ h2 {text-align:center;}
 .card-container > * {
   flex: 1;
 }
-.card {text-decoration:none;color:#000;border-radius:5pt; border:2pt solid var(--color-hover-background);padding:5pt;}
+
 .card:hover {background-color:var(--color-hover-background-alpha);color:var(--color-hover-background);}
 .card-title {font-family: 'Cairo', sans-serif;font-weight:bold;font-size:16pt;padding:5pt;line-height:16pt;}
 .card-text {padding:5pt;}
 .card-footer {padding:5pt;}
-.card-cover-img {height:100pt;}
 
 .submenu{display:flex;}
 .submenu div {font-family: 'Cairo', sans-serif;font-size:32pt;font-weight:bold;color:var(--color-hover-background); }
@@ -486,6 +485,8 @@ dialog{width:100vw;height:100vh;}
 #image-viewer-dialog {border-radius:10pt;border:5pt solid var(--color-hover-background);}
 
 .themePinColor {fill:var(--color-filter);}
+
+
 
     </style>
 
@@ -763,87 +764,6 @@ dialog{width:100vw;height:100vh;}
             });
         }
 
-        
-        /*
-        function load_trip_map() {
-        
-            let map = initiate_map();
-            
-            const mapEl = document.getElementById("map");
-            const dataEl = document.getElementById("map-data");
-            const geojson = JSON.parse(dataEl.textContent);
-        
-            try {
-            
-            map.on("load", () => {
-              map.addSource("map-data", { type: "geojson", data: geojson });
-        
-              ["layer-1", "layer-2", "layer-3"].forEach(id => {
-                map.addLayer({
-                  id,
-                  type: "line",
-                  source: "map-data",
-                  filter: ["all",
-                    ["==", ["geometry-type"], "LineString"],
-                    ["==", ["get", "layer"], id]
-                  ],
-                  paint: {
-                    "line-color": ["get", "color"],
-                    "line-width": 4
-                  }
-                });
-              });
-        
-              map.addLayer({
-                id: "points",
-                type: "circle",
-                source: "map-data",
-                filter: ["==", ["geometry-type"], "Point"],
-                paint: {
-                  "circle-radius": 6,
-                  "circle-color": "#ffbf00",
-                  "circle-stroke-color": "#000",
-                  "circle-stroke-width": 1
-                }
-              });
-        
-              map.on("click", "points", e => {
-                const f = e.features[0];
-                if (!f.properties.popup) return;
-                new maplibregl.Popup()
-                  .setLngLat(f.geometry.coordinates)
-                  .setText(f.properties.popup)
-                  .addTo(map);
-              });
-        
-              map.on("mouseenter", "points", () => map.getCanvas().style.cursor = "pointer");
-              map.on("mouseleave", "points", () => map.getCanvas().style.cursor = "");
-        
-              // auto-fit bounds
-              const coords = geojson.features.flatMap(f =>
-                f.geometry.type === "Point" ? [f.geometry.coordinates] :
-                f.geometry.type === "LineString" ? f.geometry.coordinates : []
-              );
-        
-              if (coords.length) {
-                const bounds = coords.reduce(
-                  (b, c) => [
-                    [Math.min(b[0][0], c[0]), Math.min(b[0][1], c[1])],
-                    [Math.max(b[1][0], c[0]), Math.max(b[1][1], c[1])]
-                  ],
-                  [coords[0], coords[0]]
-                );
-        
-                map.fitBounds(bounds, { padding: 50, maxZoom: 12, linear: true });
-              }
-            });
-            
-            } catch (error) {
-                console.error('JSON Parse Error:', error);
-            }
-        
-        }*/
-        
         
         function load_contour_map() {
         

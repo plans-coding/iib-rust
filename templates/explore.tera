@@ -11,13 +11,14 @@
 <div class="card-container">
 {% for row in explore %}
 
-    <a href="?path=trip:{{ row.OuterId }}" class="card">
-      <div style="
-          background-image: url('../image.webp');
-          background-size: cover;
+    <a href="?path=trip:{{ row.OuterId }}" class="card" data-trip-domain="{{ row.TripDomain }}">
+      <div class="explore-cover" data-trip-domain="{{ row.TripDomain }}" style="
+          background-image: url('../images/database.svg');
+          background-size: contain;
           background-position: center;
           background-repeat: no-repeat;
-        " class="card-cover-img">
+          height:120pt;
+        ">
         </div>
       <!--<img src="{{ row.CoverPhoto }}" class="card-img-top" alt="...">-->
       <div class="card-body">

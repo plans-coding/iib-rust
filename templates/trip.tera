@@ -144,7 +144,7 @@
     </div>
 
     <div><div id="map" style="width:100%;height:100%;"></div></div>
-    <div id="map-pin-data" data-trip-map-overall='{{ trip_map_pins_overall | json_encode }}' data-trip-map-accommodation='{{ trip_events | json_encode }}' data-theme-color="{{ theme_color }}"></div>
+    <div id="map-pin-data" data-trip-map-overall='{{ trip_map_pins_overall | json_encode }}' data-trip-map-accommodation='{{ trip_map_pins_accommodation | json_encode }}' data-theme-color="{{ theme_color }}"></div>
 
 
   </div>
@@ -158,8 +158,9 @@
       <div class="day-left">
       
         <div class="day-event">{{ day.Events }}</div>
+                
         <div class="day-foot" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
-          <div class="day-label"><div class="day-icon" data-iib-tripDomain='{{ trip_summary[0].DomainAbbreviation }}'>{{ loop.index }}</div> {{ day.Weekday | default(value="") }} {{ day.Date }}</div>
+          <div class="day-label"><div class="day-icon" data-iib-tripDomain='{{ trip_summary[0].DomainAbbreviation }}'>{{ loop.index - 1 }}</div> {{ day.Weekday | default(value="") }} {{ day.Date }}</div>
            &nbsp; <a style="text-decoration:none;" target="_blank" href="{{ settings.Base.ExternalMapProvider }}{{ day.AccommodationCoordinates }}" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
               <div class="acc-icon" data-iib-tripDomain='{{ trip_summary[0].DomainAbbreviation }}'></div>
               <span class="acc-text">{{ day.Accommodation }} – {{ day.AccommodationCountry }} – {{ day.AccommodationCoordinates }} {{ day.AccommodationCoordinateAccuracy | default(value="") }}</span>
@@ -233,50 +234,3 @@
     </div>
   {% endfor %}
 </div>
-
-<!--
-
-
-    
-
-        </div>
-    
-        <div class="col-md">
-
-            {# Map container
-            <div id="map-pin-data"
-                 data-map-overall-route='{# trip_map_pins | json #}'
-                 data-map-accommodation='{# trip_events | json | replace("'", "%27") #}'
-                 data-settings-assets='{# settings | json #}'
-                 data-tripDomain='{{ trip_summary[0].DomainAbbreviation }}'
-                 data-translation-overview='{{ translation.overview.title | default(value="Overview") }}'
-                 data-translation-accommodations='{{ translation.trip.accommodations | default(value="Accommodations") }}'>
-            </div>
-            <div id="" style="min-height:400pt;height:100%;width:100%;"></div> #}
-        </div>
-        -->
-
-
-
-<!--
-                
-    {# Theme plugin }
-    {% if settings.Plugins.Theme.enabled %}
-        {% set parsedThemeLocations = day.Events | parseThemeLocationsEventString %}
-        {% if parsedThemeLocations | length > 0 %}
-            <div class="mt-2 sightseeing-text">
-                <div class="sightseeing-icon"></div>
-                <b>{{ settings.Plugins.Theme.translation }}</b>:
-                {% for item in parsedThemeLocations %}
-                    <span>
-                        <a class="sightseeing-text" href="{{ settings.Base.ExternalMapProvider }}{{ item.coordinates }}" target="_blank">
-                            {{ item.place }}
-                        </a>
-                        {% if not loop.last %}, {% endif %}
-                    </span>
-                {% endfor %}
-            </div>
-        {% endif %}
-    {% endif #}
-  
--->

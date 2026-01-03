@@ -39,6 +39,7 @@ const QUERY_STATISTICS_OVERNIGHTS: &str = include_str!("../queries/statistics_ov
 const QUERY_STATISTICS_PER_DOMAIN_YEAR: &str = include_str!("../queries/statistics_per_domain_year.sql");
 const QUERY_STATISTICS_THEME_COUNT: &str = include_str!("../queries/statistics_theme_count.sql");
 const QUERY_TRIP_MAP_PINS_OVERALL: &str = include_str!("../queries/trip_map_pins_overall.sql");
+const QUERY_TRIP_MAP_PINS_ACCOMMODATION: &str = include_str!("../queries/trip_map_pins_accommodation.sql");
 
 // Simple queries
 const QUERY_COMMON_PARTICIPANT_GROUPS: &str = include_str!("../queries/simple/common_participant_groups.sql");
@@ -161,7 +162,7 @@ async fn session_load() -> (Vec<u8>, serde_json::Value) {
         if p_is_empty { render_structure["all"]["query_params"]["path"] = json!("explore"); }
     
         render_structure["all"]["time"] = helper::build_time_json();
-        web_sys::console::log_1(&serde_json::to_string(&render_structure["all"]).unwrap().into());
+        //web_sys::console::log_1(&serde_json::to_string(&render_structure["all"]).unwrap().into());
     
         // Get translation
         let translation_query = vec![
@@ -395,6 +396,7 @@ async fn page_load_internal() {
                             // Lägg till filter
                             ["trip_border_crossings", QUERY_TRIP_BORDER_CROSSINGS.replace("/*","").replace("*/","").replace("_OUTER_ID_",outer_id)],
                             ["trip_map_pins_overall", QUERY_TRIP_MAP_PINS_OVERALL.replace("/*","").replace("*/","").replace("_OUTER_ID_",outer_id)],
+                            ["trip_map_pins_accommodation", QUERY_TRIP_MAP_PINS_ACCOMMODATION.replace("_OUTER_ID_",outer_id)],
                             ["trip_previous", QUERY_TRIP_PREVIOUS.replace("_OUTER_ID_",outer_id)
                                 .replace("(ParticipantGroup)", &participant_group)
                                 .replace("(TripDomain)", &trip_domain)],
