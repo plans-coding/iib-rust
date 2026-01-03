@@ -9,7 +9,7 @@ use wasm_bindgen_futures::spawn_local;
 
 
 pub fn attach_select_listener() {
-    let document = window().unwrap().document().unwrap();
+    let document = window().expect("ERROR").document().expect("ERROR");
 
     // List of select IDs
     let ids = ["TripDomain", "ParticipantGroup"];
@@ -17,22 +17,22 @@ pub fn attach_select_listener() {
     for id in ids.iter() {
         let element = document
             .get_element_by_id(id)
-            .unwrap()
+            .expect("ERROR")
             .unchecked_into::<HtmlSelectElement>();
 
         // Create closure for change event
         let closure = Closure::wrap(Box::new(move || {
-            let document = window().unwrap().document().unwrap();
+            let document = window().expect("ERROR").document().expect("ERROR");
 
             let get_selected = |id: &str| -> Vec<String> {
                 let select: HtmlSelectElement = document
                     .get_element_by_id(id)
-                    .unwrap()
+                    .expect("ERROR")
                     .unchecked_into();
 
                 (0..select.length())
                     .filter_map(|i| {
-                        let option: HtmlOptionElement = select.item(i).unwrap().unchecked_into();
+                        let option: HtmlOptionElement = select.item(i).expect("ERROR").unchecked_into();
                         if option.selected() { Some(option.value()) } else { None }
                     })
                     .collect()
@@ -44,7 +44,7 @@ pub fn attach_select_listener() {
             });
 
             // Convert JSON to string for logging
-            let json_str = serde_json::to_string(&json_value).unwrap();
+            let json_str = serde_json::to_string(&json_value).expect("ERROR");
             
             // PRINT ALL CHANGES IN FILTERS
             //console::log_1(&wasm_bindgen::JsValue::from_str(&json_str));
@@ -62,7 +62,7 @@ pub fn attach_select_listener() {
 
         element
             .add_event_listener_with_callback("change", closure.as_ref().unchecked_ref())
-            .unwrap();
+            .expect("ERROR");
 
         // Prevent closure from being dropped
         closure.forget();
@@ -92,31 +92,31 @@ pub fn apply_filter_from_opfs_to_selects() {
             }
         };
 
-        let document = window().unwrap().document().unwrap();
+        let document = window().expect("ERROR").document().expect("ERROR");
 
         // Helper: set selected options in a <select> by values
         let set_selected = |select_id: &str, selected_values: &[String]| {
             let select: HtmlSelectElement = document
                 .get_element_by_id(select_id)
-                .unwrap()
+                .expect("ERROR")
                 .unchecked_into();
 
             // Clear current selection
             for i in 0..select.length() {
-                let opt: HtmlOptionElement = select.item(i).unwrap().unchecked_into();
+                let opt: HtmlOptionElement = select.item(i).expect("ERROR").unchecked_into();
                 opt.set_selected(false);
             }
 
             // Apply selection
             for i in 0..select.length() {
-                let opt: HtmlOptionElement = select.item(i).unwrap().unchecked_into();
+                let opt: HtmlOptionElement = select.item(i).expect("ERROR").unchecked_into();
                 if selected_values.iter().any(|s| s == &opt.value()) {
                     opt.set_selected(true);
                 }
             }
 
             // Optional: fire "change" so any dependent UI updates run
-            let evt = web_sys::Event::new("change").unwrap();
+            let evt = web_sys::Event::new("change").expect("ERROR");
             let _ = select.dispatch_event(&evt);
         };
 
@@ -168,9 +168,9 @@ pub fn transform_settings(settings_array: &Vec<Value>) -> Value {
     let mut result = Map::new();
 
     for setting in settings_array {
-        let attribute = setting["Attribute"].as_str().unwrap();
-        let group = setting["AttributeGroup"].as_str().unwrap();
-        let value_str = setting["Value"].as_str().unwrap();
+        let attribute = setting["Attribute"].as_str().expect("ERROR");
+        let group = setting["AttributeGroup"].as_str().expect("ERROR");
+        let value_str = setting["Value"].as_str().expect("ERROR");
 
         // Parse the value if it's a JSON object string, else keep as string
         let value: Value = if value_str.starts_with('{') || value_str.starts_with('[') {
@@ -184,7 +184,7 @@ pub fn transform_settings(settings_array: &Vec<Value>) -> Value {
             .entry(group)
             .or_insert_with(|| Value::Object(Map::new()))
             .as_object_mut()
-            .unwrap()
+            .expect("ERROR")
             .insert(attribute.to_string(), value);
     }
 
@@ -244,8 +244,8 @@ async fn user_run_sql_internal(sql: String) {
     
     helper::render_json_table(&query_response["user_sql"]);
     
-    //web_sys::console::log_1(&serde_json::to_string(&query_response).unwrap().into());
-    //web_sys::window().unwrap().document().unwrap().get_element_by_id("sql-output").unwrap().dyn_into::<web_sys::HtmlElement>().unwrap().set_inner_text(&query_response.to_string());
+    //web_sys::console::log_1(&serde_json::to_string(&query_response).expect("ERROR").into());
+    //web_sys::window().expect("ERROR").document().expect("ERROR").get_element_by_id("sql-output").expect("ERROR").dyn_into::<web_sys::HtmlElement>().expect("ERROR").set_inner_text(&query_response.to_string());
 }*/
 
 // NOT IN USE (for user manual sql requests)  -----------------------------------------------------------------------
@@ -253,12 +253,12 @@ async fn user_run_sql_internal(sql: String) {
 use web_sys::HtmlElement;
 
 pub fn render_json_table(query_response: &Value) {
-    let document = web_sys::window().unwrap().document().unwrap();
+    let document = web_sys::window().expect("ERROR").document().expect("ERROR");
     let container = document
         .get_element_by_id("sql-output")
-        .unwrap()
+        .expect("ERROR")
         .dyn_into::<HtmlElement>()
-        .unwrap();
+        .expect("ERROR");
 
     let rows = match query_response.as_array() {
         Some(arr) => arr,

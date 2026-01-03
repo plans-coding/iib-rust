@@ -10,7 +10,6 @@
         <link rel="shortcut icon" href="images/frog.svg" />
         <!--<link href="bewegung.css" rel="stylesheet">-->
         
-
     <style>
 
 :root {
@@ -28,6 +27,19 @@
     --color-submenu-background:#e2e3e5;
 }
 
+  body.dark {
+    --color-background: #121212;
+    --color-text: #e0e0e0;
+    --color-hover-background: #999;
+    --color-hover-background-alpha: #99999922;
+    --color-hover-text: #000;
+
+    --color-filter: #ffbf00;
+    --color-filter-alpha: #ffbf00bb;
+    --color-filter-background: #2b2b2b;
+
+    --color-submenu-background: #1e1e1e;
+  }
 
 
 .table td {padding:5pt;}
@@ -393,7 +405,7 @@ a.tab-link:not(.active) {font-size:20pt;margin:10pt;text-decoration:none; paddin
 a.tab-link:not(.active):hover {text-decoration:underline;}
 
 
-.breadcrumb{display:flex;align-items: center; font-family: 'Cairo', sans-serif;font-weight:bold;font-size:16pt;margin:10pt 0 10pt 0;gap:5pt;}
+.breadcrumb{color:var(--color-text);display:flex;align-items: center; font-family: 'Cairo', sans-serif;font-weight:bold;font-size:16pt;margin:10pt 0 10pt 0;gap:5pt;}
 .breadcrumb img:first-child {height:18pt;}
 .breadcrumb img:second-child {height:10pt;}
 
@@ -487,7 +499,9 @@ dialog{width:100vw;height:100vh;}
 .themePinColor {fill:var(--color-filter);}
 
 
+#themeToggle {color:var(--color-text);cursor:pointer;}
 
+.card-container {color:var(--color-text);}
     </style>
 
 <script src='https://unpkg.com/maplibre-gl@latest/dist/maplibre-gl.js'></script>
@@ -495,7 +509,7 @@ dialog{width:100vw;height:100vh;}
 
     </head>
     <body>
-    
+        
         <nav id="menu">
 
         </nav>
@@ -574,11 +588,11 @@ dialog{width:100vw;height:100vh;}
             URL.revokeObjectURL(url_maplibre);*/
             
             // Css code called from rusts
-            function inject_css(cssText) {
+            /*function inject_css(cssText) {
                 const style = document.createElement("style");
                 style.textContent = cssText;
                 document.head.appendChild(style);
-            }
+            }*/
 
 
         </script>
@@ -1158,6 +1172,16 @@ dialog{width:100vw;height:100vh;}
                 // If the canvas is not found yet, retry after a short delay
                 setTimeout(initializeChartOvernights, 100);
             }
+        }
+        
+        function initialize_theme_color() {
+              const button = document.getElementById('themeToggle');
+              button.addEventListener('click', () => {
+                document.body.classList.toggle('dark');
+                /*button.textContent = document.body.classList.contains('dark')
+                  ? 'Switch to Light Theme'
+                  : 'Switch to Dark Theme';*/
+              });
         }
         
         </script>

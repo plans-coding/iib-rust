@@ -5,7 +5,7 @@ use std::ptr;
 
 unsafe fn run_query(db: *mut ffi::sqlite3, sql: &str) -> Vec<Value> {
     let mut stmt: *mut ffi::sqlite3_stmt = ptr::null_mut();
-    let csql = CString::new(sql).unwrap();
+    let csql = CString::new(sql).expect("ERROR");
     ffi::sqlite3_prepare_v2(db, csql.as_ptr(), -1, &mut stmt, ptr::null_mut());
 
     let mut rows = Vec::new();

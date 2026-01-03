@@ -8,7 +8,6 @@ use serde_json::Value;
 mod filecontent;
 mod sqlite_query;
 mod render;
-mod query_params;
 mod helper;
 
 // Templates
@@ -82,6 +81,8 @@ extern "C" {
     fn load_country_map();
     fn load_theme_map();
     //fn inject_css(css: &str);
+    // Other
+    fn initialize_theme_color();
 }
 
 // -----------------------------------------------------------------------
@@ -89,6 +90,7 @@ extern "C" {
 // -----------------------------------------------------------------------
 #[wasm_bindgen(start)]
 fn start() {
+
     wasm_bindgen_futures::spawn_local(async {
     
         let (db_bytes, render_structure) = session_load().await;
@@ -137,7 +139,7 @@ async fn session_load() -> (Vec<u8>, serde_json::Value) {
         } else {
             web_sys::console::log_1(&"No DB loaded.".into());
             // Set query parameter 'p' to 'source'
-            query_params::set_query_params(&json!({"path":"more:source"}));
+            //query_params::set_query_params(&json!({"path":"more:source"}));
             // set page = configure -- needed?
         }
     
@@ -145,35 +147,41 @@ async fn session_load() -> (Vec<u8>, serde_json::Value) {
     // Second: Handle query parameters
     // -----------------------------------------------------------------------
     
-        let query_params = query_params::get_query_params();
-        // Presume ?p=overview if not set at all
-        let page = match &query_params["path"] { serde_json::Value::String(s) if !s.is_empty() => s.as_str(), _ => "explore", };
-        web_sys::console::log_1(&format!("Loading page: {}",page).into());
+        //let query_params = query_params::get_query_params();
+        
+        let path = web_sys::window().expect("No window available").location().search().ok()
+        .as_deref().and_then(|s| web_sys::UrlSearchParams::new_with_str(s).ok()).and_then(|params| params.get("path"));
     
+        let page = path.as_deref().unwrap_or("explore");
+
+        web_sys::console::log_1(&format!("Loading page: {}",page).into());
+        
     // -----------------------------------------------------------------------
     // Third: Common data for all pages
     // -----------------------------------------------------------------------
     
         let mut render_structure = json!({});
-        render_structure["all"]["query_params"] = query_params.clone();
+        render_structure["all"]["query_params"]["path"] = path.into();
+        //render_structure["all"]["query_params"] = query_params.clone();
+        //render_structure["all"]["query_params"] = query_params.clone();
     
         // If "path" is missing or empty, set it to "overview"
-        let p_is_empty = render_structure["all"]["query_params"]["path"].as_str().map(|s| s.is_empty()).unwrap_or(true);
-        if p_is_empty { render_structure["all"]["query_params"]["path"] = json!("explore"); }
+        //let p_is_empty = render_structure["all"]["query_params"]["path"].as_str().map(|s| s.is_empty()).unwrap_or(true);
+        //if p_is_empty { render_structure["all"]["query_params"]["path"] = json!("explore"); }
     
         render_structure["all"]["time"] = helper::build_time_json();
-        //web_sys::console::log_1(&serde_json::to_string(&render_structure["all"]).unwrap().into());
+        //web_sys::console::log_1(&serde_json::to_string(&render_structure["all"]).expect("ERROR").into());
     
         // Get translation
         let translation_query = vec![
             ("translation_filename".to_string(), "SELECT Value FROM bewxx_Settings WHERE AttributeGroup = 'Base' AND Attribute = 'LanguageFile';".to_string())
         ];
         let translation_filename = sqlite_query::get_query_data(&db_bytes, translation_query).await;
-        let json_obj: serde_json::Value = serde_json::to_value(&translation_filename).unwrap();
+        let json_obj: serde_json::Value = serde_json::to_value(&translation_filename).expect("ERROR");
         let translation_filename_extracted = format!("languages/{}",json_obj["translation_filename"][0]["Value"].as_str().expect("Expected settings[0].Value to be a string"));
         web_sys::console::log_1(&translation_filename_extracted.as_str().into());
         let translation_content = filecontent::fetch_json(&translation_filename_extracted).await.unwrap_or(serde_json::Value::String("".to_string()));
-        //web_sys::console::log_1(&serde_json::to_string(&translation_content).unwrap().into());
+        //web_sys::console::log_1(&serde_json::to_string(&translation_content).expect("ERROR").into());
     
         // Get all settings
         let settings_query = vec![
@@ -182,11 +190,10 @@ async fn session_load() -> (Vec<u8>, serde_json::Value) {
         let settings_response = sqlite_query::get_query_data(&db_bytes, settings_query).await;
     
     
-        //crender_structure["all"]["settings"] = serde_json::to_value(&settings_response["settings"]).unwrap();
-        render_structure["all"]["settings"] = helper::transform_settings(&settings_response["settings"].as_array().unwrap());
+        //crender_structure["all"]["settings"] = serde_json::to_value(&settings_response["settings"]).expect("ERROR");
+        render_structure["all"]["settings"] = helper::transform_settings(&settings_response["settings"].as_array().expect("ERROR"));
         render_structure["all"]["translation"] = translation_content;//.expect("Error with translation data.");
-        web_sys::console::log_1(&serde_json::to_string(&render_structure["all"]["settings"]).unwrap().into());
-        
+        web_sys::console::log_1(&serde_json::to_string(&render_structure["all"]["settings"]).expect("ERROR").into());
         
         // RENDER TO 'MENU'  -----------------------------------------------------------------------
         let common_data = vec![
@@ -195,6 +202,8 @@ async fn session_load() -> (Vec<u8>, serde_json::Value) {
         ];
         render_structure["all"]["common"] = sqlite_query::get_query_data(&db_bytes, common_data).await;
         let _ = render::render2dom(TEMPLATE_MENU, &render_structure["all"], "menu");
+        
+        initialize_theme_color();
         
         (db_bytes, render_structure)
 
@@ -209,21 +218,20 @@ async fn page_load_internal() {
     let mut map_request = "";
 
     // Lock the Mutex to get a mutable reference
-    let mut render_structure = render_structure_mutex.lock().unwrap();
+    let mut render_structure = render_structure_mutex.lock().expect("ERROR");
         
-    let query_params = query_params::get_query_params();
-    // Presume ?p=overview if not set at all
-    let page = match &query_params["path"] { serde_json::Value::String(s) if !s.is_empty() => s.as_str(), _ => "explore", };
-    web_sys::console::log_1(&format!("Loading page: {}",page).into());
 
-    render_structure["all"]["query_params"] = query_params.clone();
+    let path = web_sys::window().expect("No window available").location().search().ok()
+    .as_deref().and_then(|s| web_sys::UrlSearchParams::new_with_str(s).ok()).and_then(|params| params.get("path"));
 
-    // If "path" is missing or empty, set it to "overview"
-    let p_is_empty = render_structure["all"]["query_params"]["path"].as_str().map(|s| s.is_empty()).unwrap_or(true);
-    if p_is_empty { render_structure["all"]["query_params"]["path"] = json!("explore"); }
+    let page = path.as_deref().unwrap_or("explore");
+   
+    //web_sys::console::log_1(&format!("Loading page: {}",page).into());
+   
+    render_structure["all"]["query_params"]["path"] = path.clone().into();
 
     render_structure["all"]["time"] = helper::build_time_json();
-    web_sys::console::log_1(&serde_json::to_string(&render_structure["all"]).unwrap().into());
+    web_sys::console::log_1(&serde_json::to_string(&render_structure["all"]).expect("ERROR").into());
 
     // READ APPLIED FILTERS  -----------------------------------------------------------------------
     
@@ -235,18 +243,18 @@ async fn page_load_internal() {
 
     web_sys::console::log_1(&"----------------------".into());
     render_structure["all"]["filters"] = filters_value;
-    web_sys::console::log_1(&serde_json::to_string(&render_structure["all"]["filters"]).unwrap().into());
+    web_sys::console::log_1(&serde_json::to_string(&render_structure["all"]["filters"]).expect("ERROR").into());
     
     // Prepare filters
     let participant_group = if render_structure["all"]["filters"]["ParticipantGroup"].as_array().map_or(true, |a| a.is_empty()) {
         "(ParticipantGroup)".to_string()
     } else {
-        format!("({})", render_structure["all"]["filters"]["ParticipantGroup"].as_array().unwrap().iter().filter_map(|v| v.as_str()).map(|s| format!("'{}'", s)).collect::<Vec<_>>().join(","))
+        format!("({})", render_structure["all"]["filters"]["ParticipantGroup"].as_array().expect("ERROR").iter().filter_map(|v| v.as_str()).map(|s| format!("'{}'", s)).collect::<Vec<_>>().join(","))
     };
     let trip_domain = if render_structure["all"]["filters"]["TripDomain"].as_array().map_or(true, |a| a.is_empty()) {
         "(TripDomain)".to_string()
     } else {
-        format!("({})", render_structure["all"]["filters"]["TripDomain"].as_array().unwrap().iter().filter_map(|v| v.as_str()).map(|s| format!("'{}'", s)).collect::<Vec<_>>().join(","))
+        format!("({})", render_structure["all"]["filters"]["TripDomain"].as_array().expect("ERROR").iter().filter_map(|v| v.as_str()).map(|s| format!("'{}'", s)).collect::<Vec<_>>().join(","))
     };
 
     // -----------------------------------------------------------------------
@@ -465,7 +473,7 @@ async fn page_load_internal() {
                     render_structure["page"] = json!({
                         "title": suffix,
                         "template": TEMPLATE_SEARCH,
-                        "settings": serde_json::to_value(&render_structure["all"]["settings"]).unwrap(),
+                        "settings": serde_json::to_value(&render_structure["all"]["settings"]).expect("ERROR"),
                         "queries": [
                             ["search_trip", QUERY_SEARCH_TRIP.to_string().replace("/*_STRING_*/", suffix)],
                             ["search_event", QUERY_SEARCH_EVENT.to_string().replace("/*_STRING_*/", suffix)],
@@ -479,14 +487,14 @@ async fn page_load_internal() {
     // Fifth: Render content
     // -----------------------------------------------------------------------
 
-        //web_sys::console::log_1(&serde_json::to_string(&render_structure["page"]).unwrap().into());
+        //web_sys::console::log_1(&serde_json::to_string(&render_structure["page"]).expect("ERROR").into());
         
         // SET TITLE  -----------------------------------------------------------------------
     
         //web_sys::console::log_1(&"----------------------".into());
         let title = render_structure["page"]["title"].as_str().unwrap_or("Default Title");
-        web_sys::window().unwrap().document().unwrap().set_title(&format!("{title} - Immer in Bewegung"));
-        //web_sys::console::log_1(&serde_json::to_string(&render_structure["page"]["title"]).unwrap().into());
+        web_sys::window().expect("ERROR").document().expect("ERROR").set_title(&format!("{title} - Immer in Bewegung"));
+        //web_sys::console::log_1(&serde_json::to_string(&render_structure["page"]["title"]).expect("ERROR").into());
     
         // RUN SQLITE QUERIES  -----------------------------------------------------------------------
     
@@ -501,7 +509,7 @@ async fn page_load_internal() {
         .collect();
     
         let query_response: serde_json::Value = sqlite_query::get_query_data(&db_bytes, combined_query).await;
-        web_sys::console::log_1(&serde_json::to_string(&query_response).unwrap().into());
+        //web_sys::console::log_1(&serde_json::to_string(&query_response).expect("ERROR").into());
     
         let mut merged_structure = render_structure["all"].clone();
     
@@ -532,8 +540,9 @@ async fn page_load_internal() {
             load_country_map();
         } else if map_request == "theme" {
             load_theme_map();
-        }    
+        }
         initializeChart();
         initializeChartOvernights();
-
+        
+        
 }

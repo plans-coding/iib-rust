@@ -1,7 +1,13 @@
 {
   "name": "bewegung",
   "type": "module",
+  "description": "Travel documentation application",
   "version": "2.9.9",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/plans-coding/"
+  },
   "files": [
     "bewegung_bg.wasm",
     "bewegung.js",
