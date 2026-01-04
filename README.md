@@ -1,2 +1,3 @@
 # Build
-cargo build --target wasm32-unknown-unknown
+cargo install wasm-pack
+~/.cargo/bin/wasm-pack build --target web
