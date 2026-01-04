@@ -28,7 +28,7 @@
 }
 
   body.dark {
-    --color-background: #121212;
+    --color-background: #022626;
     --color-text: #e0e0e0;
     --color-hover-background: #999;
     --color-hover-background-alpha: #99999922;
@@ -39,6 +39,10 @@
     --color-filter-background: #2b2b2b;
 
     --color-submenu-background: #1e1e1e;
+    
+    color:var(--color-text);
+    
+    #map{filter: brightness(0.7) contrast(3) sepia(0.6) saturate(1) hue-rotate(300deg) invert(1);}
   }
 
 
@@ -211,7 +215,9 @@ body {
 
 .iib-menu-under {
   background-color: var(--color-submenu-background);
-  border-bottom: 2pt solid var(--color-hover-background);
+  /*border-bottom: 2pt solid var(--color-hover-background);*/
+  border-bottom: 1pt solid var(--color-hover-background);
+  box-shadow: 0 3pt 0 rgba(0, 0, 0, 0.15);
 }
 
 .iib-menu:has(#overview:hover) #submenu-overview,
@@ -371,9 +377,9 @@ details[open].trip summary {
     border: 1pt solid var(--color-hover-background);
     border-radius: 5pt;
     transition: border-color .15s
-ease-in-out, box-shadow .15s
-ease-in-out;
-border:2pt solid var(--color-hover-background);
+    ease-in-out, box-shadow .15s
+    ease-in-out;
+    border:2pt solid var(--color-hover-background);
 }
 
 .day-section, .day-accommodation { margin-top:10pt; }
@@ -386,6 +392,7 @@ h2 {text-align:center;}
 .card-container > * {
   flex: 1;
 }
+.card {display:flex;flex-direction:column;gap:10pt;}
 
 .card:hover {background-color:var(--color-hover-background-alpha);color:var(--color-hover-background);}
 .card-title {font-family: 'Cairo', sans-serif;font-weight:bold;font-size:16pt;padding:5pt;line-height:16pt;}
@@ -461,7 +468,7 @@ button.source-button:hover {background-color:#dc3545cc;}
   border-radius: 10pt;
   padding:10pt;
   margin-top:10pt;
-  background-color:#fff;
+  background-color:var(--color-background);
   
 }
 

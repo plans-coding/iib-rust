@@ -14,7 +14,7 @@
 
       <a href="?path=trip:{{ row.OuterId }}" class="card" data-trip-domain="{{ row.TripDomain }}">
         <div class="explore-cover" data-trip-domain="{{ row.TripDomain }}" data-trip-cover-photo-path="{{ row.CoverPhoto }}" style="
-            background-image: url('images/database.svg');
+            background-image: url('images/travel.svg');
             background-size: contain;
             background-position: center;
             background-repeat: no-repeat;
@@ -26,8 +26,9 @@
           <div class="card-title">{{ row.OuterId }} {{ row.OverallDestination }}</div>
           <div class="card-text">{{ row.TripDescription }}</div>
         </div>
+        <div style="flex:1;"></div>
         <div class="card-footer">
-          <small class="text-body-secondary">{{ row.TripYear }} {{ translation.trip.numberOfDays | default(value="Number of Days") }}: {{ row.NumberOfDays }}</small>
+          <small class="text-body-secondary">{{ row.TripYear }} &#x2022; {{ row.NumberOfDays }} {{ translation.explore.days | default(value="days") }}</small>
         </div>
       </a>
 

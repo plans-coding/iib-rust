@@ -1,3 +1,4 @@
+<div class="path-about">
 <div class="breadcrumb widescreen">
   <img class="icon-color" src="images/database.svg" />
   <div class="">{{ translation.about.title | default(value='About') }}</div>
@@ -45,4 +46,5 @@
         </b>
     </p>
 
+</div>
 </div>
