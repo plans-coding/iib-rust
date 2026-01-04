@@ -83,6 +83,10 @@ extern "C" {
     //fn inject_css(css: &str);
     // Other
     fn initialize_theme_color();
+    fn applyTripCoverPhotos(
+        immich_api_url: &str,
+        immich_api_key: &str,
+    );
 }
 
 // -----------------------------------------------------------------------
@@ -543,6 +547,7 @@ async fn page_load_internal() {
         }
         initializeChart();
         initializeChartOvernights();
+        applyTripCoverPhotos(&render_structure["all"]["settings"]["Feature"]["ImmichApiUrl"].to_string(),&render_structure["all"]["settings"]["Feature"]["ImmichApiKey"].to_string());
         
         
 }

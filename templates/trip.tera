@@ -1,3 +1,5 @@
+<div id="path-trip">
+
 {% set parts = trip_border_crossings[0].AllBorderCrossings | split(pat=", ") %}
 
 {% set_global filtered = [] %}
@@ -25,9 +27,9 @@
 <div class="prev_next"><a href="?path=trip:{{ trip_previous[0].OuterId }}"><img src="images/arrow-left.svg" /></a><a href="?path=trip:{{ trip_next[0].OuterId }}"><img src="images/arrow-right.svg" /></a></div>
 
 <div class="breadcrumb">
-  <img class="icon-color" src="images/database.svg" />
-  <div>{{ translation.trip.trip | default(value="Trip") }}</div>
-  <img src="images/arrow-right.svg" />
+  <img class="widescreen icon-color" src="images/database.svg" />
+  <div class="widescreen">{{ translation.trip.trip | default(value="Trip") }}</div>
+  <img class="widescreen" src="images/arrow-right.svg" />
   <div class="breadcrumb-link active">{{ trip_summary[0].OuterId }} {{ translation.trip.to | default(value="to") }} {{ trip_summary[0].OverallDestination }}</div>
 </div>
 
@@ -233,4 +235,6 @@
 
     </div>
   {% endfor %}
+</div>
+
 </div>

@@ -1,43 +1,45 @@
-<div class="breadcrumb">
-  <img class="icon-color" src="images/database.svg" />
-  <div>{{ translation.explore.title | default(value="Explore") }}</div>
-  <!--<img src="images/arrow-right.svg" />
-  <div class="breadcrumb-link active warning"><span class="immer-in-font-uc" style="font-weight:normal;">Immer in</span>&nbsp;<span class="bewegung-font-uc">Bewegung</span></div>
-  -->
-</div>
+<div id="path-explore">
+  <div class="breadcrumb">
+    <img class="icon-color" src="images/database.svg" />
+    <div>{{ translation.explore.title | default(value="Explore") }}</div>
+    <!--<img src="images/arrow-right.svg" />
+    <div class="breadcrumb-link active warning"><span class="immer-in-font-uc" style="font-weight:normal;">Immer in</span>&nbsp;<span class="bewegung-font-uc">Bewegung</span></div>
+    -->
+  </div>
 
-<input type="search" placeholder="{{ translation.menu.searchTrip | default(value="Search trip") }}" class="form-control" onkeydown="if(event.key==='Enter'){window.location.href='?path=search:'+encodeURIComponent(this.value);}" />
-<br />
-<div class="card-container">
-{% for row in explore %}
+  <input type="search" placeholder="{{ translation.menu.searchTrip | default(value="Search trip") }}" class="form-control" onkeydown="if(event.key==='Enter'){ history.pushState(null,'','?path=search:'+encodeURIComponent(this.value));page_load();}" />
+  <br />
+  <div class="card-container">
+  {% for row in explore %}
 
-    <a href="?path=trip:{{ row.OuterId }}" class="card" data-trip-domain="{{ row.TripDomain }}">
-      <div class="explore-cover" data-trip-domain="{{ row.TripDomain }}" style="
-          background-image: url('../images/database.svg');
-          background-size: contain;
-          background-position: center;
-          background-repeat: no-repeat;
-          height:120pt;
-        ">
+      <a href="?path=trip:{{ row.OuterId }}" class="card" data-trip-domain="{{ row.TripDomain }}">
+        <div class="explore-cover" data-trip-domain="{{ row.TripDomain }}" data-trip-cover-photo-path="{{ row.CoverPhoto }}" style="
+            background-image: url('images/database.svg');
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            height:120pt;
+          ">
+          </div>
+        <!--<img src="{{ row.CoverPhoto }}" class="card-img-top" alt="...">-->
+        <div class="card-body">
+          <div class="card-title">{{ row.OuterId }} {{ row.OverallDestination }}</div>
+          <div class="card-text">{{ row.TripDescription }}</div>
         </div>
-      <!--<img src="{{ row.CoverPhoto }}" class="card-img-top" alt="...">-->
-      <div class="card-body">
-        <div class="card-title">{{ row.OuterId }} {{ row.OverallDestination }}</div>
-        <div class="card-text">{{ row.TripDescription }}</div>
-      </div>
-      <div class="card-footer">
-        <small class="text-body-secondary">{{ row.TripYear }} {{ translation.trip.numberOfDays | default(value="Number of Days") }}: {{ row.NumberOfDays }}</small>
-      </div>
-    </a>
+        <div class="card-footer">
+          <small class="text-body-secondary">{{ row.TripYear }} {{ translation.trip.numberOfDays | default(value="Number of Days") }}: {{ row.NumberOfDays }}</small>
+        </div>
+      </a>
 
-{% endfor %}
-</div>
- 
-<br />
-<h2>{{ translation.explore.seeAllTripsPer | default(value="See all trips per") }}</h2>
+  {% endfor %}
+  </div>
 
-<div class="breadcrumb" style="justify-content: center; ">
-  <a href="?path=overview:year" class="breadcrumb-link {% if query_params.path == 'overview:year' %}active{% endif %}">{{ translation.overview.year | default(value="Year") }}</a>
-  <a href="?path=overview:country" class="breadcrumb-link {% if query_params.path == 'overview:country' %}active{% endif %}">{{ translation.overview.country | default(value="Country") }}</a>
-  <a href="?path=overview:plain" class="breadcrumb-link {% if query_params.path == 'overview:plain' %}active{% endif %}">{{ translation.overview.plain | default(value="Plain") }}</a>
+  <br />
+  <h2>{{ translation.explore.seeAllTripsPer | default(value="See all trips per") }}</h2>
+
+  <div class="breadcrumb" style="justify-content: center;">
+    <a href="?path=overview:year" class="breadcrumb-link {% if query_params.path == 'overview:year' %}active{% endif %}">{{ translation.overview.year | default(value="Year") }}</a>
+    <a href="?path=overview:country" class="breadcrumb-link {% if query_params.path == 'overview:country' %}active{% endif %}">{{ translation.overview.country | default(value="Country") }}</a>
+    <a href="?path=overview:plain" class="breadcrumb-link {% if query_params.path == 'overview:plain' %}active{% endif %}">{{ translation.overview.plain | default(value="Plain") }}</a>
+  </div>
 </div>

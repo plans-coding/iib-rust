@@ -1,4 +1,4 @@
-<div class="breadcrumb">
+<div class="breadcrumb widescreen">
   <img class="icon-color" src="images/database.svg" />
   <div>{{ translation.statistics.title | default(value="Summary") }}</div>
   <img src="images/arrow-right.svg" />
@@ -15,9 +15,9 @@
      data-json-color='{{ common_trip_domains | json_encode }}'>
 </template>
 
-<div style="display:flex;flex-direction:row;gap:5pt;flex-wrap:wrap;">
+<div style="display:flex;flex-direction:row;gap:5pt;flex-wrap:wrap;" id="statistics-summary-flex">
 
-  <div style="display:flex;flex-direction:column;justify-content:top;gap:3pt;align-items:stretch;">
+  <div style="display:flex;flex-direction:column;justify-content:top;gap:3pt;align-items:stretch;" id="statistics-summary-flex-widget">
     
     <div style="background-color:var(--color-hover-background-alpha);border-radius:10pt;padding:10pt;">
       <h2 style="text-align:center;">{{ statistics_visits[0].TripCount }}</h2>

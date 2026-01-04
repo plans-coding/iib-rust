@@ -1,4 +1,4 @@
-<div class="breadcrumb">
+<div class="breadcrumb widescreen">
   <img class="icon-color" src="images/database.svg" />
   <div>{{ translation.statistics.title | default(value="Summary") }}</div>
   <img src="images/arrow-right.svg" />

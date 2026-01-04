@@ -73,6 +73,7 @@ nav#menu, nav.filter, #iib-foot {display:none;}
   </div>
 
   <div style="flex-grow:1;height:100%;">
-    <iframe style="width:100%;height:100%;display:block;border:0;" src="{{ settings.Feature.ImmichUrl }}search?query=%7B%22takenAfter%22%3A%22{{ trip_date }}T{{ photoStarttime }}%3A00.000Z%22%2C%22takenBefore%22%3A%22{{ trip_date }}T{{ photoEndtime }}%3A59.999Z%22%7D#search-chips"></iframe>
+    <iframe style="width:100%;height:100%;display:block;border:0;" referrerpolicy="no-referrer"
+        src="{{ settings.Feature.ImmichUrl }}search?query=%7B%22takenAfter%22%3A%22{{ trip_date }}T{{ photoStarttime }}%3A00.000Z%22%2C%22takenBefore%22%3A%22{{ trip_date }}T{{ photoEndtime }}%3A59.999Z%22%7D#search-chips"></iframe>
   </div>
 </div>

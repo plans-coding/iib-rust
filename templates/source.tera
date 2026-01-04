@@ -1,57 +1,59 @@
-<div class="breadcrumb">
-  <img class="icon-color" src="images/database.svg" />
-  <div class="">{{ translation.source.title | default(value='Configure your data source') }}</div>
+<div id="path-source">
+  <div class="breadcrumb">
+    <img class="icon-color" src="images/database.svg" />
+    <div class="">{{ translation.source.title | default(value='Configure your data source') }}</div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:5pt;">
+
+    <div class="{% if db_loaded == "stored" %}green-text{% else %}red-text{% endif %}" id="opfsStatus" style="display:inline-block;">
+    {% if db_loaded == "stored" %}
+      {{ translation.source.stored | default(value='Database file stored in OPFS.') }}
+    {% else %}
+      {{ translation.source.missing | default(value='Database file missing in OPFS.') }}
+    {% endif %}
+    </div>
+
+    <input type="file" accept=".db,.sqlite,.sqlite3" onchange="
+    document.getElementById('opfsStatus').textContent='Waiting for confirmation.';
+    navigator.storage.getDirectory()
+    .then(d=>d.getFileHandle('chronik.db',{create:true}))
+    .then(h=>h.createWritable())
+    .then(w=>w.write(this.files[0]).then(()=>w.close()))
+    .then(()=>navigator.storage.getDirectory())
+    .then(d=>d.getFileHandle('chronik.db'))
+    .then(()=>{document.getElementById('opfsStatus').textContent='{{ translation.source.stored | default(value='Database file stored in OPFS.') }}';document.getElementById('opfsStatus').className='green-text';})
+    .catch(()=>{document.getElementById('opfsStatus').textContent='{{ translation.source.missing | default(value='Database file missing in OPFS.') }}';document.getElementById('opfsStatus').className='red-text';})
+    ">
+
+
+    <div style="text-align:center;margin-top:5pt;">
+      {{ translation.source.info | default(value="File will be saved in browser's local storage but not uploaded. Read more about") }}
+      <a style="text-decoration:none;color:#1d655e;display:inline;" href="https://w3c.github.io/FileAPI/">File API</a>.<br /><br />
+    </div>
+
+
+    <button class="source-button" onclick="
+    navigator.storage.getDirectory()
+    .then(d=>d.removeEntry('chronik.db'))
+    .catch(()=>{})
+    .then(()=>{document.getElementById('opfsStatus').textContent='{{ translation.source.missing | default(value='Database file missing in OPFS.') }}';document.getElementById('opfsStatus').className='red-text';})
+    ">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+      <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+      <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
+    </svg>
+    {{ translation.source.delete_db | default(value='Delete database file') }}
+    </button>
+
+    <button class="source-button" onclick="localStorage.clear(); caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))); navigator.serviceWorker.getRegistrations().then(r => r.forEach(reg => reg.unregister()));">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+        <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
+      </svg>
+      {{ translation.source.delete_cache | default(value='Delete web app cache') }}
+    </button>
+
+  </div>
+
 </div>
-
-<div style="display:flex;flex-direction:column;gap:5pt;">
-
-  <div class="{% if db_loaded == "stored" %}green-text{% else %}red-text{% endif %}" id="opfsStatus" style="display:inline-block;">
-  {% if db_loaded == "stored" %}
-    {{ translation.source.stored | default(value='Database file stored in OPFS.') }}
-  {% else %}
-    {{ translation.source.missing | default(value='Database file missing in OPFS.') }}
-  {% endif %}
-  </div>
-
-  <input type="file" accept=".db,.sqlite,.sqlite3" onchange="
-  document.getElementById('opfsStatus').textContent='Waiting for confirmation.';
-  navigator.storage.getDirectory()
-  .then(d=>d.getFileHandle('chronik.db',{create:true}))
-  .then(h=>h.createWritable())
-  .then(w=>w.write(this.files[0]).then(()=>w.close()))
-  .then(()=>navigator.storage.getDirectory())
-  .then(d=>d.getFileHandle('chronik.db'))
-  .then(()=>{document.getElementById('opfsStatus').textContent='{{ translation.source.stored | default(value='Database file stored in OPFS.') }}';document.getElementById('opfsStatus').className='green-text';})
-  .catch(()=>{document.getElementById('opfsStatus').textContent='{{ translation.source.missing | default(value='Database file missing in OPFS.') }}';document.getElementById('opfsStatus').className='red-text';})
-  ">
-  
-  
-  <div style="text-align:center;margin-top:5pt;">
-    {{ translation.source.info | default(value="File will be saved in browser's local storage but not uploaded. Read more about") }}
-    <a style="text-decoration:none;color:#1d655e;display:inline;" href="https://w3c.github.io/FileAPI/">File API</a>.<br /><br />
-  </div>
-  
-  
-  <button class="source-button" onclick="
-  navigator.storage.getDirectory()
-  .then(d=>d.removeEntry('chronik.db'))
-  .catch(()=>{})
-  .then(()=>{document.getElementById('opfsStatus').textContent='{{ translation.source.missing | default(value='Database file missing in OPFS.') }}';document.getElementById('opfsStatus').className='red-text';})
-  ">
-  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
-    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
-    <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
-  </svg>
-  {{ translation.source.delete_db | default(value='Delete database file') }}
-  </button>
-
- 
- <button class="source-button" onclick="localStorage.clear(); caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))); navigator.serviceWorker.getRegistrations().then(r => r.forEach(reg => reg.unregister()));">
-   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
-    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
-    <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
-  </svg>
-  {{ translation.source.delete_cache | default(value='Delete web app cache') }}
- </button>
-
- </div>
