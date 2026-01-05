@@ -116,10 +116,11 @@
           <div class="trip-details-field" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">{{ trip_border_crossings[0].AllBorderCrossings }}</div>
         </div>
         
-        {# Optional Immich photo albums INACTIVATED #}
+        {# Optional Immich photo albums #}
         {# if settings.Base.Immich == "Enabled" %}
-            {% for photoAlbum in trip_summary[0].PhotoAlbums %}
-                <div type="button" class="btn btn-iib-ctt mb-3" data-iib-tripdomain="U"
+            {% set_global photoAlbums = trip_summary[0].PhotoAlbums | split(pat="/") %}
+            {% for photoAlbum in  %}
+                <div type="button" class="filter-button"
                      onclick="openAlbum('{{ photoAlbum }}', '{{ settings.Feature.ImmichApiUrl }}', '{{ settings.Feature.ImmichApiKey }}')">
                     Immich {{ photoAlbum }}
                 </div>
@@ -127,16 +128,16 @@
         {% endif #}
         
         {# Optional Movie plugin #}
-        {# if settings.Plugin.Movie.enabled %}
+        {% if settings.Plugin.Movie.enabled %}
             {% set_global movieId = settings.Plugin.Movie.mapping | get(key=trip_summary[0].OuterId) %}
-            {% if movieId is defined %}
+            {% if movieId %}
                 <a href="{{ settings.Plugin.Movie.path }}{{ movieId }}" target="_blank">
-                    <button class="filter-button"><img src="images/photos.svg" />
-                        {{ settings.Plugins.Movie.translation }} {{ movieId }}
+                    <button class="filter-button" style="width:100%;"><img src="images/photos.svg" />
+                        {{ settings.Plugin.Movie.translation }} {{ movieId }}
                     </button>
                 </a>
             {% endif %}
-        {% endif #}
+        {% endif %}
             
 
         <!--<button class="filter-button"><img src="images/photos.svg" />Movie</button>-->
@@ -177,7 +178,7 @@
           {% if settings.Base.Immich == "Enabled" and day.OuterId not in settings.Base.ExcludeDayPhotos %}
 
               <a class="to-image-viewer" href="?path=images:{{ day.OuterId }}:{{ day.Date }}" target="_blank">
-                  <button type="button" class="filter-button" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
+                  <button type="button" class="item-viewer-button filter-button" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
                       <img src="images/photos.svg" />
                   </button>
               </a>
@@ -188,21 +189,19 @@
 
           {% set_global day_year = day.Date | date(format="%G") %}
           {% set_global day_week = day.Date | date(format="%V") %}
+          {% set_global day_date = day.Date | date(format="%Y%m%d") %}
           
           {% if settings.Plugin.Diary.enabled %}
             {% for file in settings.Plugin.Diary.filelist %}
               {% if day_year in file and day_week in file %}
               
-                <button onclick="document.getElementById('diary').showModal();" type="button" class="filter-button" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
+                <button class="item-viewer-button" onclick="document.getElementById('diary_{{ loop.index }}').showModal();" type="button" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
                     <img src="images/diary.svg" />
                 </button>
                 
-                <dialog id="diary">
-                  <h5>{{ file }}</h5>
-                  <p><img style="max-height:100%;max-width:100%;" src="{{ settings.Plugin.Diary.path }}{{ file }}"></p>
-                  <form method="dialog">
-                    <button>{{ translation.menu.close | default(value="Close") }}</button>
-                  </form>
+                <dialog class="item-viewer" id="diary_{{ loop.index }}"  onclick="this.close();">
+                  <div class="item-viewer-filename" style="position:absolute;">{{ file }}</div>
+                  <img src="{{ settings.Plugin.Diary.path }}{{ file }}" title="{{ file }}">
                 </dialog>
                 
               {% endif %}
@@ -212,18 +211,15 @@
           {# Passport plugin #}
           {% if settings.Plugin.Passport.enabled %}
             {% for file in settings.Plugin.Passport.filelist %}
-              {% if day_year in file and day_week in file %}
+              {% if day_date in file %}
               
-                <button onclick="document.getElementById('passport').showModal();" type="button" class="filter-button" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
-                    <img src="images/passport.svg" />
+                <button class="item-viewer-button" onclick="document.getElementById('passport_{{ loop.index }}').showModal();" type="button" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
+                    P
                 </button>
                 
-                <dialog id="passport">
-                  <h5>{{ file }}</h5>
-                  <p><img style="max-height:100%;max-width:100%;" src="{{ settings.Plugin.Passport.path }}{{ file }}"></p>
-                  <form method="dialog">
-                    <button>{{ translation.menu.close | default(value="Close") }}</button>
-                  </form>
+                <dialog class="item-viewer" id="passport_{{ loop.index }}"  onclick="this.close();">
+                  <div class="item-viewer-filename" style="position:absolute;">{{ file }}</div>
+                  <img src="{{ settings.Plugin.Passport.path }}{{ file }}" title="{{ file }}">
                 </dialog>
 
               {% endif %}

@@ -28,6 +28,7 @@ const TEMPLATE_DATASET: &str = include_str!("../templates/dataset.tera");
 const TEMPLATE_ABOUT: &str = include_str!("../templates/about.tera");
 const TEMPLATE_SOURCE: &str = include_str!("../templates/source.tera");
 
+/*
 // Advanced queries
 const QUERY_EXPLORE: &str = include_str!("../queries/explore.sql");
 const QUERY_OVERVIEW_YEAR: &str = include_str!("../queries/overview_year.sql");
@@ -57,6 +58,52 @@ const QUERY_TRIP_EVENTS: &str = include_str!("../queries/simple/trip_events.sql"
 const QUERY_TRIP_SUMMARY: &str = include_str!("../queries/simple/trip_summary.sql");
 const QUERY_TRIP_PREVIOUS: &str = include_str!("../queries/simple/trip_previous.sql");
 const QUERY_TRIP_NEXT: &str = include_str!("../queries/simple/trip_next.sql");
+*/
+
+macro_rules! define_queries {
+    ($($name:ident => $path:expr),+ $(,)?) => {
+        $(
+            pub const $name: &str = include_str!($path);
+        )+
+
+        pub const ALL_QUERIES: &[(&str, &str)] = &[
+            $(
+                (stringify!($name), $name),
+            )+
+        ];
+    };
+}
+
+define_queries! {
+    // Advanced queries
+    QUERY_EXPLORE => "../queries/explore.sql",
+    QUERY_OVERVIEW_YEAR => "../queries/overview_year.sql",
+    QUERY_OVERVIEW_COUNTRY => "../queries/overview_country.sql",
+    QUERY_TRIP_BORDER_CROSSINGS => "../queries/trip_border_crossings.sql",
+    QUERY_STATISTICS_VISITS => "../queries/statistics_visits.sql",
+    QUERY_STATISTICS_OVERNIGHTS => "../queries/statistics_overnights.sql",
+    QUERY_STATISTICS_PER_DOMAIN_YEAR => "../queries/statistics_per_domain_year.sql",
+    QUERY_STATISTICS_THEME_COUNT => "../queries/statistics_theme_count.sql",
+    QUERY_TRIP_MAP_PINS_OVERALL => "../queries/trip_map_pins_overall.sql",
+    QUERY_TRIP_MAP_PINS_ACCOMMODATION => "../queries/trip_map_pins_accommodation.sql",
+    // Simple queries
+    QUERY_COMMON_PARTICIPANT_GROUPS => "../queries/simple/common_participant_groups.sql",
+    QUERY_COMMON_TRIP_DOMAINS => "../queries/simple/common_trip_domains.sql",
+    QUERY_IMAGES_DATE_LIST => "../queries/simple/images_date_list.sql",
+    QUERY_IMAGES_PHOTO_TIME => "../queries/simple/images_photo_time.sql",
+    QUERY_MAP_CONTOUR => "../queries/simple/map_contour.sql",
+    QUERY_MAP_COUNTRY => "../queries/simple/map_country.sql",
+    QUERY_MAP_COUNTRY_LIST => "../queries/simple/map_country_list.sql",
+    QUERY_MAP_THEME => "../queries/simple/map_theme.sql",
+    QUERY_SEARCH_EVENT => "../queries/simple/search_event.sql",
+    QUERY_SEARCH_TRIP => "../queries/simple/search_trip.sql",
+    QUERY_STATISTICS_TRIP_COUNT => "../queries/simple/statistics_trip_count.sql",
+    QUERY_TRIP_ALL_TRIPS => "../queries/simple/trip_all_trips.sql",
+    QUERY_TRIP_EVENTS => "../queries/simple/trip_events.sql",
+    QUERY_TRIP_SUMMARY => "../queries/simple/trip_summary.sql",
+    QUERY_TRIP_PREVIOUS => "../queries/simple/trip_previous.sql",
+    QUERY_TRIP_NEXT => "../queries/simple/trip_next.sql",
+}
 
 static DB_BYTES: OnceCell<Vec<u8>> = OnceCell::new();
 static RENDER_STRUCTURE: OnceCell<Mutex<Value>> = OnceCell::new();
@@ -373,7 +420,10 @@ async fn page_load_internal() {
                     "title": render_structure.pointer("/all/translation/dataset/title").and_then(|v| v.as_str()).unwrap_or("Dataset"),
                     "settings": render_structure["all"]["settings"],
                     "template": TEMPLATE_DATASET,
-                    });
+                    "queries": [
+                        ["table_list", "SELECT name FROM sqlite_master WHERE type IN ('table', 'view') ORDER BY name;"],
+                    ]});
+                render_structure["all"]["query_templates"] = json!(ALL_QUERIES.iter().map(|(name, _)| name).collect::<Vec<_>>());
             }
             "more:source" => {
                 render_structure["page"] = json!({
@@ -550,4 +600,13 @@ async fn page_load_internal() {
         applyTripCoverPhotos(&render_structure["all"]["settings"]["Feature"]["ImmichApiUrl"].to_string(),&render_structure["all"]["settings"]["Feature"]["ImmichApiKey"].to_string());
         
         
+}
+
+
+
+fn get_query(name: &str) -> Option<&'static str> {
+    ALL_QUERIES
+        .iter()
+        .find(|(n, _)| *n == name)
+        .map(|(_, q)| *q)
 }
