@@ -37,14 +37,16 @@ section {max-width:100%!important;width:100%!important;margin:0!important;}
 
   <div style="display:flex;flex-direction:column;">
     {% for item in table_list %}
-      <div onclick="setEditorText('SELECT * FROM ' + this.innerHTML + ';')">{{ item.name }}</div>
+      <div style="cursor:pointer;" onclick="load_code_editor('SELECT * FROM ' + this.innerHTML + ';');">{{ item.name }}</div>
     {% endfor %}
   </div>
 
   <div style="display:flex;flex-direction:column;flex:1;max-height:100%;overflow:hidden;">
-    <div id="sql-input"></div>
-    <button onclick="user_run_sql(getEditorText('sql-input'))">RUN</button>
-    <div style="overflow:auto;" id="sql-output"><table id="sql-output-table"></table></div>
+
+	<textarea id="code_editor">SELECT * from bewa_Overview;</textarea>
+
+    <button onclick="user_run_sql(get_code_editor('sql-input'));">RUN</button>
+    <div style="overflow:auto;" id="sql-output"></div>
 
   </div>
 

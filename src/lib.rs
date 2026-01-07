@@ -128,7 +128,7 @@ extern "C" {
     fn load_country_map();
     fn load_theme_map();
     fn load_code_editor();
-    fn initiate_spreadhseet();
+    fn initiate_spreadsheet();
     //fn inject_css(css: &str);
     // Other
     fn initialize_theme_color();
@@ -254,7 +254,7 @@ async fn session_load() -> (Vec<u8>, serde_json::Value) {
             ("common_participant_groups".to_string(), QUERY_COMMON_PARTICIPANT_GROUPS.to_string())
         ];
         render_structure["all"]["common"] = sqlite_query::get_query_data(&db_bytes, common_data).await;
-        let _ = render::render2dom(TEMPLATE_MENU, &render_structure["all"], "menu");
+        let _ = render::render2dom(TEMPLATE_MENU, &render_structure["all"], "menu", false);
         
         initialize_theme_color();
         
@@ -582,7 +582,7 @@ async fn page_load_internal() {
         }
     
         // RENDER TO 'APP'  -----------------------------------------------------------------------
-        let _ = render::render2dom(&render_structure["page"]["template"].as_str().expect("template must be a string"), &merged_structure, "app");
+        let _ = render::render2dom(&render_structure["page"]["template"].as_str().expect("template must be a string"), &merged_structure, "app", true);
         
         helper::apply_filter_from_opfs_to_selects();
         helper::attach_select_listener();
@@ -640,9 +640,47 @@ async fn user_run_sql_internal(sql: String) {
     //web_sys::window().expect("ERROR").document().expect("ERROR").get_element_by_id("sql-output-table").expect("ERROR").dyn_into::<web_sys::HtmlElement>().expect("ERROR").set_inner_text(&query_response.to_string());
     web_sys::console::log_1(&serde_json::to_string(&query_response).expect("ERROR").into());
 
-    let _ = render::render2dom("<tr><td>{{ user_sql | json_encode }}</td></tr>", &query_response, "sql-output-table");
+    //let _ = render::render2dom("hej", &query_response, "sql-output");
+    let _ = render::render2dom(
+        "Loading...",
+        &query_response,
+        "sql-output",
+        false,
+    );
+    let _ = render::render2dom(
+        "<div style=\"position: relative; display: inline-block;\">
+        <table id=\"sql-output-table\">
+        <thead>
+        <tr>
+        <th id=\"selectAll\">#</th>
+        {% if user_sql | length > 0 %}
+        {% for key, _ in user_sql[0] %}
+        <th>{{ key }}</th>
+        {% endfor %}
+        {% endif %}
+        </tr>
+        </thead>
+        <tbody>
+        {% for row in user_sql %}
+        <tr>
+        <th>{{ loop.index }}</th>
+        {% for key, value in row %}
+        <td>{{ value | json_encode }}</td>
+        {% endfor %}
+        </tr>
+        {% endfor %}
+        </tbody>
+        </table>
+        <div id=\"border\" class=\"selection-border\"></div>
+        </div>
+        ",
+        &query_response,
+        "sql-output",
+        false,
+    );
 
-    //initiate_spreadhseet();
+    //initiate_spreadsheet();
+    initiate_spreadsheet();
 }
 
 
