@@ -9,7 +9,17 @@
         <meta name="msapplication-navbutton-color" content="#6f757e">
         <link rel="shortcut icon" href="images/frog.svg" />
         <!--<link href="bewegung.css" rel="stylesheet">-->
-        
+
+
+  <!-- jsuites (required by Jspreadsheet CE v5) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsuites@5/dist/jsuites.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/jsuites@5/dist/jsuites.min.js"></script>
+
+  <!-- jspreadsheet CE v5 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jspreadsheet-ce@5/dist/jspreadsheet.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/jspreadsheet-ce@5/dist/index.min.js"></script>
+
+
     <style>
 
 :root {
@@ -30,16 +40,18 @@
   body.dark {
     --color-background: #022626;
     --color-text: #e0e0e0;
-    --color-hover-background: #999;
+    --color-hover-background: #1d655e;
     --color-hover-background-alpha: #99999922;
-    --color-hover-text: #000;
+    --color-hover-text: #fff;
 
     --color-filter: #ffbf00;
     --color-filter-alpha: #ffbf00bb;
-    --color-filter-background: #2b2b2b;
+    --color-filter-background: #ffbf00;
 
-    --color-submenu-background: #1e1e1e;
+    --color-submenu-background: #1d655e;
     
+    #filter {color:#000;}
+
     color:var(--color-text);
     
     #map{filter: brightness(0.7) contrast(3) sepia(0.6) saturate(1) hue-rotate(300deg) invert(1);}
@@ -254,6 +266,7 @@ body {
 }
 
 
+#themeToggle:hover {background-color:var(--color-hover-background);color:var(--color-hover-text);}
 #filter {background-color:#ffbf00;cursor:pointer;}/*border-bottom-left-radius:10pt;border-bottom-right-radius:10pt; */
 #filter:hover {background-color:var(--color-filter-alpha);}
 .remove-filter {background-color:transparent;border:0;border-radius:0pt;padding:2pt;cursor:pointer;}
@@ -533,14 +546,36 @@ dialog{width:100vw;height:100vh;}
 }
 
 
+.jspreadsheet thead th {
+    position: sticky;
+    top: 0;
+    background: #f0f0f0;
+    z-index: 2;
+}
+
+/* Make row headers sticky */
+.jspreadsheet tbody th {
+    position: sticky;
+    left: 0;
+    background: #f0f0f0;
+    z-index: 1;
+}
+
+/* Optional: make top-left corner above row and column headers sticky */
+.jspreadsheet thead th:first-child {
+    z-index: 3;
+}
+
     </style>
 
 <script src='https://unpkg.com/maplibre-gl@latest/dist/maplibre-gl.js'></script>
 <link href='https://unpkg.com/maplibre-gl@latest/dist/maplibre-gl.css' rel='stylesheet' /></link>
 
+
+
     </head>
     <body>
-        
+
         <nav id="menu">
 
         </nav>
@@ -565,7 +600,7 @@ dialog{width:100vw;height:100vh;}
         </dialog>
 
         <script type="module">
-            import init, { page_load, chart_js } from "./pkg/bewegung.js";
+            import init, { page_load, chart_js, user_run_sql } from "./pkg/bewegung.js";
             await init();
             
             document.addEventListener("click", e => {
@@ -590,6 +625,11 @@ dialog{width:100vw;height:100vh;}
             window.addEventListener("popstate", page_load);
             
             window.page_load = page_load;
+            window.user_run_sql =  user_run_sql;
+            window.load_code_editor = load_code_editor;
+            window.setEditorText = setEditorText;
+            window.getEditorText = getEditorText;
+            window.initiate_spreadhseet = initiate_spreadhseet;
             
             // Image viewer
             const links = document.querySelectorAll('.to-image-viewer');
@@ -629,10 +669,66 @@ dialog{width:100vw;height:100vh;}
             }*/
 
 
+            import {EditorState} from "https://esm.sh/@codemirror/state"
+            import {EditorView, keymap, lineNumbers} from "https://esm.sh/@codemirror/view"
+            import {defaultKeymap} from "https://esm.sh/@codemirror/commands"
+            import { sql, SQLite } from "https://esm.sh/@codemirror/lang-sql"
+            import {syntaxHighlighting, defaultHighlightStyle, bracketMatching} from "https://esm.sh/@codemirror/language"
+            import {closeBrackets} from "https://esm.sh/@codemirror/autocomplete"
+
+            let view;
+
+            function load_code_editor() {
+                const startState = EditorState.create({
+                    doc: "SELECT * FROM",
+                    extensions: [
+                        lineNumbers(),
+                        keymap.of(defaultKeymap),
+                        syntaxHighlighting(defaultHighlightStyle),
+                        bracketMatching(),
+                        closeBrackets(),
+                        sql({
+                            dialect: SQLite,
+                            upperCaseKeywords: true
+                        })
+                    ]
+                });
+
+                view = new EditorView({
+                    state: startState,
+                    parent: document.getElementById('sql-input')
+                });
+            }
+
+            // Replace entire content
+            function setEditorText(text) {
+                view.dispatch({
+                    changes: {
+                        from: 0,
+                        to: view.state.doc.length,
+                        insert: text
+                    }
+                });
+            }
+
+            function getEditorText() {
+                return view.state.doc.toString();
+            }
+
+
+            function initiate_spreadhseet() {
+                jspreadsheet(document.getElementById('spreadsheet'));
+            }
+
+
         </script>
         
         <script>
         
+
+
+
+
         // MAP SCRIPT  -----------------------------------------------------------------------
         
         function initiate_map() {
@@ -1207,16 +1303,37 @@ dialog{width:100vw;height:100vh;}
                 setTimeout(initializeChartOvernights, 100);
             }
         }
-        
+    /*
         function initialize_theme_color() {
               const button = document.getElementById('themeToggle');
               button.addEventListener('click', () => {
                 document.body.classList.toggle('dark');
                 /*button.textContent = document.body.classList.contains('dark')
                   ? 'Switch to Light Theme'
-                  : 'Switch to Dark Theme';*/
+                  : 'Switch to Dark Theme';
               });
+        }*/
+
+        function initialize_theme_color() {
+            const button = document.getElementById('themeToggle');
+
+            if (localStorage.getItem('theme') === 'dark') {
+                document.body.classList.add('dark');
+            }
+
+            button.addEventListener('click', () => {
+                document.body.classList.toggle('dark');
+
+                // Save current theme to localStorage
+                if (document.body.classList.contains('dark')) {
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    localStorage.setItem('theme', 'light');
+                }
+
+            });
         }
+
 
         /* IMMICH  ----------------------------------------------------------------------- */
 

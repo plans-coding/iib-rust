@@ -4,6 +4,7 @@ export const memory: WebAssembly.Memory;
 export const chart_js: () => [number, number];
 export const page_load: () => void;
 export const start: () => void;
+export const user_run_sql: (a: number, b: number) => void;
 export const slugify: (a: number, b: number) => [number, number];
 export const rust_sqlite_wasm_abort: () => void;
 export const rust_sqlite_wasm_assert_fail: (a: number, b: number, c: number, d: number) => void;

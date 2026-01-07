@@ -127,6 +127,8 @@ extern "C" {
     fn load_contour_map();
     fn load_country_map();
     fn load_theme_map();
+    fn load_code_editor();
+    fn initiate_spreadhseet();
     //fn inject_css(css: &str);
     // Other
     fn initialize_theme_color();
@@ -597,7 +599,12 @@ async fn page_load_internal() {
         }
         initializeChart();
         initializeChartOvernights();
-        applyTripCoverPhotos(&render_structure["all"]["settings"]["Feature"]["ImmichApiUrl"].to_string(),&render_structure["all"]["settings"]["Feature"]["ImmichApiKey"].to_string());
+        if page == "trip" {
+            applyTripCoverPhotos(&render_structure["all"]["settings"]["Feature"]["ImmichApiUrl"].to_string(),&render_structure["all"]["settings"]["Feature"]["ImmichApiKey"].to_string());
+        } else if page == "dataset" {
+            load_code_editor();
+            //initiate_spreadhseet();
+        }
         
         
 }
@@ -610,3 +617,37 @@ fn get_query(name: &str) -> Option<&'static str> {
         .find(|(n, _)| *n == name)
         .map(|(_, q)| *q)
 }
+
+
+#[wasm_bindgen]
+pub fn user_run_sql(sql: String) {
+    wasm_bindgen_futures::spawn_local(async {
+        user_run_sql_internal(sql).await;
+    });
+}
+
+async fn user_run_sql_internal(sql: String) {
+    let db_bytes = DB_BYTES.get().expect("DB not initialized");
+
+    let combined_query = vec![
+        ("user_sql".to_string(), sql.clone())
+    ];
+
+    let query_response: serde_json::Value = sqlite_query::get_query_data(&db_bytes, combined_query).await;
+
+    // Return owned String
+    //serde_json::to_string(&query_response).unwrap_or_else(|_| "{}".to_string())
+    //web_sys::window().expect("ERROR").document().expect("ERROR").get_element_by_id("sql-output-table").expect("ERROR").dyn_into::<web_sys::HtmlElement>().expect("ERROR").set_inner_text(&query_response.to_string());
+    web_sys::console::log_1(&serde_json::to_string(&query_response).expect("ERROR").into());
+
+    let _ = render::render2dom("<tr><td>{{ user_sql | json_encode }}</td></tr>", &query_response, "sql-output-table");
+
+    //initiate_spreadhseet();
+}
+
+
+
+//helper::render_json_table(&query_response["user_sql"]);
+
+//web_sys::console::log_1(&serde_json::to_string(&query_response).expect("ERROR").into());
+//web_sys::window().expect("ERROR").document().expect("ERROR").get_element_by_id("sql-output").expect("ERROR").dyn_into::<web_sys::HtmlElement>().expect("ERROR").set_inner_text(&query_response.to_string());

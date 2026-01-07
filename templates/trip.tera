@@ -117,18 +117,27 @@
         </div>
         
         {# Optional Immich photo albums #}
-        {# if settings.Base.Immich == "Enabled" %}
-            {% set_global photoAlbums = trip_summary[0].PhotoAlbums | split(pat="/") %}
-            {% for photoAlbum in  %}
-                <div type="button" class="filter-button"
-                     onclick="openAlbum('{{ photoAlbum }}', '{{ settings.Feature.ImmichApiUrl }}', '{{ settings.Feature.ImmichApiKey }}')">
-                    Immich {{ photoAlbum }}
-                </div>
-            {% endfor %}
-        {% endif #}
+        {% if settings.Base.Immich == "Enabled" %}
+            {% if trip_summary[0].PhotoAlbums %}
+
+              {% if trip_summary[0].PhotoAlbums is containing(", ") %}
+                {% set_global photoAlbums = trip_summary[0].PhotoAlbums | split(pat=", ") %}
+              {% else %}
+                {% set_global photoAlbums = trip_summary[0].PhotoAlbums | split(pat=", ") %}
+              {% endif %}
+
+              {% for photoAlbum in photoAlbums %}
+                  <div type="button" class="filter-button"
+                      onclick="openAlbum('{{ photoAlbum }}', '{{ settings.Feature.ImmichApiUrl }}', '{{ settings.Feature.ImmichApiKey }}')">
+                      Immich {{ photoAlbum }}
+                  </div>
+              {% endfor %}
+
+            {% endif %}
+        {% endif %}
         
         {# Optional Movie plugin #}
-        {% if settings.Plugin.Movie.enabled %}
+        {# if settings.Plugin.Movie.enabled %}
             {% set_global movieId = settings.Plugin.Movie.mapping | get(key=trip_summary[0].OuterId) %}
             {% if movieId %}
                 <a href="{{ settings.Plugin.Movie.path }}{{ movieId }}" target="_blank">
@@ -136,8 +145,8 @@
                         {{ settings.Plugin.Movie.translation }} {{ movieId }}
                     </button>
                 </a>
-            {% endif %}
-        {% endif %}
+        % set_global photoAlbums = trip_summary[0].PhotoAlbums | split(pat="/") %}    {% endif %}
+        {% endif #}
             
 
         <!--<button class="filter-button"><img src="images/photos.svg" />Movie</button>-->

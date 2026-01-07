@@ -110,61 +110,56 @@
   
             {# Immich photos #}
             {% if settings.Base.Immich == "Enabled" and day.OuterId not in settings.Base.ExcludeDayPhotos %}
-  
+
                 <a class="to-image-viewer" href="?path=images:{{ day.OuterId }}:{{ day.Date }}" target="_blank">
-                    <button type="button" class="filter-button" data-iib-tripDomain="{{ day.DomainAbbreviation }}">
+                    <button type="button" class="item-viewer-button filter-button" data-iib-tripDomain="{{ day.DomainAbbreviation }}">
                         <img src="images/photos.svg" />
                     </button>
                 </a>
-  
+
             {% endif %}
-            
+
             {# Diary plugin #}
-  
+
             {% set_global day_year = day.Date | date(format="%G") %}
             {% set_global day_week = day.Date | date(format="%V") %}
-            
+            {% set_global day_date = day.Date | date(format="%Y%m%d") %}
+
             {% if settings.Plugin.Diary.enabled %}
               {% for file in settings.Plugin.Diary.filelist %}
                 {% if day_year in file and day_week in file %}
-                
-                  <button onclick="document.getElementById('diary').showModal();" type="button" class="filter-button" data-iib-tripDomain="{{ day.DomainAbbreviation }}">
+
+                  <button class="item-viewer-button" onclick="document.getElementById('diary_{{ loop.index }}').showModal();" type="button" data-iib-tripDomain="{{ day.DomainAbbreviation }}">
                       <img src="images/diary.svg" />
                   </button>
-                  
-                  <dialog id="diary">
-                    <h5>{{ file }}</h5>
-                    <p><img style="max-height:100%;max-width:100%;" src="{{ settings.Plugin.Diary.path }}{{ file }}"></p>
-                    <form method="dialog">
-                      <button>{{ translation.menu.close | default(value="Close") }}</button>
-                    </form>
+
+                  <dialog class="item-viewer" id="diary_{{ loop.index }}"  onclick="this.close();">
+                    <div class="item-viewer-filename" style="position:absolute;">{{ file }}</div>
+                    <img src="{{ settings.Plugin.Diary.path }}{{ file }}" title="{{ file }}">
                   </dialog>
-                  
+
                 {% endif %}
               {% endfor %}
             {% endif %}
-            
+
             {# Passport plugin #}
             {% if settings.Plugin.Passport.enabled %}
               {% for file in settings.Plugin.Passport.filelist %}
-                {% if day_year in file and day_week in file %}
-                
-                  <button onclick="document.getElementById('passport').showModal();" type="button" class="filter-button" data-iib-tripDomain="{{ day.DomainAbbreviation }}">
-                      <img src="images/passport.svg" />
+                {% if day_date in file %}
+
+                  <button class="item-viewer-button" onclick="document.getElementById('passport_{{ loop.index }}').showModal();" type="button" data-iib-tripDomain="{{ day.DomainAbbreviation }}">
+                      P
                   </button>
-                  
-                  <dialog id="passport">
-                    <h5>{{ file }}</h5>
-                    <p><img style="max-height:100%;max-width:100%;" src="{{ settings.Plugin.Passport.path }}{{ file }}"></p>
-                    <form method="dialog">
-                      <button>{{ translation.menu.close | default(value="Close") }}</button>
-                    </form>
+
+                  <dialog class="item-viewer" id="passport_{{ loop.index }}"  onclick="this.close();">
+                    <div class="item-viewer-filename" style="position:absolute;">{{ file }}</div>
+                    <img src="{{ settings.Plugin.Passport.path }}{{ file }}" title="{{ file }}">
                   </dialog>
-  
+
                 {% endif %}
               {% endfor %}
             {% endif %}
-        
+
         </div>
               
   

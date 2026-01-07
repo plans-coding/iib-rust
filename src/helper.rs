@@ -226,27 +226,7 @@ impl SqlFilterReplace for String {
 }
 
 // NOT IN USE (for user manual sql requests)  -----------------------------------------------------------------------
-/*#[wasm_bindgen]
-pub fn user_run_sql(sql: String) {
-    wasm_bindgen_futures::spawn_local(async {
-        user_run_sql_internal(sql).await;
-    });
-}
 
-async fn user_run_sql_internal(sql: String) {
-    let db_bytes = DB_BYTES.get().expect("DB not initialized");
-    
-        let combined_query = vec![
-            ("user_sql".to_string(), sql.to_string())
-        ];
-        
-    let query_response: serde_json::Value = sqlite_query::get_query_data(&db_bytes, combined_query).await;
-    
-    helper::render_json_table(&query_response["user_sql"]);
-    
-    //web_sys::console::log_1(&serde_json::to_string(&query_response).expect("ERROR").into());
-    //web_sys::window().expect("ERROR").document().expect("ERROR").get_element_by_id("sql-output").expect("ERROR").dyn_into::<web_sys::HtmlElement>().expect("ERROR").set_inner_text(&query_response.to_string());
-}*/
 
 // NOT IN USE (for user manual sql requests)  -----------------------------------------------------------------------
 /*

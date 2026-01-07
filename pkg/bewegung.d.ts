@@ -9,6 +9,8 @@ export function slugify(s: string): string;
 
 export function start(): void;
 
+export function user_run_sql(sql: string): void;
+
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
 
 export interface InitOutput {
@@ -16,6 +18,7 @@ export interface InitOutput {
   readonly chart_js: () => [number, number];
   readonly page_load: () => void;
   readonly start: () => void;
+  readonly user_run_sql: (a: number, b: number) => void;
   readonly slugify: (a: number, b: number) => [number, number];
   readonly rust_sqlite_wasm_abort: () => void;
   readonly rust_sqlite_wasm_assert_fail: (a: number, b: number, c: number, d: number) => void;
