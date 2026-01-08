@@ -1,52 +1,115 @@
 <style>
-section {max-width:100%!important;width:100%!important;margin:0!important;}
-#app{flex:1;}
-#iib-foot{display:none;}
 
-/*
-#sql-output table {color:red;}
+  section {max-width:100%!important;width:100%!important;margin:0!important;}
+  #iib-foot{display:none;}
+  #app {height: 100%;overflow: auto;}
 
-#sql-output {
-  max-height: 300px;
-  overflow-y: auto;
-  border: 1px solid #ccc;
+  html, body {
+    height: 100%;
+    margin: 0;
+  }
+
+  #dataset_container {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+  }
+  #left-column {
+    display: flex;
+    flex-direction: column;
+    min-width: 150px;
+    border-right: 1px solid #ccc;
+    padding:2pt;
+    gap:2pt;
+  }
+  #right-column {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+    background-color:var(--color-submenu-background);
+    gap:5pt;
+  }
+
+  #sql-output {
+    flex: 1;            /* take remaining space */
+    overflow: auto;     /* scroll if content too big */
+  }
+
+  #cellViewer { border:2pt solid var(--color-filter) !important; }
+
+          /* Set editor dimensions */
+        #editor2 {
+            height: 500px;
+            width: 50%;
+        }
+
+        /* Stretch editor to fit inside its containing div */
+        .cm-editor {
+            height: 100%;
+            width: 100%;
+        }
+
+        .tabulator {
+          border:2pt solid var(--color-filter) !important;
+        /*
+    --tabulator-background-color: red;
+    --tabulator-border-color: #444;
+    --tabulator-header-background-color: #2e2e44;
+    --tabulator-header-color: #fff;
+    --tabulator-row-even-background-color: #2a2a3a;
+    --tabulator-row-odd-background-color: #222230;
+    --tabulator-row-hover-background-color: #3a3a5a;
+    --tabulator-row-selected-background-color: #55557a;*/
 }
 
-#sql-output table {
-  border-collapse: collapse;
-  width: 100%;
+#sql-output-data .tabulator .tabulator-table .tabulator-cell.frozen {
+    background-color: #e0e0e0;  /* same as header background */
+    color: #000;                /* same as header text color */
+    font-weight: bold;           /* optional for emphasis */
+    border-right: 1px solid #ccc; /* match header border */
 }
 
-#sql-output thead th {
-  position: sticky;
-  top: 0;
-  background: #f0f0f0;
-  z-index: 1;
-  border-bottom: 1px solid #ccc;
-}
 
-#sql-output th, td {
-  padding: 8px 12px;
-  text-align: left;
-  border-bottom: 1px solid #eee;
-}
-*/
 </style>
 
-<div style="display:flex;flex-direction:row;height:100%;">
+<script id="sql_output_data" type="application/json"></script>
 
-  <div style="display:flex;flex-direction:column;">
-    {% for item in table_list %}
+<div id="dataset_container">
+
+  <div id="left-column">
+
+    <details open>
+      <summary style="cursor:pointer;">Tables</summary>
+      {% for item in table_list %}
       <div style="cursor:pointer;" onclick="load_code_editor('SELECT * FROM ' + this.innerHTML + ';');">{{ item.name }}</div>
-    {% endfor %}
+      {% endfor %}
+    </details>
+
+    <details>
+      <summary style="cursor:pointer;">Built-in queries</summary>
+    </details>
+
+    <details>
+      <summary style="cursor:pointer;">Own queries</summary>
+    </details>
+
+
   </div>
 
-  <div style="display:flex;flex-direction:column;flex:1;max-height:100%;overflow:hidden;">
+  <div id="right-column">
 
-	<textarea id="code_editor">SELECT * from bewa_Overview;</textarea>
+	<div style="border:2pt solid var(--color-filter);background-color:var(--color-background);"><textarea id="code_editor">SELECT * from bewa_Overview;</textarea></div>
 
-    <button onclick="user_run_sql(get_code_editor('sql-input'));">RUN</button>
-    <div style="overflow:auto;" id="sql-output"></div>
+    <button class="filter-button" onclick="user_sql_execution();">Run query <img src="images/run.svg"></button>
+
+    <div style="display:none;" id="loading-overlay">LOADING</div>
+
+    <div id="sql-output">
+      <div id="sql_output_table"></div>
+    </div>
+
+    <textarea id="cellViewer" style="width:100%;height:100px;margin-top:10px;" readonly></textarea>
 
   </div>
 

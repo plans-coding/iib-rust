@@ -4,6 +4,8 @@ use helper::SqlFilterReplace;
 use once_cell::sync::OnceCell;
 use std::sync::Mutex;
 use serde_json::Value;
+use wasm_bindgen_futures::future_to_promise;
+use js_sys::Promise;
 
 mod filecontent;
 mod sqlite_query;
@@ -603,7 +605,7 @@ async fn page_load_internal() {
             applyTripCoverPhotos(&render_structure["all"]["settings"]["Feature"]["ImmichApiUrl"].to_string(),&render_structure["all"]["settings"]["Feature"]["ImmichApiKey"].to_string());
         } else if page == "dataset" {
             load_code_editor();
-            //initiate_spreadhseet();
+            initiate_spreadsheet();
         }
         
         
@@ -618,15 +620,18 @@ fn get_query(name: &str) -> Option<&'static str> {
         .map(|(_, q)| *q)
 }
 
-
 #[wasm_bindgen]
-pub fn user_run_sql(sql: String) {
-    wasm_bindgen_futures::spawn_local(async {
+pub fn user_run_sql(sql: String) -> Promise {
+    // Wrap your async Rust code in a JS Promise
+    future_to_promise(async move {
         user_run_sql_internal(sql).await;
-    });
+        // Return undefined (JS will see it as resolved)
+        Ok(JsValue::undefined())
+    })
 }
 
 async fn user_run_sql_internal(sql: String) {
+
     let db_bytes = DB_BYTES.get().expect("DB not initialized");
 
     let combined_query = vec![
@@ -635,57 +640,30 @@ async fn user_run_sql_internal(sql: String) {
 
     let query_response: serde_json::Value = sqlite_query::get_query_data(&db_bytes, combined_query).await;
 
-    // Return owned String
-    //serde_json::to_string(&query_response).unwrap_or_else(|_| "{}".to_string())
-    //web_sys::window().expect("ERROR").document().expect("ERROR").get_element_by_id("sql-output-table").expect("ERROR").dyn_into::<web_sys::HtmlElement>().expect("ERROR").set_inner_text(&query_response.to_string());
-    web_sys::console::log_1(&serde_json::to_string(&query_response).expect("ERROR").into());
+    //web_sys::console::log_1(&serde_json::to_string(&query_response["user_sql"]).expect("ERROR").into());
 
-    //let _ = render::render2dom("hej", &query_response, "sql-output");
-    let _ = render::render2dom(
-        "Loading...",
-        &query_response,
-        "sql-output",
-        false,
-    );
-    let _ = render::render2dom(
-        "<div style=\"position: relative; display: inline-block;\">
-        <table id=\"sql-output-table\">
-        <thead>
-        <tr>
-        <th id=\"selectAll\">#</th>
-        {% if user_sql | length > 0 %}
-        {% for key, _ in user_sql[0] %}
-        <th>{{ key }}</th>
-        {% endfor %}
-        {% endif %}
-        </tr>
-        </thead>
-        <tbody>
-        {% for row in user_sql %}
-        <tr>
-        <th>{{ loop.index }}</th>
-        {% for key, value in row %}
-        <td>{{ value | json_encode }}</td>
-        {% endfor %}
-        </tr>
-        {% endfor %}
-        </tbody>
-        </table>
-        <div id=\"border\" class=\"selection-border\"></div>
-        </div>
-        ",
-        &query_response,
-        "sql-output",
-        false,
-    );
+    let json = serde_json::to_string(&query_response["user_sql"]).expect("JSON serialization failed");
 
-    //initiate_spreadsheet();
-    initiate_spreadsheet();
+    let document = match web_sys::window().and_then(|w| w.document()) {
+        Some(d) => d,
+        None => return,
+    };
+
+    let element = match document.get_element_by_id("sql_output_data") {
+        Some(e) => e,
+        None => {
+            web_sys::console::error_1(
+                &"Element #sql_output_data not found".into()
+            );
+            return;
+        }
+    };
+
+    let html_element: web_sys::HtmlElement = match element.dyn_into() {
+        Ok(e) => e,
+        Err(_) => return,
+    };
+
+    html_element.set_inner_text(&json);
+
 }
-
-
-
-//helper::render_json_table(&query_response["user_sql"]);
-
-//web_sys::console::log_1(&serde_json::to_string(&query_response).expect("ERROR").into());
-//web_sys::window().expect("ERROR").document().expect("ERROR").get_element_by_id("sql-output").expect("ERROR").dyn_into::<web_sys::HtmlElement>().expect("ERROR").set_inner_text(&query_response.to_string());
