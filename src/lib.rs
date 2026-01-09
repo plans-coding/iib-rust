@@ -131,6 +131,7 @@ extern "C" {
     fn load_theme_map();
     fn load_code_editor();
     fn initiate_spreadsheet();
+    fn custom_queries();
     //fn inject_css(css: &str);
     // Other
     fn initialize_theme_color();
@@ -176,6 +177,24 @@ pub fn chart_js() -> String {
 pub fn maplibre_js() -> String {
     MAPLIBRE_JS.to_string()
 }*/
+
+#[wasm_bindgen]
+pub fn get_predefined_query(name: &str) -> Option<String> {
+    ALL_QUERIES
+    .iter()
+    .find(|(k, _)| *k == name)
+    .map(|(_, v)| v.to_string())
+}
+
+#[wasm_bindgen]
+pub fn user_run_sql(sql: String) -> Promise {
+    // Wrap your async Rust code in a JS Promise
+    future_to_promise(async move {
+        helper::user_run_sql_internal(sql).await;
+        // Return undefined (JS will see it as resolved)
+        Ok(JsValue::undefined())
+    })
+}
 
 // -----------------------------------------------------------------------
 // INITIATE SESSION
@@ -607,64 +626,8 @@ async fn page_load_internal() {
         } else if page == "dataset" {
             load_code_editor();
             initiate_spreadsheet();
+            custom_queries();
         }
         
         
-}
-
-#[wasm_bindgen]
-pub fn get_predefined_query(name: &str) -> Option<String> {
-    ALL_QUERIES
-    .iter()
-    .find(|(k, _)| *k == name)
-    .map(|(_, v)| v.to_string())
-}
-
-
-#[wasm_bindgen]
-pub fn user_run_sql(sql: String) -> Promise {
-    // Wrap your async Rust code in a JS Promise
-    future_to_promise(async move {
-        user_run_sql_internal(sql).await;
-        // Return undefined (JS will see it as resolved)
-        Ok(JsValue::undefined())
-    })
-}
-
-async fn user_run_sql_internal(sql: String) {
-
-    let db_bytes = DB_BYTES.get().expect("DB not initialized");
-
-    let combined_query = vec![
-        ("user_sql".to_string(), sql.clone())
-    ];
-
-    let query_response: serde_json::Value = sqlite_query::get_query_data(&db_bytes, combined_query).await;
-
-    //web_sys::console::log_1(&serde_json::to_string(&query_response["user_sql"]).expect("ERROR").into());
-
-    let json = serde_json::to_string(&query_response["user_sql"]).expect("JSON serialization failed");
-
-    let document = match web_sys::window().and_then(|w| w.document()) {
-        Some(d) => d,
-        None => return,
-    };
-
-    let element = match document.get_element_by_id("sql_output_data") {
-        Some(e) => e,
-        None => {
-            web_sys::console::error_1(
-                &"Element #sql_output_data not found".into()
-            );
-            return;
-        }
-    };
-
-    let html_element: web_sys::HtmlElement = match element.dyn_into() {
-        Ok(e) => e,
-        Err(_) => return,
-    };
-
-    html_element.set_inner_text(&json);
-
 }

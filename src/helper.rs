@@ -6,6 +6,9 @@ use wasm_bindgen::JsCast; // needed for `unchecked_into`
 use wasm_bindgen::closure::Closure; // needed for event listener closures
 use web_sys::{HtmlSelectElement, HtmlOptionElement, window};
 use wasm_bindgen_futures::spawn_local;
+use crate::sqlite_query;
+use crate::DB_BYTES;
+
 
 
 pub fn attach_select_listener() {
@@ -225,58 +228,40 @@ impl SqlFilterReplace for String {
     }
 }
 
-// NOT IN USE (for user manual sql requests)  -----------------------------------------------------------------------
+pub async fn user_run_sql_internal(sql: String) {
 
+    let db_bytes = DB_BYTES.get().expect("DB not initialized");
 
-// NOT IN USE (for user manual sql requests)  -----------------------------------------------------------------------
-/*
-use web_sys::HtmlElement;
+    let combined_query = vec![
+        ("user_sql".to_string(), sql.clone())
+    ];
 
-pub fn render_json_table(query_response: &Value) {
-    let document = web_sys::window().expect("ERROR").document().expect("ERROR");
-    let container = document
-        .get_element_by_id("sql-output")
-        .expect("ERROR")
-        .dyn_into::<HtmlElement>()
-        .expect("ERROR");
+    let query_response: serde_json::Value = sqlite_query::get_query_data(&db_bytes, combined_query).await;
 
-    let rows = match query_response.as_array() {
-        Some(arr) => arr,
+    //web_sys::console::log_1(&serde_json::to_string(&query_response["user_sql"]).expect("ERROR").into());
+
+    let json = serde_json::to_string(&query_response["user_sql"]).expect("JSON serialization failed");
+
+    let document = match web_sys::window().and_then(|w| w.document()) {
+        Some(d) => d,
+        None => return,
+    };
+
+    let element = match document.get_element_by_id("sql_output_data") {
+        Some(e) => e,
         None => {
-            container.set_inner_text("Invalid JSON data: not an array");
+            web_sys::console::error_1(
+                &"Element #sql_output_data not found".into()
+            );
             return;
         }
     };
 
-    let mut headers: Vec<String> = Vec::new();
-    for row in rows {
-        if let Some(obj) = row.as_object() {
-            for key in obj.keys() {
-                if !headers.contains(key) {
-                    headers.push(key.clone());
-                }
-            }
-        }
-    }
+    let html_element: web_sys::HtmlElement = match element.dyn_into() {
+        Ok(e) => e,
+        Err(_) => return,
+    };
 
-    let mut html = String::from("<table><thead><tr>");
-    for header in &headers {
-        html.push_str(&format!("<th>{}</th>", header));
-    }
-    html.push_str("</tr></thead><tbody>");
+    html_element.set_inner_text(&json);
 
-    for row in rows {
-        html.push_str("<tr>");
-        if let Some(obj) = row.as_object() {
-            for header in &headers {
-                let cell = obj.get(header).map(|v| v.to_string()).unwrap_or_default();
-                html.push_str(&format!("<td>{}</td>", cell));
-            }
-        }
-        html.push_str("</tr>");
-    }
-
-    html.push_str("</tbody></table>");
-
-    container.set_inner_html(&html);
-}*/
+}

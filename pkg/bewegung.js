@@ -233,8 +233,8 @@ if (!('encodeInto' in cachedTextEncoder)) {
 
 let WASM_VECTOR_LEN = 0;
 
-function wasm_bindgen__convert__closures_____invoke__hfa3ccf2cc864f8c4(arg0, arg1) {
-    wasm.wasm_bindgen__convert__closures_____invoke__hfa3ccf2cc864f8c4(arg0, arg1);
+function wasm_bindgen__convert__closures_____invoke__h8225d6a622aa143e(arg0, arg1) {
+    wasm.wasm_bindgen__convert__closures_____invoke__h8225d6a622aa143e(arg0, arg1);
 }
 
 function wasm_bindgen__convert__closures_____invoke__h83adf183fa3daf7d(arg0, arg1, arg2) {
@@ -421,6 +421,9 @@ function __wbg_get_imports() {
     imports.wbg.__wbg_crypto_574e78ad8b13b65f = function(arg0) {
         const ret = arg0.crypto;
         return ret;
+    };
+    imports.wbg.__wbg_custom_queries_47e6cfba825ad4c2 = function() {
+        custom_queries();
     };
     imports.wbg.__wbg_dispatchEvent_50a40ea5c664f9f4 = function() { return handleError(function (arg0, arg1) {
         const ret = arg0.dispatchEvent(arg1);
@@ -790,9 +793,9 @@ function __wbg_get_imports() {
         const ret = getStringFromWasm0(arg0, arg1);
         return ret;
     };
-    imports.wbg.__wbindgen_cast_4c8995074130843f = function(arg0, arg1) {
-        // Cast intrinsic for `Closure(Closure { dtor_idx: 74, function: Function { arguments: [], shim_idx: 75, ret: Unit, inner_ret: Some(Unit) }, mutable: false }) -> Externref`.
-        const ret = makeClosure(arg0, arg1, wasm.wasm_bindgen__closure__destroy__heeb12583f9a8d85e, wasm_bindgen__convert__closures_____invoke__hfa3ccf2cc864f8c4);
+    imports.wbg.__wbindgen_cast_451624377b3804e0 = function(arg0, arg1) {
+        // Cast intrinsic for `Closure(Closure { dtor_idx: 63, function: Function { arguments: [], shim_idx: 64, ret: Unit, inner_ret: Some(Unit) }, mutable: false }) -> Externref`.
+        const ret = makeClosure(arg0, arg1, wasm.wasm_bindgen__closure__destroy__hb9926c4ff3384788, wasm_bindgen__convert__closures_____invoke__h8225d6a622aa143e);
         return ret;
     };
     imports.wbg.__wbindgen_cast_4eb1a4c92c39ad53 = function(arg0, arg1) {

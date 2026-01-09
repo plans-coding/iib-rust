@@ -8,14 +8,16 @@
         <meta name="theme-color" content="#6f757e" id="themeColorMeta">
         <meta name="msapplication-navbutton-color" content="#6f757e">
         <link rel="shortcut icon" href="images/frog.svg" />
+
         <link href="bewegung.css" rel="stylesheet">
 
-        <script src='https://unpkg.com/maplibre-gl@latest/dist/maplibre-gl.js'></script>
-        <link href='https://unpkg.com/maplibre-gl@latest/dist/maplibre-gl.css' rel='stylesheet' /></link>
+        <script src='bundle/maplibre-gl/maplibre-gl.js'></script>
+        <link href='bundle/maplibre-gl/maplibre-gl.css' rel='stylesheet' /></link>
+
         <script src="bundle/codemirror/sql.min.js"></script>
 
-        <link href="https://unpkg.com/tabulator-tables/dist/css/tabulator.min.css" rel="stylesheet">
-        <script type="text/javascript" src="https://unpkg.com/tabulator-tables/dist/js/tabulator.min.js"></script>
+        <link href="bundle/tabulator/tabulator.min.css" rel="stylesheet">
+        <script src="bundle/tabulator/tabulator.min.js"></script>
 
     </head>
     <body>
@@ -117,26 +119,6 @@
             // CODE EDITOR  -----------------------------------------------------------------------
 
             let cmView;
-/*            function load_code_editor(newCode = null) {
-
-                const container = document.getElementById("code_editor");
-
-                if (!cmView) {
-                    cmView = cm6.load().textarea(container, {
-                        dark: false,
-                        sql: { dialect: "sqlite" },
-                        completion: true
-                    });
-                    console.log("no");
-                } else {
-                    cmView.dispatch({
-                        changes: { from: 0, to: cmView.state.doc.length, insert: newCode }
-                    });
-                    console.log("yes");
-                }
-
-            }*/
-
 
             function load_code_editor(newCode = null) {
                 const container = document.getElementById("code_editor");
@@ -165,29 +147,48 @@
                     });
                     console.log("Content updated");
                 }
+                console.log(cmView);
             }
-
-
 
             function get_code_editor() {
                 if (!cmView) return ""; // editor not initialized yet
                 return cmView.state.doc.toString();
             }
 
-
-            // SPREADSHEET OUTPUT  -----------------------------------------------------------------------
-            /*let table;
-            function initiate_spreadsheet() {
-                //jspreadsheet(document.getElementById('sql-output-table'));
-                //const table = jspreadsheet(document.getElementById('sql-output-table'));
-
-            }*/
-
-
         </script>
 
 
         <script>
+
+        // CUSTOM QUERIES  -----------------------------------------------------------------------
+
+            async function load_query_from_file(path) {
+                const res = await fetch(path);
+                const text = await res.text();
+                load_code_editor(text);
+            }
+
+            async function custom_queries() {
+                const response = await fetch("personal/custom-queries.txt");
+                const text = await response.text();
+
+                const html = text
+                    .split("\n")
+                    .map(line => line.trim())
+                    .filter(line => line.length > 0)
+                    .map(txt_row => {
+                        const label = txt_row.split("/").pop();
+                        return `
+                            <div style="cursor:pointer;"
+                                onclick="load_query_from_file('personal/${txt_row}');">
+                                ${label}
+                            </div>
+                        `;
+                    })
+                    .join("");
+
+                document.getElementById("custom_queries").innerHTML = html;
+            }
 
         // TABULATOR  -----------------------------------------------------------------------
 
@@ -202,8 +203,9 @@
 
             function initiate_spreadsheet() {
                 sqlOutputTable = new Tabulator("#sql_output_table", {
+                    height: "100%",
                     data: [],
-                    layout: "fitColumns",
+                    layout: "fitData",
                     resizableColumns: false,
                     virtualDom: true,
                     columns: [],
@@ -222,14 +224,18 @@
                     clipboardPasteAction: "range",
                     dataLoader: true,
                     dataLoaderLoading: false,
+                    cellSelection: true,
+                    selectable: true,
                 });
 
+                // cellClick
                 sqlOutputTable.on("cellClick", function(e, cell){
-                    // Display full content in textarea
                     document.getElementById("cellViewer").textContent = cell.getValue();
                 });
 
             }
+
+
 
             function refreshTable(tabulator_data) {
 
@@ -254,6 +260,7 @@
                 const dataColumns = Object.keys(tabulator_data[0]).map(k => (
                     {title: k,field: k,headerSort: false,resizable: true}
                 ));
+
 
                 sqlOutputTable.setColumns([rownumColumn, ...dataColumns]);
 
@@ -872,16 +879,6 @@
                 setTimeout(initializeChartOvernights, 100);
             }
         }
-    /*
-        function initialize_theme_color() {
-              const button = document.getElementById('themeToggle');
-              button.addEventListener('click', () => {
-                document.body.classList.toggle('dark');
-                /*button.textContent = document.body.classList.contains('dark')
-                  ? 'Switch to Light Theme'
-                  : 'Switch to Dark Theme';
-              });
-        }*/
 
         function initialize_theme_color() {
             const button = document.getElementById('themeToggle');

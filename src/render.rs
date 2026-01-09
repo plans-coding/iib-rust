@@ -11,7 +11,7 @@ pub fn render2dom(
     let context = Context::from_serialize(json_object)
         .map_err(|e| format!("Context error: {e:?}"))?;
 
-    let rendered = Tera::one_off(template_content, &context, true)
+    let _rendered = Tera::one_off(template_content, &context, true)
         .map_err(|e| format!("Tera render error: {e:?}"))?;
         
     
@@ -27,8 +27,8 @@ pub fn render2dom(
         let re = Regex::new(r"\{([^}]*)\}\(([^)]*)\)\[([^\]]*)\]")
             .map_err(|e| format!("Regex error: {e:?}"))?;
 
-        let rendered = re
-            .replace_all(&rendered, |caps: &regex::Captures| {
+        let _rendered = re
+            .replace_all(&_rendered, |caps: &regex::Captures| {
                 format!("<a target=\"_blank\" class=\"theme-link\" href=\"{}{}\">{}</a>", &external_map_provider, &caps[2], &caps[1])
             })
             .into_owned();
@@ -45,7 +45,7 @@ pub fn render2dom(
         .get_element_by_id(element_id)
         .ok_or(format!("Element #{element_id} not found"))?;
 
-    element.set_inner_html(&rendered);
+    element.set_inner_html(&_rendered);
 
-    Ok(rendered)
+    Ok(_rendered)
 }

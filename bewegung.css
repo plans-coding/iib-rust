@@ -11,6 +11,10 @@
 
 
     --color-submenu-background:#e2e3e5;
+
+    #cellViewer { background-color:var(--color-hover-text);color:var(--color-hover-background); }
+
+
 }
 
 body.dark {
@@ -23,6 +27,7 @@ body.dark {
     --color-filter: #ffbf00;
     --color-filter-alpha: #ffbf00bb;
     --color-filter-background: #ffbf00;
+    --color-filter-text: #000;
 
     --color-submenu-background: #1d655e;
 
@@ -31,7 +36,22 @@ body.dark {
     color:var(--color-text);
 
     #map{filter: brightness(0.7) contrast(3) sepia(0.6) saturate(1) hue-rotate(300deg) invert(1);}
+
+    .ͼb {color:var(--color-filter)!important;}
+    .ͼd {color:red;}
+    .ͼ2 .cm-gutters, .ͼ2 .cm-activeLineGutter {background-color:var(--color-background);color:var(--color-text);}
+
+    .tabulator-header-contents, .tabulator-tableholder {background-color:var(--color-background);}
+    .tabulator-cell {background-color:var(--color-hover-background);color:var(--color-text);}
+    .tabulator-frozen, .tabulator-col-content {background-color:var(--color-background)!important;color:var(--color-text);}
+    .tabulator-range-row-header {color:var(--color-filter);}
+    .tabulator-row.tabulator-range-highlight .tabulator-cell.tabulator-range-row-header {color:var(--color-filter);}
+    .tabulator-row .tabulator-cell.tabulator-range-selected:not(.tabulator-range-only-cell-selected):not(.tabulator-range-row-header)  {background-color:var(--color-filter);color:#000;}
+
+    #cellViewer { background-color:var(--color-background);color:var(--color-text); }
+
 }
+
 
 
 .table td {padding:5pt;}
@@ -415,6 +435,9 @@ input[type='file']::file-selector-button {padding:5pt;border-radius:5pt;border:0
 
 button.filter-button {font-family:arial;font-size:12pt;background-color:#ffbf00;color:#var(--color-text);border:0;border-radius:5pt;padding:8pt;cursor:pointer;}
 button.filter-button:hover {background-color:#FFBF00cc;}
+
+button.black-button {font-family:arial;font-size:12pt;background-color:#000000;color:#var(--color-text);border:0;border-radius:5pt;padding:8pt;cursor:pointer;color:#fff;}
+button.black-button:hover {background-color:#000000cc;}
 
 button.source-button {width:200pt;margin:auto;font-family:arial;font-size:12pt;background-color:#dc3545;color:var(--color-hover-text);border:0;border-radius:5pt;padding:8pt;cursor:pointer;}
 button.source-button:hover {background-color:#dc3545cc;}
