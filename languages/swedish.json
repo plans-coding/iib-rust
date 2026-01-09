@@ -19,6 +19,7 @@
   },
   "explore": {
     "title": "Utforska",
+    "days": "dagar",
     "seeAllTripsPer": "Se alla resor per"
   },
   "source": {
@@ -122,7 +123,15 @@
     "overnightStays": "Övernattningar"
   },
   "dataset": {
-    "title": "Dataunderlag"
+    "title": "Dataunderlag",
+    "externalEditor": "Extern redigerare",
+    "runQuery": "Kör fråga",
+    "download": "Ladda ner",
+    "allFieldNames": "Alla fältnamn",
+    "general": "Generellt",
+    "tables": "Tabeller",
+    "predefinedQueries": "Fördefinierade frågor",
+    "customQueries": "Egna frågor"
   },
   "about": {
     "title": "Om",
