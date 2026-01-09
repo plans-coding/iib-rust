@@ -3,6 +3,8 @@
 
 export function chart_js(): string;
 
+export function get_predefined_query(name: string): string | undefined;
+
 export function page_load(): void;
 
 export function slugify(s: string): string;
@@ -16,6 +18,7 @@ export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembl
 export interface InitOutput {
   readonly memory: WebAssembly.Memory;
   readonly chart_js: () => [number, number];
+  readonly get_predefined_query: (a: number, b: number) => [number, number];
   readonly page_load: () => void;
   readonly start: () => void;
   readonly user_run_sql: (a: number, b: number) => any;
@@ -30,10 +33,10 @@ export interface InitOutput {
   readonly rust_sqlite_wasm_realloc: (a: number, b: number) => number;
   readonly sqlite3_os_end: () => number;
   readonly sqlite3_os_init: () => number;
-  readonly wasm_bindgen__convert__closures_____invoke__h83adf183fa3daf7d: (a: number, b: number, c: any) => void;
-  readonly wasm_bindgen__closure__destroy__h9461008e47dcd1fa: (a: number, b: number) => void;
   readonly wasm_bindgen__convert__closures_____invoke__hfa3ccf2cc864f8c4: (a: number, b: number) => void;
   readonly wasm_bindgen__closure__destroy__heeb12583f9a8d85e: (a: number, b: number) => void;
+  readonly wasm_bindgen__convert__closures_____invoke__h83adf183fa3daf7d: (a: number, b: number, c: any) => void;
+  readonly wasm_bindgen__closure__destroy__h9461008e47dcd1fa: (a: number, b: number) => void;
   readonly wasm_bindgen__convert__closures_____invoke__he0c6ab7d39b43216: (a: number, b: number, c: any, d: any) => void;
   readonly __wbindgen_malloc: (a: number, b: number) => number;
   readonly __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;

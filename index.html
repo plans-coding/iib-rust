@@ -44,7 +44,7 @@
         </dialog>
 
         <script type="module">
-            import init, { page_load, chart_js, user_run_sql } from "./pkg/bewegung.js";
+            import init, { page_load, chart_js, user_run_sql, get_predefined_query } from "./pkg/bewegung.js";
             await init();
             
             document.addEventListener("click", e => {
@@ -73,6 +73,7 @@
             window.load_code_editor = load_code_editor;
             window.get_code_editor = get_code_editor;
             window.initiate_spreadsheet = initiate_spreadsheet;
+            window.get_predefined_query = get_predefined_query;
             
             // Image viewer
             const links = document.querySelectorAll('.to-image-viewer');
@@ -116,7 +117,7 @@
             // CODE EDITOR  -----------------------------------------------------------------------
 
             let cmView;
-            function load_code_editor(newCode = null) {
+/*            function load_code_editor(newCode = null) {
 
                 const container = document.getElementById("code_editor");
 
@@ -126,13 +127,47 @@
                         sql: { dialect: "sqlite" },
                         completion: true
                     });
+                    console.log("no");
                 } else {
                     cmView.dispatch({
                         changes: { from: 0, to: cmView.state.doc.length, insert: newCode }
                     });
+                    console.log("yes");
                 }
 
+            }*/
+
+
+            function load_code_editor(newCode = null) {
+                const container = document.getElementById("code_editor");
+                if (!container) return;
+
+                // Destroy old editor if DOM was replaced
+                if (cmView && cmView.dom.parentNode !== container) {
+                    cmView.destroy();
+                    cmView = null;
+                }
+
+                // Create editor if it doesn't exist
+                if (!cmView) {
+                    cmView = cm6.load().textarea(container, {
+                        dark: false,
+                        sql: { dialect: "sqlite" },
+                        completion: true
+                    });
+                    console.log("Editor created");
+                }
+
+                // Apply new code if provided
+                if (typeof newCode === "string") {
+                    cmView.dispatch({
+                        changes: { from: 0, to: cmView.state.doc.length, insert: newCode }
+                    });
+                    console.log("Content updated");
+                }
             }
+
+
 
             function get_code_editor() {
                 if (!cmView) return ""; // editor not initialized yet
@@ -191,13 +226,14 @@
 
                 sqlOutputTable.on("cellClick", function(e, cell){
                     // Display full content in textarea
-                    document.getElementById("cellViewer").value = cell.getValue();
+                    document.getElementById("cellViewer").textContent = cell.getValue();
                 });
 
             }
 
             function refreshTable(tabulator_data) {
 
+                document.getElementById("run_query_button").classList.add("inactivated-button");
                 document.getElementById("loading-overlay").style.display = "block";
 
                 if (!tabulator_data || tabulator_data.length === 0) {
@@ -222,8 +258,9 @@
                 sqlOutputTable.setColumns([rownumColumn, ...dataColumns]);
 
                 setTimeout(() => {
-                    sqlOutputTable.setData(tabulator_data); // local array
-                    document.getElementById("loading-overlay").style.display = "none"; // hide after render
+                    sqlOutputTable.setData(tabulator_data);
+                    document.getElementById("loading-overlay").style.display = "none";
+                    document.getElementById("run_query_button").classList.remove("inactivated-button");
                 }, 50);
 
 

@@ -601,6 +601,7 @@ async fn page_load_internal() {
         }
         initializeChart();
         initializeChartOvernights();
+
         if page == "trip" {
             applyTripCoverPhotos(&render_structure["all"]["settings"]["Feature"]["ImmichApiUrl"].to_string(),&render_structure["all"]["settings"]["Feature"]["ImmichApiKey"].to_string());
         } else if page == "dataset" {
@@ -611,14 +612,14 @@ async fn page_load_internal() {
         
 }
 
-
-
-fn get_query(name: &str) -> Option<&'static str> {
+#[wasm_bindgen]
+pub fn get_predefined_query(name: &str) -> Option<String> {
     ALL_QUERIES
-        .iter()
-        .find(|(n, _)| *n == name)
-        .map(|(_, q)| *q)
+    .iter()
+    .find(|(k, _)| *k == name)
+    .map(|(_, v)| v.to_string())
 }
+
 
 #[wasm_bindgen]
 pub fn user_run_sql(sql: String) -> Promise {
