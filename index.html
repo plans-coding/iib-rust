@@ -205,7 +205,7 @@
                 sqlOutputTable = new Tabulator("#sql_output_table", {
                     height: "100%",
                     data: [],
-                    layout: "fitData",
+                    //layout: "fitData",
                     resizableColumns: false,
                     virtualDom: true,
                     columns: [],
@@ -226,6 +226,7 @@
                     dataLoaderLoading: false,
                     cellSelection: true,
                     selectable: true,
+                    headerSortClickElement: "icon",
                 });
 
                 // cellClick
@@ -234,7 +235,6 @@
                 });
 
             }
-
 
 
             function refreshTable(tabulator_data) {
@@ -257,19 +257,35 @@
                     headerSort: false,
                 };
 
-                const dataColumns = Object.keys(tabulator_data[0]).map(k => (
-                    {title: k,field: k,headerSort: false,resizable: true}
-                ));
+                const columns = tabulator_data.columns;
+                const rows = tabulator_data.rows;
 
+                const dataColumns = columns.map(colName => ({
+                    title: colName,
+                    field: colName,
+                    resizable: true,
+                    headerSort: true,
+                    headerFilter:"input"
+                }));
 
-                sqlOutputTable.setColumns([rownumColumn, ...dataColumns]);
+                const allColumns = [rownumColumn, ...dataColumns];
+
+                const objectRows = rows.map((row, index) => {
+                    const obj = {};
+                    columns.forEach((colName, i) => {
+                        obj[colName] = row[i];
+                    });
+                    obj["_rownum"] = index + 1;
+                    return obj;
+                });
+
+                sqlOutputTable.setColumns(allColumns);
 
                 setTimeout(() => {
-                    sqlOutputTable.setData(tabulator_data);
+                    sqlOutputTable.setData(objectRows);
                     document.getElementById("loading-overlay").style.display = "none";
                     document.getElementById("run_query_button").classList.remove("inactivated-button");
                 }, 50);
-
 
             }
 

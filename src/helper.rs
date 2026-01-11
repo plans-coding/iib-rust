@@ -228,6 +228,8 @@ impl SqlFilterReplace for String {
     }
 }
 
+// JSON output
+/*
 pub async fn user_run_sql_internal(sql: String) {
 
     let db_bytes = DB_BYTES.get().expect("DB not initialized");
@@ -264,4 +266,43 @@ pub async fn user_run_sql_internal(sql: String) {
 
     html_element.set_inner_text(&json);
 
+}*/
+
+pub async fn user_run_sql_internal(sql: String) {
+    let db_bytes = DB_BYTES.get().expect("DB not initialized");
+
+    let combined_query = vec![
+        ("user_sql".to_string(), sql.clone())
+    ];
+
+    let query_response: serde_json::Value = sqlite_query::get_query_data_preserve_order(&db_bytes, combined_query).await;
+
+    // Extract the "user_sql" object with "columns" + "rows"
+    let result = &query_response["user_sql"];
+
+    // Serialize directly; columns are first, rows second
+    let json = serde_json::to_string(result).expect("JSON serialization failed");
+
+    let document = match web_sys::window().and_then(|w| w.document()) {
+        Some(d) => d,
+        None => return,
+    };
+
+    let element = match document.get_element_by_id("sql_output_data") {
+        Some(e) => e,
+        None => {
+            web_sys::console::error_1(
+                &"Element #sql_output_data not found".into()
+            );
+            return;
+        }
+    };
+
+    let html_element: web_sys::HtmlElement = match element.dyn_into() {
+        Ok(e) => e,
+        Err(_) => return,
+    };
+
+    html_element.set_inner_text(&json);
 }
+
