@@ -46,7 +46,7 @@
         </dialog>
 
         <script type="module">
-            import init, { page_load, chart_js, user_run_sql, get_predefined_query } from "./pkg/bewegung.js";
+            import init, { page_load, chart_js, user_run_sql, get_predefined_query, sync_cover_photo_list } from "./pkg/bewegung.js";
             await init();
             
             document.addEventListener("click", e => {
@@ -76,6 +76,7 @@
             window.get_code_editor = get_code_editor;
             window.initiate_spreadsheet = initiate_spreadsheet;
             window.get_predefined_query = get_predefined_query;
+            window.sync_cover_photo_list = sync_cover_photo_list;
             
             // Image viewer
             const links = document.querySelectorAll('.to-image-viewer');

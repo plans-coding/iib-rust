@@ -11,6 +11,7 @@ mod filecontent;
 mod sqlite_query;
 mod render;
 mod helper;
+mod toolbox_immich;
 
 // Templates
 const TEMPLATE_MENU: &str = include_str!("../templates/_menu.tera");
@@ -29,38 +30,7 @@ const TEMPLATE_STATISTICS_THEMES: &str = include_str!("../templates/statistics_t
 const TEMPLATE_DATASET: &str = include_str!("../templates/dataset.tera");
 const TEMPLATE_ABOUT: &str = include_str!("../templates/about.tera");
 const TEMPLATE_SOURCE: &str = include_str!("../templates/source.tera");
-
-/*
-// Advanced queries
-const QUERY_EXPLORE: &str = include_str!("../queries/explore.sql");
-const QUERY_OVERVIEW_YEAR: &str = include_str!("../queries/overview_year.sql");
-const QUERY_OVERVIEW_COUNTRY: &str = include_str!("../queries/overview_country.sql");
-const QUERY_TRIP_BORDER_CROSSINGS: &str = include_str!("../queries/trip_border_crossings.sql");
-const QUERY_STATISTICS_VISITS: &str = include_str!("../queries/statistics_visits.sql");
-const QUERY_STATISTICS_OVERNIGHTS: &str = include_str!("../queries/statistics_overnights.sql");
-const QUERY_STATISTICS_PER_DOMAIN_YEAR: &str = include_str!("../queries/statistics_per_domain_year.sql");
-const QUERY_STATISTICS_THEME_COUNT: &str = include_str!("../queries/statistics_theme_count.sql");
-const QUERY_TRIP_MAP_PINS_OVERALL: &str = include_str!("../queries/trip_map_pins_overall.sql");
-const QUERY_TRIP_MAP_PINS_ACCOMMODATION: &str = include_str!("../queries/trip_map_pins_accommodation.sql");
-
-// Simple queries
-const QUERY_COMMON_PARTICIPANT_GROUPS: &str = include_str!("../queries/simple/common_participant_groups.sql");
-const QUERY_COMMON_TRIP_DOMAINS: &str = include_str!("../queries/simple/common_trip_domains.sql");
-const QUERY_IMAGES_DATE_LIST: &str = include_str!("../queries/simple/images_date_list.sql");
-const QUERY_IMAGES_PHOTO_TIME: &str = include_str!("../queries/simple/images_photo_time.sql");
-const QUERY_MAP_CONTOUR: &str = include_str!("../queries/simple/map_contour.sql");
-const QUERY_MAP_COUNTRY: &str = include_str!("../queries/simple/map_country.sql");
-const QUERY_MAP_COUNTRY_LIST: &str = include_str!("../queries/simple/map_country_list.sql");
-const QUERY_MAP_THEME: &str = include_str!("../queries/simple/map_theme.sql");
-const QUERY_SEARCH_EVENT: &str = include_str!("../queries/simple/search_event.sql");
-const QUERY_SEARCH_TRIP: &str = include_str!("../queries/simple/search_trip.sql");
-const QUERY_STATISTICS_TRIP_COUNT: &str = include_str!("../queries/simple/statistics_trip_count.sql");
-const QUERY_TRIP_ALL_TRIPS: &str = include_str!("../queries/simple/trip_all_trips.sql");
-const QUERY_TRIP_EVENTS: &str = include_str!("../queries/simple/trip_events.sql");
-const QUERY_TRIP_SUMMARY: &str = include_str!("../queries/simple/trip_summary.sql");
-const QUERY_TRIP_PREVIOUS: &str = include_str!("../queries/simple/trip_previous.sql");
-const QUERY_TRIP_NEXT: &str = include_str!("../queries/simple/trip_next.sql");
-*/
+const TEMPLATE_IMMICH_COVER_PHOTOS_SYNC: &str = include_str!("../templates/toolbox/immich_cover_photos_sync.tera");
 
 macro_rules! define_queries {
     ($($name:ident => $path:expr),+ $(,)?) => {
@@ -82,12 +52,13 @@ define_queries! {
     QUERY_OVERVIEW_YEAR => "../queries/overview_year.sql",
     QUERY_OVERVIEW_COUNTRY => "../queries/overview_country.sql",
     QUERY_TRIP_BORDER_CROSSINGS => "../queries/trip_border_crossings.sql",
+    QUERY_TRIP_MAP_PINS_ACCOMMODATION => "../queries/trip_map_pins_accommodation.sql",
+    QUERY_TRIP_MAP_PINS_OVERALL => "../queries/trip_map_pins_overall.sql",
     QUERY_STATISTICS_VISITS => "../queries/statistics_visits.sql",
     QUERY_STATISTICS_OVERNIGHTS => "../queries/statistics_overnights.sql",
     QUERY_STATISTICS_PER_DOMAIN_YEAR => "../queries/statistics_per_domain_year.sql",
     QUERY_STATISTICS_THEME_COUNT => "../queries/statistics_theme_count.sql",
-    QUERY_TRIP_MAP_PINS_OVERALL => "../queries/trip_map_pins_overall.sql",
-    QUERY_TRIP_MAP_PINS_ACCOMMODATION => "../queries/trip_map_pins_accommodation.sql",
+
     // Simple queries
     QUERY_COMMON_PARTICIPANT_GROUPS => "../queries/simple/common_participant_groups.sql",
     QUERY_COMMON_TRIP_DOMAINS => "../queries/simple/common_trip_domains.sql",
@@ -195,6 +166,15 @@ pub fn user_run_sql(sql: String) -> Promise {
         Ok(JsValue::undefined())
     })
 }
+#[wasm_bindgen]
+pub fn sync_cover_photo_list() {
+    wasm_bindgen_futures::spawn_local(async {
+
+        let db_bytes = filecontent::get_sqlite_binary().await;
+        let _ = toolbox_immich::sync_cover_photo_list_internal(&db_bytes).await;
+    });
+}
+
 
 // -----------------------------------------------------------------------
 // INITIATE SESSION
@@ -463,6 +443,15 @@ async fn page_load_internal() {
                     });
                 render_structure["all"]["current_version"] = filecontent::fetch_text("version").await.into();
                 render_structure["all"]["latest_version"] = json!(helper::get_latest_version_number().await);
+            }
+            "toolbox:cover" => {
+                render_structure["page"] = json!({
+                    "title": render_structure.pointer("/all/translation/dataset/title").and_then(|v| v.as_str()).unwrap_or("Dataset"),
+                        "settings": render_structure["all"]["settings"],
+                        "template": TEMPLATE_IMMICH_COVER_PHOTOS_SYNC,
+                        "queries": [
+                            ["cover_photo_original_paths", "SELECT CoverPhoto from bewa_Overview WHERE CoverPhoto IS NOT NULL;"],
+                        ]});
             }
             _ => {
             

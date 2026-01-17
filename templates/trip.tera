@@ -24,17 +24,25 @@
 {% endfor %}
 
 
-<div class="prev_next"><a href="?path=trip:{{ trip_previous[0].OuterId }}"><img src="images/arrow-left.svg" /></a><a href="?path=trip:{{ trip_next[0].OuterId }}"><img src="images/arrow-right.svg" /></a></div>
+  <!--<div class="prev_next"><a href="?path=trip:{{ trip_previous[0].OuterId }}"><img src="images/arrow-left.svg" /></a><a href="?path=trip:{{ trip_next[0].OuterId }}"><img src="images/arrow-right.svg" /></a></div>-->
 
-<div class="breadcrumb">
-  <img class="widescreen icon-color" src="images/database.svg" />
-  <div class="widescreen">{{ translation.trip.trip | default(value="Trip") }}</div>
-  <img class="widescreen" src="images/arrow-right.svg" />
-  <div class="breadcrumb-link active">{{ trip_summary[0].OuterId }} {{ translation.trip.to | default(value="to") }} {{ trip_summary[0].OverallDestination }}</div>
-</div>
+  <div class="breadcrumb-trip">
+    <a href="?path=trip:{{ trip_previous[0].OuterId }}"><div class="breadcrumb-trip-link active"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-left" viewBox="0 0 16 16">
+    <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0"/>
+</svg></div></a>
+    <div style="display:grid;grid-template-columns: auto auto auto auto;align-items: center;">
+      <div class="widescreen">&nbsp;{{ translation.trip.trip | default(value="Trip") }}&nbsp;</div>
+      <img class="widescreen" style="margin-right:5pt;" src="images/arrow-right.svg" />
+      <div class="breadcrumb-link active">{{ trip_summary[0].OuterId }} {{ translation.trip.to | default(value="to") }} {{ trip_summary[0].OverallDestination }}</div>
+    </div>
+    <a href="?path=trip:{{ trip_next[0].OuterId }}"><div class="breadcrumb-trip-link active"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
+    <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708"/>
+</svg>
+</div></a>
+  </div>
 
 
-<details open class="trip" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
+  <details open class="trip" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
   <summary data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
     {{ trip_summary[0].TripDescription }}
   </summary>
@@ -137,16 +145,34 @@
         {% endif %}
         
         {# Optional Movie plugin #}
-        {# if settings.Plugin.Movie.enabled %}
-            {% set_global movieId = settings.Plugin.Movie.mapping | get(key=trip_summary[0].OuterId) %}
+        {% if settings.Plugin.Movie.enabled %}
+            {% set_global movieId = settings.Plugin.Movie.mapping | get(key=trip_summary[0].OuterId, default=false) %}
             {% if movieId %}
-                <a href="{{ settings.Plugin.Movie.path }}{{ movieId }}" target="_blank">
-                    <button class="filter-button" style="width:100%;"><img src="images/photos.svg" />
-                        {{ settings.Plugin.Movie.translation }} {{ movieId }}
-                    </button>
-                </a>
-        % set_global photoAlbums = trip_summary[0].PhotoAlbums | split(pat="/") %}    {% endif %}
-        {% endif #}
+
+                <button class="filter-button" style="width:100%;" onclick="document.getElementById('movie').showModal();" ><img src="images/photos.svg" />
+                    {{ settings.Plugin.Movie.translation }} {{ movieId }}
+                </button>
+
+
+                <dialog class="item-viewer" id="movie">
+                  <div class="item-viewer-filename" style="position:absolute;">{{ movieId }}</div>
+                  t.mode='hidden';
+                  <video width="640" height="360" controls id="v" controls onloadedmetadata="
+                    t=this.textTracks[0];
+
+                    t.oncuechange=()=>d.innerHTML=[...t.activeCues].map(c=>c.text).join('<br>');
+                    ">
+                    <source src="{{ settings.Plugin.Movie.path }}{{ movieId }}.mp4" type="video/mp4">
+                    <track kind="subtitles" src="{{ settings.Plugin.Movie.path }}{{ movieId }}.txt" default>
+                    Your browser does not support the video tag.
+                  </video>
+
+                  <div id="d"></div>
+
+                </dialog>
+
+          {% endif %}
+        {% endif %}
             
 
         <!--<button class="filter-button"><img src="images/photos.svg" />Movie</button>-->
@@ -204,13 +230,13 @@
             {% for file in settings.Plugin.Diary.filelist %}
               {% if day_year in file and day_week in file %}
               
-                <button class="item-viewer-button" onclick="document.getElementById('diary_{{ loop.index }}').showModal();" type="button" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
+                <button class="item-viewer-button" onclick="const img = document.getElementById('diary_image_{{ loop.index }}');if (!img.src) img.src = img.dataset.src;document.getElementById('diary_{{ loop.index }}').showModal();" type="button" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
                     <img src="images/diary.svg" />
                 </button>
                 
                 <dialog class="item-viewer" id="diary_{{ loop.index }}"  onclick="this.close();">
                   <div class="item-viewer-filename" style="position:absolute;">{{ file }}</div>
-                  <img src="{{ settings.Plugin.Diary.path }}{{ file }}" title="{{ file }}">
+                  <img id="diary_image_{{ loop.index }}" data-src="{{ settings.Plugin.Diary.path }}{{ file }}" title="{{ file }}">
                 </dialog>
                 
               {% endif %}
@@ -222,13 +248,13 @@
             {% for file in settings.Plugin.Passport.filelist %}
               {% if day_date in file %}
               
-                <button class="item-viewer-button" onclick="document.getElementById('passport_{{ loop.index }}').showModal();" type="button" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
+                <button class="item-viewer-button" onclick="const img = document.getElementById('passport_image_{{ loop.index }}');if (!img.src) img.src = img.dataset.src;document.getElementById('passport_{{ loop.index }}').showModal();" type="button" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
                     P
                 </button>
                 
                 <dialog class="item-viewer" id="passport_{{ loop.index }}"  onclick="this.close();">
                   <div class="item-viewer-filename" style="position:absolute;">{{ file }}</div>
-                  <img src="{{ settings.Plugin.Passport.path }}{{ file }}" title="{{ file }}">
+                  <img id="passport_image_{{ loop.index }}" data-src="{{ settings.Plugin.Passport.path }}{{ file }}" title="{{ file }}">
                 </dialog>
 
               {% endif %}

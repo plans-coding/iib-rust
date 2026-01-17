@@ -11,6 +11,8 @@ export function slugify(s: string): string;
 
 export function start(): void;
 
+export function sync_cover_photo_list(): void;
+
 export function user_run_sql(sql: string): Promise<any>;
 
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
@@ -21,6 +23,7 @@ export interface InitOutput {
   readonly get_predefined_query: (a: number, b: number) => [number, number];
   readonly page_load: () => void;
   readonly start: () => void;
+  readonly sync_cover_photo_list: () => void;
   readonly user_run_sql: (a: number, b: number) => any;
   readonly slugify: (a: number, b: number) => [number, number];
   readonly rust_sqlite_wasm_abort: () => void;

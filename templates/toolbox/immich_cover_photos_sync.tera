@@ -1,0 +1,12 @@
+Toolbox: Immich Cover Photo Sync
+
+<script id="coverPhotoOriginalPaths" type="application/json">{{ cover_photo_original_paths | json_encode | safe }}</script>
+
+
+<button onclick="update_cover_photo_list();">Test</button>
+
+1 sql fillista
+2 hämta album id innehåll
+3 jämför
+4 lägg till
+5 använd uppdaterat album

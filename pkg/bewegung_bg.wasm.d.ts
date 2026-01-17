@@ -5,6 +5,7 @@ export const chart_js: () => [number, number];
 export const get_predefined_query: (a: number, b: number) => [number, number];
 export const page_load: () => void;
 export const start: () => void;
+export const sync_cover_photo_list: () => void;
 export const user_run_sql: (a: number, b: number) => any;
 export const slugify: (a: number, b: number) => [number, number];
 export const rust_sqlite_wasm_abort: () => void;

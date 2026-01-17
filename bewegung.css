@@ -6,6 +6,7 @@
     --color-hover-text: #fff;
 
     --color-filter:#ffbf00;
+    --color-chart-text:#000;
     --color-filter-alpha: #ffbf00bb;
     --color-filter-background: #fdf8ee;
 
@@ -24,6 +25,7 @@ body.dark {
     --color-hover-background-alpha: #99999922;
     --color-hover-text: #fff;
 
+    --color-chart-text:#ffbf00;
     --color-filter: #ffbf00;
     --color-filter-alpha: #ffbf00bb;
     --color-filter-background: #ffbf00;
