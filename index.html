@@ -46,7 +46,7 @@
         </dialog>
 
         <script type="module">
-            import init, { page_load, chart_js, user_run_sql, get_predefined_query, sync_cover_photo_list } from "./pkg/bewegung.js";
+            import init, { page_load, chart_js, user_run_sql, get_predefined_query } from "./pkg/bewegung.js";
             await init();
             
             document.addEventListener("click", e => {
@@ -76,7 +76,6 @@
             window.get_code_editor = get_code_editor;
             window.initiate_spreadsheet = initiate_spreadsheet;
             window.get_predefined_query = get_predefined_query;
-            window.sync_cover_photo_list = sync_cover_photo_list;
             
             // Image viewer
             const links = document.querySelectorAll('.to-image-viewer');
@@ -919,7 +918,7 @@
 
 
         /* IMMICH  ----------------------------------------------------------------------- */
-
+        /*
         async function getCoverPhoto(path, immichApiUrl, immichApiKey) {
             try {
                 const response = await fetch(JSON.parse(immichApiUrl) + 'search/metadata', {
@@ -974,7 +973,171 @@
                     console.warn('Failed to load cover photo for', path, err);
                 }
             }
+        }*/
+
+        /* IMMICH COVER PHOTOS ----------------------------------------------------------------------- */
+
+        async function get_cover_album_list(immichUrl, immichCoverAlbumId) {
+            const response = await fetch(immichUrl + "api/albums/" + immichCoverAlbumId);
+
+            if (!response.ok) {
+                throw new Error("Failed to fetch album: " + response.status + " " + response.statusText);
+            }
+
+            return response.json();
+
         }
+
+
+        async function add_photo_to_album(immichUrl, immichCoverAlbumId, assetIds) {
+            const response = await fetch(immichUrl + "api/albums/" + immichCoverAlbumId + "/assets", {
+                method: "PUT",
+                headers: {
+                "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                ids: assetIds
+                })
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(
+                "Failed to add assets to album: " +
+                response.status + " " +
+                response.statusText + " - " +
+                errorText
+                );
+            }
+
+            return response.json();
+        }
+
+
+        async function searchByOriginalPath(immichUrl, originalPath) {
+            const response = await fetch(`${immichUrl}api/search/metadata`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    originalPath
+                })
+            });
+
+            if (!response.ok) {
+                //const text = await response.text();
+                //throw new Error(
+                //    `Immich search failed for ${originalPath}: ${response.status} ${text}`
+                //);
+            }
+
+            return response.json();
+        }
+
+        async function searchMissingCoverPhotos(immichUrl, missingCoverPhotos) {
+            const results = [];
+
+            for (const item of missingCoverPhotos) {
+                const originalPath = item.CoverPhoto;
+
+                try {
+                    const searchResult = await searchByOriginalPath(
+                        immichUrl,
+                        originalPath
+                    );
+
+                    const assetId = searchResult?.assets?.items?.[0]?.id;
+                    if (assetId) {
+                        results.push({
+                            coverPhoto: originalPath,
+                            outerId: item.OuterId,
+                            assetId
+                        });
+                    }
+                } catch (err) {
+                    console.error(err);
+                    /*results.push({
+                        coverPhoto: originalPath,
+                        outerId: item.OuterId,
+                        error: err.message
+                    });*/
+                }
+            }
+
+            return results;
+        }
+
+
+        // RUN THIS TO SYNC THE IMMICH ALBUM
+        async function sync_album_covers(immichUrl, immichCoverAlbumId) {
+
+            const cover_albums_db_text =
+                document.getElementById("coverPhotoOriginalPaths").textContent;
+
+            const cover_albums_db = JSON.parse(cover_albums_db_text);
+
+            const cover_albums_response = await get_cover_album_list(
+                immichUrl,
+                immichCoverAlbumId
+            );
+
+            const existingOriginalPaths = new Set(
+                cover_albums_response.assets.map(a => a.originalPath)
+            );
+
+            // Filter CoverPhoto entries that do NOT exist in the album assets
+            const missingCoverPhotos = cover_albums_db.filter(item => {
+                return !existingOriginalPaths.has(item.CoverPhoto);
+            });
+
+            console.log("Missing cover photos:", missingCoverPhotos);
+
+            const searchResults = await searchMissingCoverPhotos(
+                immichUrl,
+                missingCoverPhotos
+            );
+
+            const assetIds = results.map(r => r.assetId).filter(id => id != null);
+
+            const addPhotos = await add_photo_to_album(immichUrl, immichCoverAlbumId, assetIds);
+
+        }
+
+        // RUN THIS TO SAVE IMMICH ALBUM TO OPFS
+        async function save_album_covers_ids2OPFS(immichUrl, immichCoverAlbumId) {
+
+            const cover_albums_db_text =
+                document.getElementById("coverPhotoOriginalPaths").textContent;
+
+            const cover_albums_db = JSON.parse(cover_albums_db_text);
+
+            const cover_albums_response = await get_cover_album_list(
+                immichUrl,
+                immichCoverAlbumId
+            );
+
+            const outerIdToAssetId = Object.fromEntries(
+                cover_albums_db
+                    .map(dbItem => {
+                        const asset = cover_albums_response.assets.find(
+                            a => a.originalPath === dbItem.CoverPhoto
+                        );
+                        return asset ? [dbItem.OuterId, asset.id] : null;
+                    })
+                    .filter(Boolean)
+            );
+
+            await (await (await navigator.storage.getDirectory())
+            .getFileHandle("cover_photos.json", { create: true }))
+            .createWritable()
+            .then(w => (w.write(JSON.stringify(outerIdToAssetId, null, 2)), w.close()));
+
+
+        }
+
+
+
 
         </script>
 

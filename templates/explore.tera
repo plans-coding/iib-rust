@@ -9,15 +9,21 @@
 
   <input type="search" placeholder="{{ translation.menu.searchTrip | default(value="Search trip") }}" class="form-control" onkeydown="if(event.key==='Enter'){ history.pushState(null,'','?path=search:'+encodeURIComponent(this.value));page_load();}" />
   <br />
+
+
   <div class="card-container">
+
+
   {% for row in explore %}
+
+      {% set cover_photo_id = cover_photos_list | get(key=row.OuterId, default="NO") %}
 
       <a href="?path=trip:{{ row.OuterId }}" class="card" data-trip-domain="{{ row.TripDomain }}">
         <div class="explore-cover" data-trip-domain="{{ row.TripDomain }}" data-trip-cover-photo-path="{{ row.CoverPhoto }}" style="
-            background-image: url('images/travel.svg');
-            background-size: contain;
-            background-position: center;
-            background-repeat: no-repeat;
+            background-image: {%if cover_photo_id != "NO" %}url('https://immich.karlaplan.dedyn.io/api/assets/{{cover_photo_id}}/thumbnail'), linear-gradient(rgba(255,255,255,1)), {% endif %}url('images/travel.svg');
+            background-size: {%if cover_photo_id != "NO" %}cover, {% endif %}contain;
+            background-position: {%if cover_photo_id != "NO" %}center, {% endif %}center;
+            background-repeat: {%if cover_photo_id != "NO" %}no-repeat, {% endif %}no-repeat;
             height:120pt;
           ">
           </div>

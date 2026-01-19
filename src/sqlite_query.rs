@@ -3,7 +3,6 @@ use sqlite_wasm_rs as ffi;
 use std::ffi::CString;
 use std::ptr;
 use serde_json::{Value, Map};
-use indexmap::IndexMap;
 
 unsafe fn run_query(db: *mut ffi::sqlite3, sql: &str) -> Vec<Value> {
     let mut stmt: *mut ffi::sqlite3_stmt = ptr::null_mut();

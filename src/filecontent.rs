@@ -163,3 +163,42 @@ pub async fn load_filter_from_opfs() -> Option<Vec<u8>> {
 
     None
 }
+
+
+pub async fn cover_photos_list_from_opfs() -> Option<String> {
+    // Get app-specific directory
+    let dir = match app_specific_dir().await {
+        Ok(d) => d,
+        Err(e) => {
+            web_sys::console::log_1(&format!("Failed to access OPFS dir: {:?}", e).into());
+            return None;
+        }
+    };
+
+    // Try to get the file handle
+    let file = match dir
+    .get_file_handle_with_options("cover_photos.json", &GetFileHandleOptions { create: false })
+    .await
+    {
+        Ok(f) => f,
+        Err(_) => {
+            web_sys::console::log_1(&"cover_photos.json not found in OPFS".into());
+            return None;
+        }
+    };
+
+    // Read file content
+    match file.read().await {
+        Ok(bytes) => match String::from_utf8(bytes) {
+            Ok(content) => Some(content),
+            Err(e) => {
+                web_sys::console::log_1(&format!("File is not valid UTF-8: {:?}", e).into());
+                None
+            }
+        },
+        Err(e) => {
+            web_sys::console::log_1(&format!("Failed to read file: {:?}", e).into());
+            None
+        }
+    }
+}

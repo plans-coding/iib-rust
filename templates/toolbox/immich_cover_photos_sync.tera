@@ -2,11 +2,7 @@ Toolbox: Immich Cover Photo Sync
 
 <script id="coverPhotoOriginalPaths" type="application/json">{{ cover_photo_original_paths | json_encode | safe }}</script>
 
+You need to be logged in at Immich for this to work: {{ settings.Feature.ImmichUrl }}
 
-<button onclick="update_cover_photo_list();">Test</button>
-
-1 sql fillista
-2 hämta album id innehåll
-3 jämför
-4 lägg till
-5 använd uppdaterat album
+<button onclick="sync_album_covers('{{ settings.Feature.ImmichUrl }}', '{{ settings.Feature.ImmichCoverAlbumId }}');">Synchronize Immich Album</button>
+<button onclick="save_album_covers_ids2OPFS('{{ settings.Feature.ImmichUrl }}', '{{ settings.Feature.ImmichCoverAlbumId }}');">Save Cover Photo List to OPFS</button>

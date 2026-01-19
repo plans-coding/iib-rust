@@ -11,7 +11,6 @@ mod filecontent;
 mod sqlite_query;
 mod render;
 mod helper;
-mod toolbox_immich;
 
 // Templates
 const TEMPLATE_MENU: &str = include_str!("../templates/_menu.tera");
@@ -166,14 +165,6 @@ pub fn user_run_sql(sql: String) -> Promise {
         Ok(JsValue::undefined())
     })
 }
-#[wasm_bindgen]
-pub fn sync_cover_photo_list() {
-    wasm_bindgen_futures::spawn_local(async {
-
-        let db_bytes = filecontent::get_sqlite_binary().await;
-        let _ = toolbox_immich::sync_cover_photo_list_internal(&db_bytes).await;
-    });
-}
 
 
 // -----------------------------------------------------------------------
@@ -311,6 +302,15 @@ async fn page_load_internal() {
         format!("({})", render_structure["all"]["filters"]["TripDomain"].as_array().expect("ERROR").iter().filter_map(|v| v.as_str()).map(|s| format!("'{}'", s)).collect::<Vec<_>>().join(","))
     };
 
+
+    use std::collections::HashMap;
+    let cover_photos_list_opt = filecontent::cover_photos_list_from_opfs().await;
+    let cover_photos_map: HashMap<String, String> = match cover_photos_list_opt {
+        Some(json_str) => serde_json::from_str(&json_str).expect("Invalid JSON"),
+        None => HashMap::new(),
+    };
+
+
     // -----------------------------------------------------------------------
     // Fourth: Page specific data
     // -----------------------------------------------------------------------
@@ -325,6 +325,7 @@ async fn page_load_internal() {
                         .replace_filter("(TripDomain)", &render_structure["all"]["query_params"]["f"])
                         .replace_filter("(ParticipantGroup)", &render_structure["all"]["query_params"]["f"])],
                     ]});
+                render_structure["all"]["cover_photos_list"] = serde_json::to_value(&cover_photos_map).expect("Failed to convert map to Value");
             }
             "overview:year" => {
                 render_structure["page"] = json!({
@@ -450,7 +451,7 @@ async fn page_load_internal() {
                         "settings": render_structure["all"]["settings"],
                         "template": TEMPLATE_IMMICH_COVER_PHOTOS_SYNC,
                         "queries": [
-                            ["cover_photo_original_paths", "SELECT CoverPhoto from bewa_Overview WHERE CoverPhoto IS NOT NULL;"],
+                            ["cover_photo_original_paths", "SELECT OuterId, CoverPhoto from bewa_Overview WHERE CoverPhoto IS NOT NULL;"],
                         ]});
             }
             _ => {

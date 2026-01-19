@@ -11,8 +11,6 @@ export function slugify(s: string): string;
 
 export function start(): void;
 
-export function sync_cover_photo_list(): void;
-
 export function user_run_sql(sql: string): Promise<any>;
 
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
@@ -23,7 +21,6 @@ export interface InitOutput {
   readonly get_predefined_query: (a: number, b: number) => [number, number];
   readonly page_load: () => void;
   readonly start: () => void;
-  readonly sync_cover_photo_list: () => void;
   readonly user_run_sql: (a: number, b: number) => any;
   readonly slugify: (a: number, b: number) => [number, number];
   readonly rust_sqlite_wasm_abort: () => void;
@@ -36,10 +33,10 @@ export interface InitOutput {
   readonly rust_sqlite_wasm_realloc: (a: number, b: number) => number;
   readonly sqlite3_os_end: () => number;
   readonly sqlite3_os_init: () => number;
-  readonly wasm_bindgen__convert__closures_____invoke__h83adf183fa3daf7d: (a: number, b: number, c: any) => void;
-  readonly wasm_bindgen__closure__destroy__h9461008e47dcd1fa: (a: number, b: number) => void;
   readonly wasm_bindgen__convert__closures_____invoke__h8225d6a622aa143e: (a: number, b: number) => void;
   readonly wasm_bindgen__closure__destroy__hb9926c4ff3384788: (a: number, b: number) => void;
+  readonly wasm_bindgen__convert__closures_____invoke__h83adf183fa3daf7d: (a: number, b: number, c: any) => void;
+  readonly wasm_bindgen__closure__destroy__h9461008e47dcd1fa: (a: number, b: number) => void;
   readonly wasm_bindgen__convert__closures_____invoke__he0c6ab7d39b43216: (a: number, b: number, c: any, d: any) => void;
   readonly __wbindgen_malloc: (a: number, b: number) => number;
   readonly __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
