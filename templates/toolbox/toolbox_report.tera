@@ -1,0 +1,36 @@
+<div class="breadcrumb widescreen">
+  <!--<img class="icon-color" src="images/frog.svg" />-->
+  <div>{{ translation.toolbox.title | default(value="Toolbox") }}</div>
+  <img src="images/arrow-right.svg" />
+
+  <a href="?path=toolbox:report" class="breadcrumb-link {% if query_params.path == 'toolbox:report' %}active{% endif %}">{{ translation.toolbox.report | default(value="Report") }}</a>
+  <a href="?path=toolbox:input" class="breadcrumb-link {% if query_params.path == 'toolbox:input' %}active{% endif %}">{{ translation.toolbox.input | default(value="Input tool") }}</a>
+  {% if settings.Base.Immich == "Enabled" %}
+    <a href="?path=toolbox:cover" class="breadcrumb-link {% if query_params.path == 'toolbox:cover' %}active{% endif %}">{{ translation.toolbox.cover | default(value="Cover Photo Sync") }}</a>
+  {% endif %}
+</div>
+
+<div class="">
+
+    <div>Your current filter selection will apply.</div>
+
+    <div>
+        <label for="grInputTitle">Title</label>
+        <input type="text" class="form-control" id="grInputTitle" value="Mina resor fram till 2026">
+    </div>
+
+    <div class="">
+        <label for="grInputInfo" class="">Baksida</label>
+        <input type="text" class="form-control" id="grInputInfo" value="Genererad 2026-01-20">
+    </div>
+
+
+    <!--
+    <hr />
+    <div><i>Klicka på OK för att starta. Vänta sedan tills dialogrutan för utskrift visas. Detta kan ta flera minuter.</i></div>
+    -->
+
+</div>
+<br>
+
+<button class="filter-button" onclick="window.open();">Generate report</button>

@@ -421,7 +421,7 @@ a.tab-link:not(.active):hover {text-decoration:underline;}
 .breadcrumb img:first-child {height:18pt;}
 .breadcrumb img:second-child {height:10pt;}
 
-.breadcrumb-link {text-decoration:none;font-weight:bold;color:var(--color-hover-background);padding:0 5pt 0 5pt;border-radius:5pt; }
+.breadcrumb-link {text-decoration:none;font-weight:bold;color:var(--color-hover-background);padding:0 5pt 0 5pt;border-radius:5pt;border:1pt solid var(--color-hover-background); }
 .breadcrumb-link.active {text-decoration:none;background-color:var(--color-hover-background);color:var(--color-hover-text);}
 .breadcrumb-link:not(.active):hover {background-color:var(--color-hover-background-alpha);}
 .warning {background: linear-gradient(90deg, #1d655e, #1d655ecc, #82ec3e, #1d655e);}

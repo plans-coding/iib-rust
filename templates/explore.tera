@@ -1,6 +1,6 @@
 <div id="path-explore">
   <div class="breadcrumb">
-    <img class="icon-color" src="images/database.svg" />
+    <img class="icon-color" src="images/frog.svg" />
     <div>{{ translation.explore.title | default(value="Explore") }}</div>
     <!--<img src="images/arrow-right.svg" />
     <div class="breadcrumb-link active warning"><span class="immer-in-font-uc" style="font-weight:normal;">Immer in</span>&nbsp;<span class="bewegung-font-uc">Bewegung</span></div>

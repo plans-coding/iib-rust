@@ -29,7 +29,10 @@ const TEMPLATE_STATISTICS_THEMES: &str = include_str!("../templates/statistics_t
 const TEMPLATE_DATASET: &str = include_str!("../templates/dataset.tera");
 const TEMPLATE_ABOUT: &str = include_str!("../templates/about.tera");
 const TEMPLATE_SOURCE: &str = include_str!("../templates/source.tera");
-const TEMPLATE_IMMICH_COVER_PHOTOS_SYNC: &str = include_str!("../templates/toolbox/immich_cover_photos_sync.tera");
+const TEMPLATE_TOOLBOX_REPORT: &str = include_str!("../templates/toolbox/toolbox_report.tera");
+const TEMPLATE_TOOLBOX_INPUT: &str = include_str!("../templates/toolbox/toolbox_input.tera");
+const TEMPLATE_TOOLBOX_COVER: &str = include_str!("../templates/toolbox/toolbox_cover.tera");
+
 
 macro_rules! define_queries {
     ($($name:ident => $path:expr),+ $(,)?) => {
@@ -276,7 +279,7 @@ async fn page_load_internal() {
     render_structure["all"]["query_params"]["path"] = path.clone().into();
 
     render_structure["all"]["time"] = helper::build_time_json();
-    web_sys::console::log_1(&serde_json::to_string(&render_structure["all"]).expect("ERROR").into());
+    //web_sys::console::log_1(&serde_json::to_string(&render_structure["all"]).expect("ERROR").into());
 
     // READ APPLIED FILTERS  -----------------------------------------------------------------------
     
@@ -445,11 +448,28 @@ async fn page_load_internal() {
                 render_structure["all"]["current_version"] = filecontent::fetch_text("version").await.into();
                 render_structure["all"]["latest_version"] = json!(helper::get_latest_version_number().await);
             }
+            "toolbox:report" => {
+                render_structure["page"] = json!({
+                    "title": render_structure.pointer("/all/translation/toolbox/report").and_then(|v| v.as_str()).unwrap_or("Report"),
+                        "settings": render_structure["all"]["settings"],
+                        "template": TEMPLATE_TOOLBOX_REPORT,
+                        });
+            }
+            "toolbox:input" => {
+                render_structure["page"] = json!({
+                    "title": render_structure.pointer("/all/translation/toolbox/input").and_then(|v| v.as_str()).unwrap_or("Input"),
+                        "settings": render_structure["all"]["settings"],
+                        "template": TEMPLATE_TOOLBOX_INPUT,
+                        "queries": [
+                            ["inner_id_max", "SELECT InnerId FROM bewa_Overview WHERE InnerId LIKE '$_INNER_ID_PREFIX_%' ORDER BY SUBSTR(InnerId, 2) + 0 DESC LIMIT 1;".replace("_INNER_ID_PREFIX_","")],
+                            ["outer_id_max", "SELECT OuterId FROM bewa_Overview WHERE OuterId GLOB '_OUTER_ID_PREFIX_[0-9]*' ORDER BY CAST(substr(OuterId, length('_OUTER_ID_') + 1) AS INTEGER) DESC LIMIT 1;".replace("_OUTER_ID_PREFIX_","")]
+                        ]});
+                }
             "toolbox:cover" => {
                 render_structure["page"] = json!({
-                    "title": render_structure.pointer("/all/translation/dataset/title").and_then(|v| v.as_str()).unwrap_or("Dataset"),
+                    "title": render_structure.pointer("/all/translation/toolbox/cover").and_then(|v| v.as_str()).unwrap_or("Cover"),
                         "settings": render_structure["all"]["settings"],
-                        "template": TEMPLATE_IMMICH_COVER_PHOTOS_SYNC,
+                        "template": TEMPLATE_TOOLBOX_COVER,
                         "queries": [
                             ["cover_photo_original_paths", "SELECT OuterId, CoverPhoto from bewa_Overview WHERE CoverPhoto IS NOT NULL;"],
                         ]});
