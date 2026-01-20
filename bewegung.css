@@ -37,7 +37,8 @@ body.dark {
 
     color:var(--color-text);
 
-    #map{filter: brightness(0.7) contrast(3) sepia(0.6) saturate(1) hue-rotate(300deg) invert(1);}
+    #map_old{filter: brightness(0.7) contrast(3) sepia(0.6) saturate(1) hue-rotate(300deg) invert(1);}
+    #map{filter: brightness(0.7) contrast(3) sepia(0.6) saturate(1) hue-rotate(210deg) invert(1);}
 
     .ͼb {color:var(--color-filter)!important;}
     .ͼd {color:red;}
@@ -431,7 +432,7 @@ a.tab-link:not(.active):hover {text-decoration:underline;}
 
 .breadcrumb-trip {color:var(--color-text);  display: grid;grid-template-columns: auto auto 1fr;justify-items: end;font-family: 'Cairo', sans-serif;font-weight:bold;font-size:16pt;margin:5pt 0 10pt 0;gap:5pt;}
 
-.breadcrumb-trip-link {text-decoration:none;font-weight:bold;background-color:var(--color-hover-background-alpha);color:var(--color-filter-text);padding:0 5pt 0 5pt;border-radius:5pt; }
+.breadcrumb-trip-link {text-decoration:none;font-weight:bold;background-color:var(--color-hover-background-alpha);color:var(--color-text);padding:0 5pt 0 5pt;border-radius:5pt; }
 .breadcrumb-trip-link:hover {background-color:var(--color-hover-background);color:var(--color-hover-text);}
 
 .single-link {text-decoration:none;color:#1d655e;}

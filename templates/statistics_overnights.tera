@@ -1,5 +1,5 @@
 <div class="breadcrumb widescreen">
-  <img class="icon-color" src="images/database.svg" />
+  <img class="icon-color" src="images/frog.svg" />
   <div>{{ translation.statistics.title | default(value="Summary") }}</div>
   <img src="images/arrow-right.svg" />
   <a href="?path=statistics:summary" class="breadcrumb-link {% if query_params.path == 'statistics:summary' %}active{% endif %}">{{ translation.statistics.summary | default(value="Summary") }}</a>

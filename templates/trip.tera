@@ -42,7 +42,7 @@
   </div>
 
 
-  <details open class="trip" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
+  <details open class="trip" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}" style="user-select:none;">
   <summary data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
     {{ trip_summary[0].TripDescription }}
   </summary>

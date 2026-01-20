@@ -1,5 +1,5 @@
 <div class="path-toolbox">
-  <div class="breadcrumb widescreen">
+  <div class="breadcrumb">
     <!--<img class="icon-color" src="images/frog.svg" />-->
     <div>{{ translation.toolbox.title | default(value="Toolbox") }}</div>
     <img src="images/arrow-right.svg" />
