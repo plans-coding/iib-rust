@@ -977,6 +977,23 @@
 
         /* IMMICH COVER PHOTOS ----------------------------------------------------------------------- */
 
+        async function check_immich_authorization() {
+            const immichUrl = document.getElementById("immichUrl").textContent;
+            try {
+                const response = await fetch(immichUrl + "api/auth/status");
+                document.getElementById("immich_authorization_status").classList.remove("red-text");
+                document.getElementById("immich_authorization_status").classList.add("green-text");
+                document.getElementById("immich_authorization_status_OK").style.display = "block";
+                console.log("Immich Auth OK");
+                return response.status === 200;
+            } catch (err) {
+                document.getElementById("immich_authorization_status_NOT_OK").style.display = "block";
+                console.log("Immich Auth NOT OK");
+                return false;
+            }
+        }
+
+
         async function get_cover_album_list(immichUrl, immichCoverAlbumId) {
             const response = await fetch(immichUrl + "api/albums/" + immichCoverAlbumId);
 

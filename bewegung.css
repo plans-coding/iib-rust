@@ -391,6 +391,7 @@ details[open].trip summary {
     ease-in-out, box-shadow .15s
     ease-in-out;
     border:2pt solid var(--color-hover-background);
+    box-sizing: border-box;
 }
 
 .day-section, .day-accommodation { margin-top:10pt; }
@@ -534,7 +535,7 @@ dialog{width:100vw;height:100vh;}
 
 .card-container {color:var(--color-text);}
 
-#path-explore, #path-source, #path-trip .breadcrumb {padding:0 5pt 0 5pt;}
+#path-explore, #path-source, #path-trip, .path-toolbox, .breadcrumb {padding:0 5pt 0 5pt;}
 
 /* Smaller screens - last css is present*/
 

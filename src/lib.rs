@@ -108,10 +108,11 @@ extern "C" {
     //fn inject_css(css: &str);
     // Other
     fn initialize_theme_color();
-    fn applyTripCoverPhotos(
+    /*fn applyTripCoverPhotos(
         immich_api_url: &str,
         immich_api_key: &str,
-    );
+    );*/
+    fn check_immich_authorization();
 }
 
 // -----------------------------------------------------------------------
@@ -619,7 +620,7 @@ async fn page_load_internal() {
         helper::attach_select_listener();
         
         // POST CODE  -----------------------------------------------------------------------
-        if map_request == "trip" {
+        /*if map_request == "trip" {
             load_trip_map();
         } else if map_request == "contour" {
             load_contour_map();
@@ -627,16 +628,27 @@ async fn page_load_internal() {
             load_country_map();
         } else if map_request == "theme" {
             load_theme_map();
+        }*/
+
+        match map_request {
+            "trip" => load_trip_map(),
+            "contour" => load_contour_map(),
+            "country" => load_country_map(),
+            "theme" => load_theme_map(),
+            _ => {}
         }
+
         initializeChart();
         initializeChartOvernights();
 
         if page == "trip" {
-            applyTripCoverPhotos(&render_structure["all"]["settings"]["Feature"]["ImmichApiUrl"].to_string(),&render_structure["all"]["settings"]["Feature"]["ImmichApiKey"].to_string());
+            //applyTripCoverPhotos(&render_structure["all"]["settings"]["Feature"]["ImmichApiUrl"].to_string(),&render_structure["all"]["settings"]["Feature"]["ImmichApiKey"].to_string());
         } else if page == "dataset" {
             load_code_editor();
             initiate_spreadsheet();
             custom_queries();
+        } else if page == "toolbox:cover" {
+            check_immich_authorization();
         }
         
         
