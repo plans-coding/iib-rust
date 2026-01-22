@@ -1,3 +1,13 @@
+<style>
+/* Background photo from thumbnail */
+{% set cover_photo_id = cover_photos_list | get(key=trip_summary[0].OuterId, default="NO") %}
+
+body {
+    background: {%if cover_photo_id != "NO" %} linear-gradient(rgba(255,255,255,0.4), #f8fafd), url('{{ settings.Feature.ImmichUrl | safe }}api/assets/{{ cover_photo_id }}/thumbnail') {% endif %};
+    background-repeat: no-repeat;
+    background-size: 100% auto;
+    }
+</style>
 <div id="path-trip">
 
 {% set parts = trip_border_crossings[0].AllBorderCrossings | split(pat=", ") %}
@@ -43,7 +53,7 @@
 
 
   <details open class="trip" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}" style="user-select:none;">
-  <summary data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
+  <summary data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}" style="border-radius:3pt;">
     {{ trip_summary[0].TripDescription }}
   </summary>
 
@@ -123,12 +133,31 @@
           </label>
           <div class="trip-details-field" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">{{ trip_border_crossings[0].AllBorderCrossings }}</div>
         </div>
-        
+
         {# Optional Immich photo albums #}
         {% if settings.Base.Immich == "Enabled" %}
-            {% if trip_summary[0].PhotoAlbums %}
+	    
+	    {# Immich description search #}
+            {% if trip_immich_desc_search[0].ImmichDescSearch %}
 
-              {% if trip_summary[0].PhotoAlbums is containing(", ") %}
+                  <a class="to-image-viewer" href='{{ settings.Feature.ImmichUrl }}search?query=%7B"description"%3A"IIB-F-2"%7D#search-chips' target="_blank">
+                      <button type="button" class="item-viewer-button filter-button" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}" style="width:100%;">
+                          <img src="images/photos.svg" />
+			{{ trip_immich_desc_search[0].ImmichDescSearch }}
+                      </button>
+                  </a>
+
+            {# Immich photo albums #}
+            {% elif trip_immich_album_name[0].ImmichAlbumName %}
+
+                  <a class="to-image-viewer" data-album="{{ trip_immich_album_name[0].ImmichAlbumName }}"   onclick="get_album_id_from_name('{{ settings.Feature.ImmichUrl }}', this.dataset.album).then(function(id){window.open('/albums/'+id)})" target="_blank">
+                      <button type="button" class="item-viewer-button filter-button" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}" style="width:100%;">
+                          <img src="images/photos.svg" style="vertical-align: middle;" />
+			{{ trip_immich_album_name[0].ImmichAlbumName }}
+                      </button>
+                  </a>
+
+              {#{% if trip_summary[0].PhotoAlbums is containing(", ") %}
                 {% set_global photoAlbums = trip_summary[0].PhotoAlbums | split(pat=", ") %}
               {% else %}
                 {% set_global photoAlbums = trip_summary[0].PhotoAlbums | split(pat=", ") %}
@@ -136,10 +165,10 @@
 
               {% for photoAlbum in photoAlbums %}
                   <div type="button" class="filter-button"
-                      onclick="openAlbum('{{ photoAlbum }}', '{{ settings.Feature.ImmichApiUrl }}', '{{ settings.Feature.ImmichApiKey }}')">
+			onclick="openAlbum('{{ photoAlbum }}', '{{ settings.Feature.ImmichApiUrl }}', '{{ settings.Feature.ImmichApiKey }}')">
                       Immich {{ photoAlbum }}
                   </div>
-              {% endfor %}
+              {% endfor %}#}
 
             {% endif %}
         {% endif %}
@@ -181,7 +210,7 @@
 
     </div>
 
-    <div><div id="map" style="width:100%;height:100%;"></div></div>
+    <div><div id="map" style="width:100%;height:100%;border-radius:3pt;"></div></div>
     <div id="map-pin-data" data-trip-map-overall='{{ trip_map_pins_overall | json_encode }}' data-trip-map-accommodation='{{ trip_map_pins_accommodation | json_encode }}' data-theme-color="{{ theme_color }}"></div>
 
 

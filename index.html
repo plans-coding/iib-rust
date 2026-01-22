@@ -1153,8 +1153,110 @@
 
         }
 
+        /* IMMICH ALBUMS ----------------------------------------------------------------------- */
+        async function get_album_id_from_name(immichUrl, albumName) {
+            const response = await fetch(immichUrl + "api/albums");
 
+            if (!response.ok) {
+                throw new Error("Failed to fetch albums: " + response.status + " " + response.statusText);
+            }
 
+            const albums = await response.json();
+
+            const album = albums.find(a => a.albumName === albumName);
+
+            if (!album) {
+                alert("No album with that name found");
+                return null;
+            }
+
+            return album.id;
+        }
+
+        async function process_album_string(immichUrl, input) {
+            const regex = /\[([^\]]+)\]\(([\s\S]*?)\)/g; // allow multiline $2
+
+            const UUID_REGEX =
+                /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+            let match;
+            while ((match = regex.exec(input)) !== null) {
+                const albumName = match[1]; // $1
+                const filesPart = match[2]; // $2 (multiline)
+
+                // Resolve album ID
+                const immichAlbumId = await get_album_id_from_name(immichUrl, albumName);
+                if (!immichAlbumId) {
+                    continue; // alert already shown
+                }
+
+                // Split + dedupe file paths
+                const filenames = Array.from(
+                    new Set(
+                        filesPart
+                            .trim()
+                            .split(/\s+/)
+                            .filter(Boolean)
+                    )
+                );
+
+                const assetIds = [];
+
+                for (const filename of filenames) {
+                    try {
+                        const result = await searchByOriginalPath(immichUrl, filename);
+
+                        if (result.assets?.total === 0) {
+                            console.warn("No asset found for path:", filename);
+                            continue;
+                        }
+
+                        // Normalize possible return shapes from searchByOriginalPath
+                        let assetId = null;
+
+                        if (typeof result === "string") {
+                            assetId = result;
+                        }
+                        else if (Array.isArray(result) && result.length > 0) {
+                            assetId = result[0]?.id ?? result[0];
+                        }
+                        else if (result && typeof result === "object") {
+                            // Immich search response shape
+                            if (result.assets?.items?.length > 0) {
+                                assetId = result.assets.items[0].id;
+                            }
+                            // Fallback: generic object with id
+                            else if (result.id) {
+                                assetId = result.id;
+                            }
+                        }
+
+                        if (!assetId || !UUID_REGEX.test(assetId)) {
+                            console.warn(
+                                "Rejected non-UUID assetId for path:",
+                                filename,
+                                "→",
+                                result
+                            );
+                            continue;
+                        }
+
+                        assetIds.push(assetId);
+
+                    } catch (err) {
+                        console.error("Failed to resolve asset for:", filename, err);
+                    }
+                }
+
+                if (assetIds.length === 0) {
+                    console.warn("No valid assets found for album:", albumName);
+                    continue;
+                }
+
+                // Add assets to album
+                await add_photo_to_album(immichUrl, immichAlbumId, assetIds);
+            }
+        }
 
         </script>
 

@@ -127,7 +127,7 @@ WHERE m.type='table';"
           <path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5"></path>
           <path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0z"></path>
         </svg></button>{% endif %}
-      <button style="flex:1;" class="filter-button" id="run_query_button" onclick="user_sql_execution();">{{ translation.dataset.runQuery | default(value="Run query") }} <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-play" viewBox="0 0 16 16">
+      <button style="flex:1;" class="filter-button" id="run_query_button" onclick="user_sql_execution();">{{ translation.dataset.runQuery | default(value="Run query") }} <svg xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle;" width="20" height="20" fill="currentColor" class="bi bi-play" viewBox="0 0 16 16">
     <path d="M10.804 8 5 4.633v6.734zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696z"/>
 </svg></button>
       <div style="display:none;" id="loading-overlay"><img src="images/frog.svg" style="width:40px;height:40px;" class="rotate-animation" /></div>

@@ -499,8 +499,11 @@ async fn page_load_internal() {
                             ["trip_next", QUERY_TRIP_NEXT.replace("_OUTER_ID_",outer_id)
                                 .replace("(ParticipantGroup)", &participant_group)
                                 .replace("(TripDomain)", &trip_domain)],
-                    ]});
-                    map_request = "trip";
+                            ["trip_immich_desc_search", "SELECT CASE WHEN PhotoAlbums LIKE '!desc[%]%' THEN substr(PhotoAlbums, instr(PhotoAlbums, '[') + 1, instr(PhotoAlbums, ']') - instr(PhotoAlbums, '[') - 1) ELSE NULL END AS ImmichDescSearch FROM bewa_Overview WHERE OuterId = '_OUTER_ID_';".replace("_OUTER_ID_",outer_id)],
+                            ["trip_immich_album_name", "SELECT substr(PhotoAlbums, instr(PhotoAlbums, '[') + 1, instr(PhotoAlbums, ']') - instr(PhotoAlbums, '[') - 1) AS ImmichAlbumName FROM bewa_Overview WHERE OuterId = '_OUTER_ID_' AND PhotoAlbums NOT LIKE '!desc[%]%' AND PhotoAlbums LIKE '%[%]%';".replace("_OUTER_ID_",outer_id)],
+                        ]});
+                        render_structure["all"]["cover_photos_list"] = serde_json::to_value(&cover_photos_map).expect("Failed to convert map to Value");
+                        map_request = "trip";
                 }
                 
                 if let Some(suffix) = page.strip_prefix("images:") {
