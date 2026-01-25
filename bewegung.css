@@ -1,5 +1,6 @@
 :root {
     --color-background: #f8fafd;
+    --color-background-alpha: #f8fafdaa;
     --color-text:#000;
     --color-hover-background: #6f757e;
     --color-hover-background-alpha: #6f757e22;
@@ -20,6 +21,7 @@
 
 body.dark {
     --color-background: #022626;
+    --color-background-alpha: #022626aa;
     --color-text: #e0e0e0;
     --color-hover-background: #1d655e;
     --color-hover-background-alpha: #99999922;
@@ -148,7 +150,7 @@ body.dark {
 
 
 /* ===== Base ===== */
-html,body{height:100%;}
+html,body{min-height:100%;}
 body {
     margin: 0;
     font-family:
@@ -165,9 +167,10 @@ body {
     "Segoe UI Emoji",
     "Segoe UI Symbol",
     "Noto Color Emoji";
-    background-color:var(--color-background);
     display: flex;
     flex-direction: column;
+    background-color:var(--color-background);
+    backdrop-filter:blur(10px);
 }
 
 
@@ -198,6 +201,7 @@ body {
     flex-direction:row;
     border-bottom: 1pt solid var(--color-hover-background);
     box-shadow: 0 3pt 0 rgba(0, 0, 0, 0.15);
+    background-color:var(--color-background);
 }
 
 .iib-menu-over img, .iib-menu-over svg, #more {
@@ -410,7 +414,7 @@ h2 {text-align:center;}
 .card:hover {background-color:var(--color-hover-background-alpha);color:var(--color-hover-background);}
 .card-title {font-family: 'Cairo', sans-serif;font-weight:bold;font-size:16pt;padding:5pt;line-height:16pt;}
 .card-text {padding:5pt;}
-.card-footer {padding:5pt;}
+.card-footer {padding:5pt;color:#fff;border-radius:3pt;}
 
 .submenu{display:flex;}
 .submenu div {font-family: 'Cairo', sans-serif;font-size:32pt;font-weight:bold;color:var(--color-hover-background); }
@@ -493,7 +497,7 @@ button.source-button:hover {background-color:#dc3545cc;}
 
 }
 
-.day {display: grid;grid-template-columns: 1fr 20pt;padding:10pt;gap:5pt;}
+.day {display: grid;grid-template-columns: 1fr;padding:10pt;gap:5pt;}
 .day:not(:first-child){}
 .day:hover{background-color:var(--color-hover-background-alpha);}
 
@@ -529,7 +533,7 @@ dialog{width:100vw;height:100vh;}
 }
 .themePinColor {fill:var(--color-filter);}
 .item-viewer-filename{color: #000000;background-color: #ffffffaa;}
-.item-viewer-button{background-color:var(--color-filter);width:30pt;height:30pt;border:0;border-radius:10pt;cursor:pointer;}
+.item-viewer-button{background-color:var(--color-filter);width:30pt;height:30pt;border:0;border-radius:5pt;cursor:pointer;}
 #close-dialog {cursor:pointer;background-color:#dc3545;border:0;border-radius:40pt;color:#fff;height:40pt;width:40pt;}
 
 #themeToggle {color:var(--color-text);cursor:pointer;}

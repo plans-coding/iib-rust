@@ -11,134 +11,145 @@
     {% endif %}
   </div>
 
-  <a href="coordinate-tool.html">Coordinate tool</a>
+  <a href="coordinate-tool.html" target="_blank"><button class="filter-button"><img src="images/photos.svg" />Coordinate Tool</button></a>
+  <a href="coordinate-tool.html" target="_blank"><button class="filter-button"><img src="images/photos.svg" />Generate SQL-code</button></a>
+  <a href="coordinate-tool.html" target="_blank"><button class="filter-button"><img src="images/photos.svg" />Reset</button></a>
+  <a href="coordinate-tool.html" target="_blank"><button class="filter-button"><img src="images/photos.svg" />Download file from OPFS</button></a>
+  <a href="coordinate-tool.html" target="_blank"><button class="filter-button"><img src="images/photos.svg" />Save changes to OPFS</button></a>
 
-  <h1>Generate trip creation code</h1>
+    <label>InnerId: <input type="text" name="InnerId"></label><br>
+    <label>OuterId: <input type="text" name="OuterId"></label><br>
+    <label>OverallDestination: <input type="text" name="OverallDestination"></label><br>
+    <label>MapPins: <input type="text" name="MapPins"></label><br>
+    <label>StartNode: <input type="text" name="StartNode"></label><br>
+    <label>EndNode: <input type="text" name="EndNode"></label><br>
+    <label>PhotoStarttime: <input type="time" name="PhotoStarttime"></label><br>
+    <label>PhotoEndtime: <input type="time" name="PhotoEndtime"></label><br>
+    <label>PhotoAlbums: <input type="text" name="PhotoAlbums"></label><br>
 
-  <div style="border: 3pt solid gold;">
-    <div>
-      <select id="selectTripDomain" onchange="updateMaxII(this.value)">
-        <option value="X">Choose trip domain</option>
-      </select>
-      <label for="currentMaxII">Curr Max(InnerId)</label><br />
-      <input type="text" id="currentMaxII" placeholder="" disabled>
+  <details open class="trip" data-trip-omain="" style="user-select:none;">
+  <summary data-trip-domain="" style="border-radius:3pt;">
+                <select>
+            {% for item in common.common_trip_domains %}
+              <option value="{{ item.DomainAbbreviation }}">{{ item.DomainDescription }}</option>
+            {% endfor %}
+            </select>
+            <input type="text" name="TripDescription">
+  </summary>
+
+  <div class="trip-layout">
+
+    <!-- Left Column -->
+    <div style="display:flex;flex-direction:column; gap: 2pt;">
+
+      <div style="display:flex;gap:2pt;flex-direction:row;">
+        <div class="trip-details-container">
+          <label class="trip-details-label">
+            {{ translation.trip.departureDate | default(value="Departure Date") }}
+          </label>
+          <div class="trip-details-field" data-trip-domain=""><input type="date" name="DepartureDate"></div>
+        </div>
+
+        <div class="trip-details-container">
+          <label class="trip-details-label">
+            {{ translation.trip.returnDate | default(value="Return Date") }}
+          </label>
+          <div class="trip-details-field" data-trip-domain=""><input type="date" name="ReturnDate"></div>
+        </div>
+
+        <div class="trip-details-container">
+          <label class="trip-details-label">
+            {{ translation.trip.numberOfDays | default(value="Number of Days") }}
+          </label>
+          <div class="trip-details-field" data-trip-domain="">0</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:2pt;flex-direction:row;">
+        <div class="trip-details-container">
+          <label class="trip-details-label">
+            {{ translation.trip.participantGroup | default(value="Participant Group") }}
+          </label>
+          <div class="trip-details-field" data-trip-domain="">
+            <!--<input type="text" name="ParticipantGroup">-->
+            <select>
+            {% for item in common.common_participant_groups %}
+              <option>{{ item.ParticipantGroup }}</option>
+            {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div class="trip-details-container">
+          <label class="trip-details-label">
+            {{ translation.trip.outerId | default(value="ID") }}
+          </label>
+          <div class="trip-details-field" data-trip-domain="">Auto???</div>
+        </div>
+
+        <div class="trip-details-container">
+          <label class="trip-details-label">
+            {{ translation.trip.numberOfCountries | default(value="Number of Countries") }}
+          </label>
+          <div class="trip-details-field" data-trip-domain="">TBC</div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column; gap:2pt;">
+        <div class="trip-details-container">
+          <label class="trip-details-label">
+            {{ translation.trip.uniqueCountries | default(value="Unique Countries") }}
+          </label>
+          <div class="trip-details-field" data-trip-domain="">TBC</div>
+        </div>
+
+        <div class="trip-details-container">
+          <label class="trip-details-label">
+            {{ translation.trip.overallRoute | default(value="Overall Route") }}
+          </label>
+          <div class="trip-details-field" data-trip-domain="">TBC</div>
+        </div>
+
+        <div class="trip-details-container">
+          <label class="trip-details-label">
+            {{ translation.trip.countryTripMovements | default(value="Country Trip Movements") }}
+          </label>
+          <div class="trip-details-field" data-trip-domain="">TBC</div>
+        </div>
+
+        <div class="trip-details-container">
+          <label class="trip-details-label">
+            {{ translation.trip.test | default(value="CoverPhoto") }}
+          </label>
+          <div class="trip-details-field" data-trip-domain=""><input type="text" name="CoverPhoto"></div>
+        </div>
+
+        <div class="trip-details-container">
+          <label class="trip-details-label">
+            {{ translation.trip.test | default(value="DocumentationNote") }}
+          </label>
+          <div class="trip-details-field" data-trip-domain=""><input type="text" name="DocumentationNote"></div>
+        </div>
+
+
+
+
+      </div>
+
     </div>
 
     <div>
-      <select id="selectOuterIdPrefixes" onchange="updateMaxOI(this.value)">
-        <option value="X">Choose numbering format</option>
-      </select>
-      <label for="currentMaxOI">Curr Max(OuterId)</label><br />
-      <input type="text" id="currentMaxOI" disabled>
+
+    Höger
+
+      {#
+        <div id="map-pin-data" data-trip-map-overall='{{ trip_map_pins_overall | json_encode }}' data-trip-map-accommodation='{{ trip_map_pins_accommodation | json_encode }}' data-theme-color="{{ theme_color }}"></div>
+        <div id="map" style="width:100%;height:100%;border-radius:3pt;"></div>
+      #}
+
     </div>
 
-    <!--
-    <div>
-      <label for="formCN">
-        <span onclick="navigator.clipboard.writeText(document.getElementById('formCN').value)" style="cursor:pointer;color:blue;">
-          Get current
-        </span>
-        (remember to add one afterwards)
-      </label><br />
-      <textarea id="formCN" disabled>
-  -- Get current highest InnerId for U
-  SELECT InnerId
-  FROM bewa_Overview
-  WHERE InnerId LIKE 'U%'
-  ORDER BY SUBSTR(InnerId, 2) + 0
-  DESC LIMIT 1;
-  -- Get current highest OuterId for P
-  SELECT OuterId
-  FROM bewa_Overview
-  WHERE OuterId LIKE 'P-%'
-    AND OuterId NOT LIKE 'P-%-%'  -- optional: avoid 'P-SE-' and similar
-  ORDER BY CAST(SUBSTR(OuterId, LENGTH('P-') + 1) AS INTEGER) DESC
-  LIMIT 1;</textarea>
-    </div>
-    -->
+
+
   </div>
-
-  <div style="background-color:rgb(29,101,94,0.2);">
-    <div><br />
-      <button onclick="copyPlusOne()" style="background-color:#1d655e;color:#fff;">
-        Copy numbers from above +1 &#8608;
-      </button>
-    </div>
-
-    <div>
-      <label for="formII">New InnerId</label><br />
-      <input type="text" id="formII" placeholder="X1" oninput="updateSQL()">
-    </div>
-
-    <div>
-      <label for="formOI">New OuterId</label><br />
-      <input type="text" id="formOI" placeholder="A-1" oninput="updateSQL()">
-    </div>
-  </div>
-
-  <div>
-    <div>
-      <label for="formOD">OverallDestination</label><br />
-      <input type="text" id="formOD" placeholder="String" oninput="updateSQL()">
-    </div>
-
-    <div>
-      <label for="formTD">TripDescription</label><br />
-      <input type="text" id="formTD" placeholder="String" oninput="updateSQL()">
-    </div>
-
-    <div>
-      <label for="selectParticipantGroup">ParticipantGroup</label><br />
-      <select id="selectParticipantGroup" onchange="updateSQL()">
-        <option value="X">Choose participant group</option>
-      </select>
-      <!-- <input type="text" id="formPG" placeholder="Word" oninput="updateSQL()"> -->
-    </div>
-
-    <div>
-      <label for="formTP"><b>Events [All Rows]:</b> TravelParticipants</label><br />
-      <input type="text" id="formTP" placeholder="Name A, Name B" oninput="updateSQL()">
-    </div>
-  </div>
-
-  <div>
-    <div>
-      <label for="formDD">DepartureDate</label><br />
-      <input type="date" id="formDD" placeholder="YYYY-MM-DD" oninput="updateSQL()">
-    </div>
-
-    <div>
-      <label for="formRD">ReturnDate</label><br />
-      <input type="date" id="formRD" placeholder="YYYY-MM-DD" oninput="updateSQL()">
-    </div>
-
-    <div>
-      <label for="formMP">MapPins</label><br />
-      <input type="text" id="formMP" placeholder="Add after creation" disabled>
-    </div>
-
-    <div>
-      <label for="formPS">PhotoStarttime</label><br />
-      <input type="text" id="formPS" placeholder="Add after creation" disabled>
-    </div>
-
-    <div>
-      <label for="formPE">PhotoEndtime</label><br />
-      <input type="text" id="formPE" placeholder="Add after creation" disabled>
-    </div>
-  </div>
-
-  <div>
-    <button onclick="navigator.clipboard.writeText(document.getElementById('sqlOutput').value)">
-      Copy SQLite code
-    </button>
-  </div>
-
-  <div>
-    <textarea id="sqlOutput" style="width:100%;height:100pt;" disabled></textarea>
-  </div>
-
-  <div>
-    <img src="img/frog.svg" style="height:30pt;" />
-  </div>
-</div>
+</details>

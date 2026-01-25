@@ -1,5 +1,9 @@
 <div class="gradient-bar-inactive"></div>
 <style>
+details.trip summary[data-trip-domain=''] { background-color: #000; }
+details.trip[data-trip-domain=''],
+.trip-details-field[data-trip-domain=''] { background-color: #00000022; }
+
 {% for tripDomain in common.common_trip_domains %}
 
 .days[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}] .theme-link {color:{{ tripDomain.Color }};background-color:{{ tripDomain.Color }}22;text-decoration:underline;}
@@ -66,6 +70,10 @@ details.trip[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}],
 .btn-filter-domain[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}]:active {
   background-color: {{ tripDomain.Color }}cc;
   color:#fff;
+}
+
+.card-footer[data-trip-domain={{ tripDomain.DomainAbbreviation }}] {
+  background-color: {{ tripDomain.Color }};
 }
 {% endfor %}
 </style>

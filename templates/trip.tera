@@ -3,7 +3,7 @@
 {% set cover_photo_id = cover_photos_list | get(key=trip_summary[0].OuterId, default="NO") %}
 
 body {
-    background: {%if cover_photo_id != "NO" %} linear-gradient(rgba(255,255,255,0.4), #f8fafd), url('{{ settings.Feature.ImmichUrl | safe }}api/assets/{{ cover_photo_id }}/thumbnail') {% endif %};
+    background: {%if cover_photo_id != "NO" %} linear-gradient(var(--color-background-alpha)), url('{{ settings.Feature.ImmichUrl | safe }}api/assets/{{ cover_photo_id }}/thumbnail') {% endif %};
     background-repeat: no-repeat;
     background-size: 100% auto;
     }
@@ -42,8 +42,10 @@ body {
 </svg></div></a>
     <div style="display:grid;grid-template-columns: auto auto auto auto;align-items: center;">
       <div class="widescreen">&nbsp;{{ translation.trip.trip | default(value="Trip") }}&nbsp;</div>
-      <img class="widescreen" style="margin-right:5pt;" src="images/arrow-right.svg" />
-      <div class="breadcrumb-link active">{{ trip_summary[0].OuterId }} {{ translation.trip.to | default(value="to") }} {{ trip_summary[0].OverallDestination }}</div>
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="widescreen bi bi-chevron-right" viewBox="0 0 16 16">
+    <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708"/>
+</svg>
+      <div class="breadcrumb-link active" style="background-color:{{ theme_color }}!important;">{{ trip_summary[0].OuterId }} {{ translation.trip.to | default(value="to") }} {{ trip_summary[0].OverallDestination }}</div>
     </div>
     <a href="?path=trip:{{ trip_next[0].OuterId }}"><div class="breadcrumb-trip-link active"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
     <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708"/>
@@ -224,7 +226,67 @@ body {
     
       <div class="day-left">
       
-        <div class="day-event">{{ day.Events }}</div>
+        <div class="day-event">
+
+            <div style="float:right;display:flex;flex-direction:column;gap:2pt;margin:0 0 5pt 5pt;">
+
+              {# Immich photos #}
+              {% if settings.Base.Immich == "Enabled" and day.OuterId not in settings.Base.ExcludeDayPhotos %}
+
+                  <a class="to-image-viewer" href="?path=images:{{ day.OuterId }}:{{ day.Date }}" target="_blank">
+                      <button type="button" class="item-viewer-button filter-button" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
+                          <img src="images/photos.svg" />
+                      </button>
+                  </a>
+
+              {% endif %}
+
+              {# Diary plugin #}
+
+              {% set_global day_year = day.Date | date(format="%G") %}
+              {% set_global day_week = day.Date | date(format="%V") %}
+              {% set_global day_date = day.Date | date(format="%Y%m%d") %}
+
+              {% if settings.Plugin.Diary.enabled %}
+                {% for file in settings.Plugin.Diary.filelist %}
+                  {% if day_year in file and day_week in file %}
+
+                    <button class="item-viewer-button" onclick="const img = document.getElementById('diary_image_{{ loop.index }}');if (!img.src) img.src = img.dataset.src;document.getElementById('diary_{{ loop.index }}').showModal();" type="button" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
+                        <img src="images/diary.svg" />
+                    </button>
+
+                    <dialog class="item-viewer" id="diary_{{ loop.index }}"  onclick="this.close();">
+                      <div class="item-viewer-filename" style="position:absolute;">{{ file }}</div>
+                      <img id="diary_image_{{ loop.index }}" data-src="{{ settings.Plugin.Diary.path }}{{ file }}" title="{{ file }}">
+                    </dialog>
+
+                  {% endif %}
+                {% endfor %}
+              {% endif %}
+
+              {# Passport plugin #}
+              {% if settings.Plugin.Passport.enabled %}
+                {% for file in settings.Plugin.Passport.filelist %}
+                  {% if day_date in file %}
+
+                    <button class="item-viewer-button" onclick="const img = document.getElementById('passport_image_{{ loop.index }}');if (!img.src) img.src = img.dataset.src;document.getElementById('passport_{{ loop.index }}').showModal();" type="button" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
+                        P
+                    </button>
+
+                    <dialog class="item-viewer" id="passport_{{ loop.index }}"  onclick="this.close();">
+                      <div class="item-viewer-filename" style="position:absolute;">{{ file }}</div>
+                      <img id="passport_image_{{ loop.index }}" data-src="{{ settings.Plugin.Passport.path }}{{ file }}" title="{{ file }}">
+                    </dialog>
+
+                  {% endif %}
+                {% endfor %}
+              {% endif %}
+
+          </div>
+
+        {{ day.Events }}
+
+        </div>
                 
         <div class="day-foot" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
           <div class="day-label"><div class="day-icon" data-iib-tripDomain='{{ trip_summary[0].DomainAbbreviation }}'>{{ loop.index - 1 }}</div> {{ day.Weekday | default(value="") }} {{ day.Date }}</div>
@@ -233,62 +295,6 @@ body {
               <span class="acc-text">{{ day.Accommodation }} – {{ day.AccommodationCountry }} – {{ day.AccommodationCoordinates }} {{ day.AccommodationCoordinateAccuracy | default(value="") }}</span>
           </a>
         </div>
-      
-      </div>
-      <div class="day-right">
-      
-
-          {# Immich photos #}
-          {% if settings.Base.Immich == "Enabled" and day.OuterId not in settings.Base.ExcludeDayPhotos %}
-
-              <a class="to-image-viewer" href="?path=images:{{ day.OuterId }}:{{ day.Date }}" target="_blank">
-                  <button type="button" class="item-viewer-button filter-button" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
-                      <img src="images/photos.svg" />
-                  </button>
-              </a>
-
-          {% endif %}
-          
-          {# Diary plugin #}
-
-          {% set_global day_year = day.Date | date(format="%G") %}
-          {% set_global day_week = day.Date | date(format="%V") %}
-          {% set_global day_date = day.Date | date(format="%Y%m%d") %}
-          
-          {% if settings.Plugin.Diary.enabled %}
-            {% for file in settings.Plugin.Diary.filelist %}
-              {% if day_year in file and day_week in file %}
-              
-                <button class="item-viewer-button" onclick="const img = document.getElementById('diary_image_{{ loop.index }}');if (!img.src) img.src = img.dataset.src;document.getElementById('diary_{{ loop.index }}').showModal();" type="button" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
-                    <img src="images/diary.svg" />
-                </button>
-                
-                <dialog class="item-viewer" id="diary_{{ loop.index }}"  onclick="this.close();">
-                  <div class="item-viewer-filename" style="position:absolute;">{{ file }}</div>
-                  <img id="diary_image_{{ loop.index }}" data-src="{{ settings.Plugin.Diary.path }}{{ file }}" title="{{ file }}">
-                </dialog>
-                
-              {% endif %}
-            {% endfor %}
-          {% endif %}
-          
-          {# Passport plugin #}
-          {% if settings.Plugin.Passport.enabled %}
-            {% for file in settings.Plugin.Passport.filelist %}
-              {% if day_date in file %}
-              
-                <button class="item-viewer-button" onclick="const img = document.getElementById('passport_image_{{ loop.index }}');if (!img.src) img.src = img.dataset.src;document.getElementById('passport_{{ loop.index }}').showModal();" type="button" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
-                    P
-                </button>
-                
-                <dialog class="item-viewer" id="passport_{{ loop.index }}"  onclick="this.close();">
-                  <div class="item-viewer-filename" style="position:absolute;">{{ file }}</div>
-                  <img id="passport_image_{{ loop.index }}" data-src="{{ settings.Plugin.Passport.path }}{{ file }}" title="{{ file }}">
-                </dialog>
-
-              {% endif %}
-            {% endfor %}
-          {% endif %}
       
       </div>
             

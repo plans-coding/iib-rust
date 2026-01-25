@@ -29,11 +29,11 @@
           </div>
         <!--<img src="{{ row.CoverPhoto }}" class="card-img-top" alt="...">-->
         <div class="card-body">
-          <div class="card-title">{{ row.OuterId }} {{ row.OverallDestination }}</div>
+          <div class="card-title" data-trip-domain="{{ row.TripDomain }}">{{ row.OuterId }} {{ row.OverallDestination }}</div>
           <div class="card-text">{{ row.TripDescription }}</div>
         </div>
         <div style="flex:1;"></div>
-        <div class="card-footer">
+        <div class="card-footer" data-trip-domain="{{ row.TripDomain }}">
           <small class="text-body-secondary">{{ row.TripYear }} &#x2022; {{ row.NumberOfDays }} {{ translation.explore.days | default(value="days") }}</small>
         </div>
       </a>

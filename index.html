@@ -735,7 +735,7 @@
                 const colorData = JSON.parse(chartDataDiv.getAttribute('data-json-color'));
 
                 const barColor = getComputedStyle(document.documentElement)
-                .getPropertyValue('--color-filter')
+                .getPropertyValue('--color-text')
                 .trim();
         
                 if (Array.isArray(jsonData) && jsonData.length > 0 && Array.isArray(colorData)) {
