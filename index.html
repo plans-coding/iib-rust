@@ -1109,13 +1109,14 @@
             });
 
             console.log("Missing cover photos:", missingCoverPhotos);
+            document.getElementById('count_missing_photos').textContent = missingCoverPhotos.length;
 
             const searchResults = await searchMissingCoverPhotos(
                 immichUrl,
                 missingCoverPhotos
             );
 
-            const assetIds = results.map(r => r.assetId).filter(id => id != null);
+            const assetIds = searchResults.map(r => r.assetId).filter(id => id != null);
 
             const addPhotos = await add_photo_to_album(immichUrl, immichCoverAlbumId, assetIds);
 
@@ -1148,7 +1149,9 @@
             await (await (await navigator.storage.getDirectory())
             .getFileHandle("cover_photos.json", { create: true }))
             .createWritable()
-            .then(w => (w.write(JSON.stringify(outerIdToAssetId, null, 2)), w.close()));
+            .then(w => (w.write(JSON.stringify(outerIdToAssetId, null, 2)), w.close())).then(() => {
+    document.getElementById("cover2opfs").textContent = "OK";
+  });
 
 
         }

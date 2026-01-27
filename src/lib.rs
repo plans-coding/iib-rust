@@ -31,7 +31,7 @@ const TEMPLATE_ABOUT: &str = include_str!("../templates/about.tera");
 const TEMPLATE_SOURCE: &str = include_str!("../templates/source.tera");
 const TEMPLATE_TOOLBOX_REPORT: &str = include_str!("../templates/toolbox/toolbox_report.tera");
 const TEMPLATE_TOOLBOX_INPUT: &str = include_str!("../templates/toolbox/toolbox_input.tera");
-const TEMPLATE_TOOLBOX_COVER: &str = include_str!("../templates/toolbox/toolbox_cover.tera");
+//const TEMPLATE_TOOLBOX_COVER: &str = include_str!("../templates/toolbox/toolbox_cover.tera");
 
 
 macro_rules! define_queries {
@@ -437,7 +437,9 @@ async fn page_load_internal() {
                 render_structure["page"] = json!({
                     "title": render_structure.pointer("/all/translation/source/title").and_then(|v| v.as_str()).unwrap_or("Source"),
                     "template": TEMPLATE_SOURCE,
-                    });
+                    "queries": [
+                        ["cover_photo_original_paths", "SELECT OuterId, CoverPhoto from bewa_Overview WHERE CoverPhoto IS NOT NULL;"],
+                    ]});
                 render_structure["all"]["db_loaded"] = json!(if !&db_bytes.is_empty() { "stored" } else { "missing" });
             }
             "more:about" => {
@@ -466,7 +468,7 @@ async fn page_load_internal() {
                             ["outer_id_max", "SELECT OuterId FROM bewa_Overview WHERE OuterId GLOB '_OUTER_ID_PREFIX_[0-9]*' ORDER BY CAST(substr(OuterId, length('_OUTER_ID_') + 1) AS INTEGER) DESC LIMIT 1;".replace("_OUTER_ID_PREFIX_","")]
                         ]});
                 }
-            "toolbox:cover" => {
+            /*"toolbox:cover" => {
                 render_structure["page"] = json!({
                     "title": render_structure.pointer("/all/translation/toolbox/cover").and_then(|v| v.as_str()).unwrap_or("Cover"),
                         "settings": render_structure["all"]["settings"],
@@ -474,7 +476,7 @@ async fn page_load_internal() {
                         "queries": [
                             ["cover_photo_original_paths", "SELECT OuterId, CoverPhoto from bewa_Overview WHERE CoverPhoto IS NOT NULL;"],
                         ]});
-            }
+            // }*/
             _ => {
             
                 web_sys::console::log_1(&"Second tier.".into());
@@ -650,7 +652,7 @@ async fn page_load_internal() {
             load_code_editor();
             initiate_spreadsheet();
             custom_queries();
-        } else if page == "toolbox:cover" {
+        } else if page == "more:source" {
             check_immich_authorization();
         }
         

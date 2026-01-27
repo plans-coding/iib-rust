@@ -1,7 +1,6 @@
 <style>
 /* Background photo from thumbnail */
 {% set cover_photo_id = cover_photos_list | get(key=trip_summary[0].OuterId, default="NO") %}
-
 body {
     background: {%if cover_photo_id != "NO" %} linear-gradient(var(--color-background-alpha)), url('{{ settings.Feature.ImmichUrl | safe }}api/assets/{{ cover_photo_id }}/thumbnail') {% endif %};
     background-repeat: no-repeat;

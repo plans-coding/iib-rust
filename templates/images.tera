@@ -1,4 +1,5 @@
 <style>
+html, body {height:100%;}
 section {max-width:100%!important;width:100%!important;margin:0!important;background-color:#000;}
 #app{flex:1;}
 #iib-foot{display:none;}

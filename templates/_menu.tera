@@ -1,8 +1,11 @@
 <div class="gradient-bar-inactive"></div>
 <style>
-details.trip summary[data-trip-domain=''] { background-color: #000; }
+details.trip summary[data-trip-domain=''] { background-color: var(--color-hover-background); }
 details.trip[data-trip-domain=''],
-.trip-details-field[data-trip-domain=''] { background-color: #00000022; }
+.trip-details-field[data-trip-domain=''] { background-color: var(--color-hover-background-alpha);  }
+details.trip[data-trip-domain=''],
+.trip-details-field[data-trip-domain=''] { background-color: var(--color-hover-background-alpha);  }
+
 
 {% for tripDomain in common.common_trip_domains %}
 
@@ -160,6 +163,7 @@ details.trip[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}],
         <div style="flex: 1;"></div>
         <a href="?path=dataset">{{ translation.menu.dataset | default(value="Dataset") }}</a>
         <a href="?path=toolbox:report" target="_blank">{{ translation.menu.toolbox | default(value="Toolbox") }}</a>
+        <a href="?path=toolbox:input" target="_blank">{{ translation.menu.createTrip | default(value="Create trip") }}</a>
         <a href="?path=more:source">{{ translation.source.title | default(value="Source") }}</a>
         <a href="?path=more:about">{{ translation.about.title | default(value="About") }}</a>
     </div>

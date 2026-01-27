@@ -1,14 +1,8 @@
 <div class="path-toolbox">
   <div class="breadcrumb">
-    <!--<img class="icon-color" src="images/frog.svg" />-->
-    <div>{{ translation.toolbox.title | default(value="Toolbox") }}</div>
-    <img src="images/arrow-right.svg" />
+    <img class="icon-color" src="images/frog.svg" />
+    <div>{{ translation.toolbox.report | default(value="Generate report") }}</div>
 
-    <a href="?path=toolbox:report" class="breadcrumb-link {% if query_params.path == 'toolbox:report' %}active{% endif %}">{{ translation.toolbox.report | default(value="Report") }}</a>
-    <a href="?path=toolbox:input" class="breadcrumb-link {% if query_params.path == 'toolbox:input' %}active{% endif %}">{{ translation.toolbox.input | default(value="Input tool") }}</a>
-    {% if settings.Base.Immich == "Enabled" %}
-      <a href="?path=toolbox:cover" class="breadcrumb-link {% if query_params.path == 'toolbox:cover' %}active{% endif %}">{{ translation.toolbox.cover | default(value="Cover Photo Sync") }}</a>
-    {% endif %}
   </div>
 
   <div style="max-width:80%;background-color:var(--color-hover-background-alpha);display:flex;border-radius:10pt;flex-direction:column;padding:10pt;gap:5pt;margin:auto;">
