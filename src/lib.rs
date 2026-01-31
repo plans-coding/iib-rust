@@ -30,6 +30,7 @@ const TEMPLATE_DATASET: &str = include_str!("../templates/dataset.tera");
 const TEMPLATE_ABOUT: &str = include_str!("../templates/about.tera");
 const TEMPLATE_SOURCE: &str = include_str!("../templates/source.tera");
 const TEMPLATE_TOOLBOX_REPORT: &str = include_str!("../templates/toolbox/toolbox_report.tera");
+const TEMPLATE_TOOLBOX_REPORT_OUTPUT: &str = include_str!("../templates/toolbox/toolbox_report_output.tera");
 const TEMPLATE_TOOLBOX_INPUT: &str = include_str!("../templates/toolbox/toolbox_input.tera");
 //const TEMPLATE_TOOLBOX_COVER: &str = include_str!("../templates/toolbox/toolbox_cover.tera");
 
@@ -113,6 +114,7 @@ extern "C" {
         immich_api_key: &str,
     );*/
     fn check_immich_authorization();
+    fn init_create_trip();
 }
 
 // -----------------------------------------------------------------------
@@ -572,6 +574,25 @@ async fn page_load_internal() {
                             ["search_event", QUERY_SEARCH_EVENT.to_string().replace("/*_STRING_*/", suffix)],
                         ]});
                 }
+
+                if let Some(suffix) = page.strip_prefix("toolbox:report:output:") {
+
+                    let mut parts = suffix.splitn(2, ':');
+
+                    if let (Some(title_string), Some(backside_string)) = (parts.next(), parts.next()) {
+                        let title_string = title_string.to_string();
+                        let backside_string = backside_string.to_string();
+
+                        render_structure["page"] = json!({
+                            "title": suffix,
+                            "template": TEMPLATE_TOOLBOX_REPORT_OUTPUT,
+                            "queries": [
+                                ["output", ""],
+                            ]});
+                        render_structure["all"]["title_string"] = json!(title_string);
+                        render_structure["all"]["backside_string"] = json!(backside_string);
+                    }
+                }
                 
             }
         }
@@ -654,7 +675,9 @@ async fn page_load_internal() {
             custom_queries();
         } else if page == "more:source" {
             check_immich_authorization();
+        } else if page == "toolbox:input" {
+            init_create_trip();
         }
-        
+
         
 }
