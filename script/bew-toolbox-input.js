@@ -121,6 +121,40 @@ async function generateSQLCode() {
 
 // OTHER ----------
 
+function copyPreviousDetails(btn, type) {
+    const currentEvent = btn.closest(".event");
+    if (!currentEvent) return;
+
+    const prevEvent = currentEvent.previousElementSibling;
+    if (!prevEvent) return;
+
+    const fieldGroups = {
+        AccommodationFields: [
+            "Accommodation",
+            "AccommodationCountry",
+            "AccommodationCoordinatesAccuracy",
+            "AccommodationCoordinates"
+        ],
+        TravelParticipants: [
+            "TravelParticipants"
+        ]
+    };
+
+    const fields = fieldGroups[type];
+    if (!fields) return;
+
+    for (const name of fields) {
+        const source = prevEvent.querySelector(`[name="${name}"]`);
+        const target = currentEvent.querySelector(`[name="${name}"]`);
+
+        if (source && target) {
+            target.value = source.value ?? "";
+        }
+    }
+}
+
+
+
 function checkDates() {
 
     const startDateInput = document.querySelector('input[name="DepartureDate"]');
@@ -133,6 +167,7 @@ function checkDates() {
         dateStatusEl.textContent = "Select start and end date";
     } else {
         dateStatusEl.textContent = ""; // clear message
+        document.getElementById("trip_summary_inputs").open = false;
     }
 }
 
@@ -142,14 +177,10 @@ checkDates();
 let isDirty = false;
 let saveTimer = null;
 
-const statusEl = document.getElementById("current_trip_documentation_status");
-
-
-
 function setStatus(text) {
-    if (statusEl) statusEl.textContent = text;
+    const el = document.getElementById("current_trip_documentation_status");
+    if (el) el.textContent = text;
 }
-
 
 function markDirty() {
     if (isDirty) return;
@@ -259,31 +290,44 @@ function populateOverview(data) {
     });
 }
 
-function createEventElement(dateStr, eventData = {}) {
+function createEventElement(dateStr, eventData = {}, index = 0) {
     const div = document.createElement("div");
     div.className = "event";
-    div.style.border = "1px solid #ccc";
-    div.style.padding = "6px";
-    div.style.marginBottom = "6px";
+    div.style.border = "0px solid #ccc";
+    div.style.padding = "0px";
+    div.style.marginBottom = "5pt";
 
     div.innerHTML = `
-    <details>
-    <summary><b>${dateStr}</b></summary>
-    <div>
-    <input type="hidden" name="Date" value="${dateStr}">
-    </div>
+    <details style="border-radius:10pt;border:3pt solid var(--color-hover-background);padding:3pt;user-select:none;">
+        <summary style="padding:0 0 5pt 0;color:var(--color-hover-background);"><b>Day ${index}: ${dateStr}</b></summary>
+        <div>
+        <input type="hidden" name="Date" value="${dateStr}">
+        </div>
 
-    <label>Events: <textarea type="text" class="form-control" name="Events" value="${eventData.Events || ""}"></textarea></label><br>
-    <div style="display:flex;flex-direction:row;">
-    <label>Accommodation: <input class="form-control" name="Accommodation" value="${eventData.Accommodation || ""}"></label><br>
-    <label>AccommodationCountry: <input type="text" name="AccommodationCountry" value="${eventData.AccommodationCountry || ""}" class="form-control"></label><br>
-    <label>AccommodationCoordinatesAccuracy: <input type="text" name="AccommodationCoordinatesAccuracy" value="${eventData.AccommodationCoordinatesAccuracy || ""}" class="form-control"></label><br>
-    <label>AccommodationCoordinates: <input type="text" name="AccommodationCoordinates" value="${eventData.AccommodationCoordinates || ""}" class="form-control"></label><br>
-    </div>
-    <label>TravelParticipants: <input type="text" name="TravelParticipants" value="${eventData.TravelParticipants || ""}" class="form-control"></label><br>
-    <label>AdditionalNotes: <input type="text" name="AdditionalNotes" value="${eventData.AdditionalNotes || ""}" class="form-control"></label><br>
-    <label>CountriesDuringDay: <input type="text" name="CountriesDuringDay" value="${eventData.CountriesDuringDay || ""}" class="form-control"></label><br>
+        <label>Events <textarea type="text" class="form-control" name="Events" value="${eventData.Events || ""}"></textarea></label><br>
 
+        <div style="display:flex;flex-direction:row;flex-wrap:wrap;gap:2pt;">
+            <label style="flex:1;">Accommodation <input class="form-control" name="Accommodation" value="${eventData.Accommodation || ""}"></label><br>
+            <label style="flex:1;">AccommodationCountry <input type="text" name="AccommodationCountry" value="${eventData.AccommodationCountry || ""}" class="form-control"></label><br>
+            <label style="flex:1;">AccommodationCoordinatesAccuracy <input type="text" name="AccommodationCoordinatesAccuracy" value="${eventData.AccommodationCoordinatesAccuracy || ""}" class="form-control"></label><br>
+            <label style="flex:1;">AccommodationCoordinates <input type="text" name="AccommodationCoordinates" value="${eventData.AccommodationCoordinates || ""}" class="form-control"></label><br>
+            <button style="flex:1;" class="filter-button" type="button" onclick="copyPreviousDetails(this, 'AccommodationFields')">Copy</button>
+        </div>
+
+        <br>
+
+        <div style="display:flex;flex-direction:column;flex-wrap:wrap;gap:5pt;">
+            <label>TravelParticipants <input type="text" name="TravelParticipants" value="${eventData.TravelParticipants || ""}" class="form-control"></label>
+            <button class="filter-button" style="flex:1;" type="button" onclick="copyPreviousDetails(this, 'TravelParticipants')">Copy</button><br>
+        </div>
+
+
+        <label>AdditionalNotes <input type="text" name="AdditionalNotes" value="${eventData.AdditionalNotes || ""}" class="form-control"></label>
+
+        <br>
+
+        <label>CountriesDuringDay <input type="text" name="CountriesDuringDay" value="${eventData.CountriesDuringDay || ""}" class="form-control"></label>
+        <br>
 
     </details>
     `;
@@ -326,7 +370,10 @@ function syncEventsToDateSpan(existingEvents = []) {
         d.setDate(d.getDate() + i);
 
         const dateStr = d.toISOString().split("T")[0];
-        fs.appendChild(createEventElement(dateStr, existingEvents[i] || {}));
+
+        fs.appendChild(
+            createEventElement(dateStr, existingEvents[i] || {}, i)
+        );
     }
 }
 
