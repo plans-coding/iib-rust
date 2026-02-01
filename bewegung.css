@@ -550,11 +550,13 @@ dialog{width:100vw;height:100vh;}
     #iib-foot {display:none;}
     .card-container, #statistics-summary-flex, #statistics-summary-flex-widget { flex-direction: column!important; }
     #filter-button-overmenu{display:none;}
+    #non_widescreen {display:none;}
 }
 
 @media (min-width: 601px) {
     #overview svg, #map_menu svg, #statistics svg {display:none;}
     #filter-button-undermenu{display:none;}
+    #non_widescreen {display:block;}
 }
 
 

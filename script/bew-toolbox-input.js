@@ -165,8 +165,10 @@ function checkDates() {
 
     if (!startDateInput.value || !endDateInput.value) {
         dateStatusEl.textContent = "Select start and end date";
+        dateStatusEl.style.display = "block";
     } else {
         dateStatusEl.textContent = ""; // clear message
+        dateStatusEl.style.display = "none";
         document.getElementById("trip_summary_inputs").open = false;
     }
 }
@@ -298,36 +300,62 @@ function createEventElement(dateStr, eventData = {}, index = 0) {
     div.style.marginBottom = "5pt";
 
     div.innerHTML = `
-    <details style="border-radius:10pt;border:3pt solid var(--color-hover-background);padding:3pt;user-select:none;">
-        <summary style="padding:0 0 5pt 0;color:var(--color-hover-background);"><b>Day ${index}: ${dateStr}</b></summary>
+    <details style="border-radius:10pt;background-color: var(--color-hover-background-alpha);padding:5pt;user-select:none;">
+        <summary style="padding:5pt;color:var(--color-hover-background);"><b>Day ${index}: ${dateStr}</b></summary>
         <div>
         <input type="hidden" name="Date" value="${dateStr}">
         </div>
 
-        <label>Events <textarea type="text" class="form-control" name="Events" value="${eventData.Events || ""}"></textarea></label><br>
-
-        <div style="display:flex;flex-direction:row;flex-wrap:wrap;gap:2pt;">
-            <label style="flex:1;">Accommodation <input class="form-control" name="Accommodation" value="${eventData.Accommodation || ""}"></label><br>
-            <label style="flex:1;">AccommodationCountry <input type="text" name="AccommodationCountry" value="${eventData.AccommodationCountry || ""}" class="form-control"></label><br>
-            <label style="flex:1;">AccommodationCoordinatesAccuracy <input type="text" name="AccommodationCoordinatesAccuracy" value="${eventData.AccommodationCoordinatesAccuracy || ""}" class="form-control"></label><br>
-            <label style="flex:1;">AccommodationCoordinates <input type="text" name="AccommodationCoordinates" value="${eventData.AccommodationCoordinates || ""}" class="form-control"></label><br>
-            <button style="flex:1;" class="filter-button" type="button" onclick="copyPreviousDetails(this, 'AccommodationFields')">Copy</button>
+        <div class="trip-details-container" style="background-color: var(--color-hover-background-alpha);border-radius:5pt;margin-bottom:5pt;">
+            <div class="trip-details-label"><label>Events</label></div>
+            <div class="trip-details-field"><textarea type="text" class="form-control" name="Events" value="${eventData.Events || ""}"></textarea></div>
         </div>
 
-        <br>
+        <div style="background-color: var(--color-hover-background-alpha);padding:5pt;border-radius:5pt;">
 
-        <div style="display:flex;flex-direction:column;flex-wrap:wrap;gap:5pt;">
-            <label>TravelParticipants <input type="text" name="TravelParticipants" value="${eventData.TravelParticipants || ""}" class="form-control"></label>
-            <button class="filter-button" style="flex:1;" type="button" onclick="copyPreviousDetails(this, 'TravelParticipants')">Copy</button><br>
+            <div style="display:flex;flex-direction:row;flex-wrap:wrap;gap:2pt;margin-bottom:5pt;">
+
+                <div class="trip-details-container">
+                    <div class="trip-details-label"><label>Accommodation</label></div>
+                    <div class="trip-details-field"><input class="form-control" name="Accommodation" value="${eventData.Accommodation || ""}"></div>
+                </div>
+
+                <div class="trip-details-container">
+                    <div class="trip-details-label"><label>AccCountry</label></div>
+                    <div class="trip-details-field"><input type="text" name="AccommodationCountry" value="${eventData.AccommodationCountry || ""}" class="form-control"></div>
+                </div>
+
+                <div class="trip-details-container">
+                    <div class="trip-details-label"><label>AccAccuracy</label></div>
+                    <div class="trip-details-field"><input type="text" name="AccommodationCoordinatesAccuracy" value="${eventData.AccommodationCoordinatesAccuracy || ""}" class="form-control"></div>
+                </div>
+
+                <div class="trip-details-container">
+                    <div class="trip-details-label"><label>AccCoordinates</label></div>
+                    <div class="trip-details-field"><input type="text" name="AccommodationCoordinates" value="${eventData.AccommodationCoordinates || ""}" class="form-control"></div>
+                </div>
+
+            </div>
+            <div style="padding:0 5pt 5pt 5pt;"><button style="width:100%;" class="filter-button" type="button" onclick="copyPreviousDetails(this, 'AccommodationFields')">Copy Accommodation</button></div>
+
+            <div class="trip-details-container">
+                <div class="trip-details-label"><label>Travel Participants</label></div>
+                <div class="trip-details-field"><input type="text" name="TravelParticipants" value="${eventData.TravelParticipants || ""}" class="form-control"></div>
+            </div>
+
+            <div style="padding:0 5pt 5pt 5pt;"><button style="width:100%;" class="filter-button" type="button" onclick="copyPreviousDetails(this, 'TravelParticipants')">Copy TravelParticipants</button></div>
+
+            <div class="trip-details-container">
+                <div class="trip-details-label"><label>Additional Notes</label></div>
+                <div class="trip-details-field"><input type="text" name="AdditionalNotes" value="${eventData.AdditionalNotes || ""}" class="form-control"></div>
+            </div>
+
+            <div class="trip-details-container">
+                <div class="trip-details-label"><label>Countries During Day</label></div>
+                <div class="trip-details-field"><input type="text" name="CountriesDuringDay" value="${eventData.CountriesDuringDay || ""}" class="form-control"></div>
+            </div>
+
         </div>
-
-
-        <label>AdditionalNotes <input type="text" name="AdditionalNotes" value="${eventData.AdditionalNotes || ""}" class="form-control"></label>
-
-        <br>
-
-        <label>CountriesDuringDay <input type="text" name="CountriesDuringDay" value="${eventData.CountriesDuringDay || ""}" class="form-control"></label>
-        <br>
 
     </details>
     `;
