@@ -65,6 +65,7 @@ async function check_immich_authorization() {
         document.getElementById("immich_authorization_status").classList.remove("red-text");
         document.getElementById("immich_authorization_status").classList.add("green-text");
         document.getElementById("immich_authorization_status_OK").style.display = "block";
+        document.getElementById("immich_authorization_status_OK_buttons").style.display = "block";
         console.log("Immich Auth OK");
         return response.status === 200;
     } catch (err) {
