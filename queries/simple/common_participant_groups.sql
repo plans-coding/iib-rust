@@ -1,4 +1,4 @@
-SELECT
-    *
+SELECT DISTINCT
+    ParticipantGroup
 FROM
-    bewx_ParticipantGroups;
+    bewa_Overview;

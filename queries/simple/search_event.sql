@@ -1,5 +1,5 @@
 SELECT
-    SUBSTR(o.InnerId, 1, 1) AS DomainAbbreviation,
+    TripDomain AS DomainAbbreviation,
     o.OuterId AS OuterId,
     e.InnerId,
     o.OverallDestination AS OverallDestination,

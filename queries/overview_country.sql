@@ -1,4 +1,29 @@
-WITH OrderedEvents AS (
+WITH ContinentCountriesParsed AS (
+    -- Parses the ContinentCountries setting from bewx_Settings
+    WITH RECURSIVE split(str, line, rest) AS (
+      SELECT
+        Value,
+        substr(Value || char(10), 1, instr(Value || char(10), char(10)) - 1),
+        substr(Value || char(10), instr(Value || char(10), char(10)) + 1)
+      FROM bewx_Settings
+      WHERE Attribute = 'ContinentCountries'
+
+      UNION ALL
+
+      SELECT
+        str,
+        substr(rest, 1, instr(rest, char(10)) - 1),
+        substr(rest, instr(rest, char(10)) + 1)
+      FROM split
+      WHERE rest != ''
+    )
+    SELECT
+      substr(line, 1, instr(line, ':') - 1) AS Continent,
+      substr(line, instr(line, ':') + 1) AS Country
+    FROM split
+    WHERE line != ''
+),
+OrderedEvents AS (
     -- Orders events by date to process country sequences correctly
     SELECT InnerId, countriesduringday, Date
     FROM bewb_Events
@@ -43,7 +68,7 @@ normalized AS (
         b.OverallDestination,
         b.ParticipantGroup,
         b.DepartureDate,
-        SUBSTR(a.InnerId, 1, 1) AS TripDomain
+		b.TripDomain
     FROM BorderCrossings AS a,
         json_each('["' || REPLACE(AllBorderCrossings, ', ', '", "') || '"]')
     LEFT JOIN  bewa_Overview AS b
@@ -57,17 +82,17 @@ SELECT
     c.Continent,
     n.Country,
     GROUP_CONCAT(n.OuterID, ', ') AS OuterIDs,
-    GROUP_CONCAT(n.InnerId, ', ') AS InnerIDs,
+	GROUP_CONCAT(n.TripDomain, ', ') AS TripDomains,
     GROUP_CONCAT(n.OverallDestination, ' | ') AS OverallDestination,
     GROUP_CONCAT(n.ParticipantGroup, ' | ') AS ParticipantGroup
 FROM (
     -- Filters out special country markers before final grouping
-    SELECT DISTINCT Country, OuterID, InnerId, OverallDestination, ParticipantGroup
+    SELECT DISTINCT Country, OuterID, InnerId, TripDomain, OverallDestination, ParticipantGroup
     FROM normalized
     WHERE OriginalCountry NOT LIKE '+%'
     AND OriginalCountry NOT LIKE '**%'
 ) AS n
-LEFT JOIN bewx_ContinentCountries AS c
+LEFT JOIN ContinentCountriesParsed AS c
 ON c.Country = n.Country
 GROUP BY c.Continent, n.Country
 ORDER BY

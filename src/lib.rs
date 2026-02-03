@@ -225,7 +225,7 @@ async fn session_load() -> (Vec<u8>, serde_json::Value) {
     
         // Get translation
         let translation_query = vec![
-            ("translation_filename".to_string(), "SELECT Value FROM bewxx_Settings WHERE AttributeGroup = 'Base' AND Attribute = 'LanguageFile';".to_string())
+            ("translation_filename".to_string(), "SELECT Value FROM bewx_Settings WHERE AttributeGroup = 'Base' AND Attribute = 'LanguageFile';".to_string())
         ];
         let translation_filename = sqlite_query::get_query_data(&db_bytes, translation_query).await;
         let json_obj: serde_json::Value = serde_json::to_value(&translation_filename).expect("ERROR");
@@ -233,27 +233,32 @@ async fn session_load() -> (Vec<u8>, serde_json::Value) {
         web_sys::console::log_1(&translation_filename_extracted.as_str().into());
         let translation_content = filecontent::fetch_json(&translation_filename_extracted).await.unwrap_or(serde_json::Value::String("".to_string()));
         //web_sys::console::log_1(&serde_json::to_string(&translation_content).expect("ERROR").into());
-    
+
         // Get all settings
         let settings_query = vec![
-            ("settings".to_string(), "SELECT * FROM bewxx_Settings;".to_string())
+            ("settings".to_string(), "SELECT * FROM bewx_Settings;".to_string())
         ];
+
         let settings_response = sqlite_query::get_query_data(&db_bytes, settings_query).await;
-    
-    
+
         //crender_structure["all"]["settings"] = serde_json::to_value(&settings_response["settings"]).expect("ERROR");
+        web_sys::console::log_1(&serde_json::to_string(&settings_response["settings"]).expect("ERROR").into());
         render_structure["all"]["settings"] = helper::transform_settings(&settings_response["settings"].as_array().expect("ERROR"));
         render_structure["all"]["translation"] = translation_content;//.expect("Error with translation data.");
+
         web_sys::console::log_1(&serde_json::to_string(&render_structure["all"]["settings"]).expect("ERROR").into());
-        
+
         // RENDER TO 'MENU'  -----------------------------------------------------------------------
         let common_data = vec![
             ("common_trip_domains".to_string(), QUERY_COMMON_TRIP_DOMAINS.to_string()),
             ("common_participant_groups".to_string(), QUERY_COMMON_PARTICIPANT_GROUPS.to_string())
         ];
+
         render_structure["all"]["common"] = sqlite_query::get_query_data(&db_bytes, common_data).await;
+
         let _ = render::render2dom(TEMPLATE_MENU, &render_structure["all"], "menu", false);
-        
+
+        //web_sys::console::log_1(&serde_json::to_string(&render_structure["all"]).expect("ERROR").into());
         initialize_theme_color();
         
         (db_bytes, render_structure)
@@ -470,15 +475,6 @@ async fn page_load_internal() {
                             ["outer_id_max", "SELECT OuterId FROM bewa_Overview WHERE OuterId GLOB '_OUTER_ID_PREFIX_[0-9]*' ORDER BY CAST(substr(OuterId, length('_OUTER_ID_') + 1) AS INTEGER) DESC LIMIT 1;".replace("_OUTER_ID_PREFIX_","")]
                         ]});
                 }
-            /*"toolbox:cover" => {
-                render_structure["page"] = json!({
-                    "title": render_structure.pointer("/all/translation/toolbox/cover").and_then(|v| v.as_str()).unwrap_or("Cover"),
-                        "settings": render_structure["all"]["settings"],
-                        "template": TEMPLATE_TOOLBOX_COVER,
-                        "queries": [
-                            ["cover_photo_original_paths", "SELECT OuterId, CoverPhoto from bewa_Overview WHERE CoverPhoto IS NOT NULL;"],
-                        ]});
-            // }*/
             _ => {
             
                 web_sys::console::log_1(&"Second tier.".into());
@@ -646,15 +642,6 @@ async fn page_load_internal() {
         helper::attach_select_listener();
         
         // POST CODE  -----------------------------------------------------------------------
-        /*if map_request == "trip" {
-            load_trip_map();
-        } else if map_request == "contour" {
-            load_contour_map();
-        } else if map_request == "country" {
-            load_country_map();
-        } else if map_request == "theme" {
-            load_theme_map();
-        }*/
 
         match map_request {
             "trip" => load_trip_map(),
@@ -667,6 +654,8 @@ async fn page_load_internal() {
         initializeChart();
         initializeChartOvernights();
 
+
+/*
         if page == "trip" {
             //applyTripCoverPhotos(&render_structure["all"]["settings"]["Feature"]["ImmichApiUrl"].to_string(),&render_structure["all"]["settings"]["Feature"]["ImmichApiKey"].to_string());
         } else if page == "dataset" {
@@ -677,7 +666,20 @@ async fn page_load_internal() {
             check_immich_authorization();
         } else if page == "toolbox:input" {
             init_create_trip();
-        }
+        }*/
 
+        match page {
+            "trip" => {
+                //applyTripCoverPhotos(&render_structure["all"]["settings"]["Feature"]["ImmichApiUrl"].to_string(),&render_structure["all"]["settings"]["Feature"]["ImmichApiKey"].to_string());
+            }
+            "dataset" => {
+                load_code_editor();
+                initiate_spreadsheet();
+                custom_queries();
+            }
+            "more:source" => check_immich_authorization(),
+            "toolbox:input" => init_create_trip(),
+            _ => {}
+        }
         
 }

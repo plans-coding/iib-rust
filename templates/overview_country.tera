@@ -79,7 +79,7 @@
           <div class="country-trips">
 
               {% set countryOuterId = row.OuterIDs | split(pat=", ") %}
-              {% set countryInnerId = row.InnerIDs | split(pat=", ") %}
+              {% set countryInnerId = row.TripDomains | split(pat=", ") %}
               {% set countryOverallDestination = row.OverallDestination | split(pat=" | ") %}
               {% set countryParticipantGroup = row.ParticipantGroup | split(pat=" | ") %}
 
@@ -87,7 +87,7 @@
                   {% set i = loop.index0 %}
                   <a href="?path=trip:{{ countryOuterId[i] }}" class="iib-decade iib-item"
                       data-iib-participantGroup="{{ countryParticipantGroup[i] }}"
-                      data-iib-tripDomain="{{ countryInnerId[i] | truncate(length=1, end="") }}">
+                      data-iib-tripDomain="{{ countryInnerId[i] }}">
                       {{ countryOuterId[i] }} {{ countryOverallDestination[i] }}
                   </a>
               {% endfor %}
@@ -131,7 +131,7 @@
         <td class="text-start">
 
           {% set countryOuterId = row.OuterIDs | split(pat=", ") %}
-          {% set countryInnerId = row.InnerIDs | split(pat=", ") %}
+          {% set countryInnerId = row.TripDomains | split(pat=", ") %}
           {% set countryOverallDestination = row.OverallDestination | split(pat=" | ") %}
           {% set countryParticipantGroup = row.ParticipantGroup | split(pat=" | ") %}
 
@@ -141,7 +141,7 @@
                 style="display:inline-block;"
                 class="iib-decade iib-item"
                 data-iib-participantGroup="{{ countryParticipantGroup[i] }}"
-                data-iib-tripDomain="{{ countryInnerId[i] | truncate(length=1, end="") }}"
+                data-iib-tripDomain="{{ countryInnerId[i] }}"
               >
                 {{ countryOuterId[i] }} {{ countryOverallDestination[i] }}
             </a>

@@ -41,7 +41,7 @@ BorderCrossings AS (
 )
 
 SELECT
-    SUBSTR(InnerId, 1, 1) AS DomainAbbreviation,
+    TripDomain AS DomainAbbreviation,
     *
 FROM
     bewa_Overview

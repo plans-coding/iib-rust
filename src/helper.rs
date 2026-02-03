@@ -167,6 +167,7 @@ pub async fn get_latest_version_number() -> String {
     latest_version_number.expect("No version number found")
 }
 
+/*
 pub fn transform_settings(settings_array: &Vec<Value>) -> Value {
     let mut result = Map::new();
 
@@ -192,7 +193,37 @@ pub fn transform_settings(settings_array: &Vec<Value>) -> Value {
     }
 
     Value::Object(result)
+}*/
+
+pub fn transform_settings(settings_array: &Vec<Value>) -> Value {
+    let mut result = Map::new();
+
+    for setting in settings_array {
+        let attribute = setting["Attribute"].as_str().unwrap_or("unknown");
+        let group = setting["AttributeGroup"].as_str().unwrap_or("unknown");
+
+        let value: Value = match &setting["Value"] {
+            Value::String(s) => {
+                if s.starts_with('{') || s.starts_with('[') {
+                    serde_json::from_str(s).unwrap_or(Value::String(s.clone()))
+                } else {
+                    Value::String(s.clone())
+                }
+            }
+            other => other.clone(), // handles null, numbers, booleans
+        };
+
+        result
+        .entry(group)
+        .or_insert_with(|| Value::Object(Map::new()))
+        .as_object_mut()
+        .unwrap()
+        .insert(attribute.to_string(), value);
+    }
+
+    Value::Object(result)
 }
+
 
 pub trait SqlFilterReplace {
     fn replace_filter(self, placeholder: &str, data: &Value) -> String;
@@ -229,44 +260,6 @@ impl SqlFilterReplace for String {
 }
 
 // JSON output
-/*
-pub async fn user_run_sql_internal(sql: String) {
-
-    let db_bytes = DB_BYTES.get().expect("DB not initialized");
-
-    let combined_query = vec![
-        ("user_sql".to_string(), sql.clone())
-    ];
-
-    let query_response: serde_json::Value = sqlite_query::get_query_data(&db_bytes, combined_query).await;
-
-    //web_sys::console::log_1(&serde_json::to_string(&query_response["user_sql"]).expect("ERROR").into());
-
-    let json = serde_json::to_string(&query_response["user_sql"]).expect("JSON serialization failed");
-
-    let document = match web_sys::window().and_then(|w| w.document()) {
-        Some(d) => d,
-        None => return,
-    };
-
-    let element = match document.get_element_by_id("sql_output_data") {
-        Some(e) => e,
-        None => {
-            web_sys::console::error_1(
-                &"Element #sql_output_data not found".into()
-            );
-            return;
-        }
-    };
-
-    let html_element: web_sys::HtmlElement = match element.dyn_into() {
-        Ok(e) => e,
-        Err(_) => return,
-    };
-
-    html_element.set_inner_text(&json);
-
-}*/
 
 pub async fn user_run_sql_internal(sql: String) {
     let db_bytes = DB_BYTES.get().expect("DB not initialized");

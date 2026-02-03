@@ -9,7 +9,7 @@ ORDER BY DepartureDate ASC
 LIMIT 1;*/
 SELECT
 	OuterId,
-	SUBSTR(InnerId, 1, 1) AS TripDomain
+	TripDomain
 FROM bewa_Overview
 WHERE OuterID IS NOT NULL AND DepartureDate > (
     SELECT

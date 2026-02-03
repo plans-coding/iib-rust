@@ -13,5 +13,5 @@ SELECT o.OuterId AS OuterId, e.InnerId,
 FROM bewb_Events e
 JOIN bewa_Overview o ON e.InnerId = o.InnerId
 WHERE
-    OuterId = '/*_OUTER_ID_*/'
+    o.OuterId = '/*_OUTER_ID_*/'
 ORDER BY Date ASC;

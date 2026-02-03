@@ -1,6 +1,6 @@
 SELECT
     bewa_Overview.OuterId,
-    SUBSTR(bewb_Events.InnerId, 1, 1) AS DomainAbbreviation,
+    bewb_Events.TripDomain AS DomainAbbreviation,
     bewb_Events.Date
 FROM
     bewa_Overview

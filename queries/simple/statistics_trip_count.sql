@@ -1,6 +1,6 @@
 SELECT
     COUNT(InnerId) AS Count,
-    SUBSTR(InnerId, 1, 1) AS TripDomain
+    TripDomain
 FROM
     bewa_Overview
 /*WHERE
