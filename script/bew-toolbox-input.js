@@ -75,42 +75,84 @@ async function removeTripDataFromOPFS() {
 
 // GENERATE SQL FROM JSON ----
 
-function escapeSQLiteString(value) {
-    if (value === null || value === undefined) return "NULL";
+function toSQLiteLiteral(value) {
+    // null/undefined/empty string → NULL
+    if (value === null || value === undefined || value === "") {
+        return "NULL";
+    }
+
+    // numbers pass through
+    if (typeof value === "number") {
+        return value.toString();
+    }
+
+    // strings escaped
     return `'${value.toString().replace(/'/g, "''")}'`;
 }
 
-function objectToSQLiteInsert(tableName, obj) {
-    const columns = Object.keys(obj).join(", ");
-    const values = Object.values(obj).map(escapeSQLiteString).join(", ");
-    return `INSERT INTO ${tableName} (${columns}) VALUES (${values});`;
+function buildOverviewInsert(obj) {
+    const allColumns = Object.keys(obj);
+
+    // remove InnerId because we generate it
+    const dataColumns = allColumns.filter(c => c !== "InnerId");
+
+    const values = dataColumns.map(c => toSQLiteLiteral(obj[c]));
+
+    return `
+    -- Overview
+    INSERT INTO bewa_Overview (
+        InnerId, ${dataColumns.join(", ")}
+    )
+    SELECT
+    generatedInnerId,
+    ${values.join(",\n  ")}
+    FROM _p;`;
+}
+
+function buildEventsInsert(events) {
+    if (!events.length) return "";
+
+    const columns = Object.keys(events[0]).filter(c => c !== "InnerId");
+
+    const selects = events.map(e => {
+        const values = columns.map(c => toSQLiteLiteral(e[c])).join(", ");
+        return `SELECT generatedInnerId, ${values} FROM _p`;
+    });
+
+    return `
+    WITH _p AS (
+        SELECT InnerId AS generatedInnerId
+        FROM bewa_Overview
+        ORDER BY rowid DESC LIMIT 1
+    )
+
+    -- Events (explicit rows)
+    INSERT INTO bewb_Events (
+        InnerId, ${columns.join(", ")}
+    )
+    ${selects.join("\nUNION ALL\n")};`;
 }
 
 async function generateSQLCode() {
     try {
-        // Get the OPFS root directory
         const root = await navigator.storage.getDirectory();
-
-        // Get the file handle for tripData.json
         const fileHandle = await root.getFileHandle("tripData.json");
         const file = await fileHandle.getFile();
 
-        // Read the file as JSON
         const jsonData = JSON.parse(await file.text());
 
-        // Convert overview to SQLite INSERT
-        const overviewSQL = objectToSQLiteInsert("bewa_Overview", jsonData.overview);
+        const overviewSQL = buildOverviewInsert(jsonData.overview);
+        const eventsSQL   = buildEventsInsert(jsonData.events);
 
-        // Convert events to SQLite INSERTs
-        const eventsSQL = jsonData.events.map(event =>
-        objectToSQLiteInsert("bewb_Events", event)
-        ).join("\n");
+        const finalSQL = `
+        WITH _p AS (
+            SELECT lower(hex(randomblob(3))) AS generatedInnerId
+        )
+        ${overviewSQL}
+        ${eventsSQL}
+        `;
 
-        const finalSQL = overviewSQL + "\n" + eventsSQL;
-
-        //console.log(finalSQL);
-
-        document.getElementById('generated_sql_code').textContent = finalSQL;
+        document.getElementById('generated_sql_code').textContent = finalSQL.trim();
         document.getElementById('generated_sql_code').style.display = 'block';
 
     } catch (err) {

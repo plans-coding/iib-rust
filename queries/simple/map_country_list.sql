@@ -1,7 +1,7 @@
 SELECT
     DISTINCT AccommodationCountry
 FROM
-    IIBb_Events
+    bewb_Events
 WHERE
     AccommodationCountry NOT LIKE '(%'
     AND AccommodationCountry NOT LIKE '-%'

@@ -14,7 +14,7 @@ CROSS JOIN
             kv.key,
             kv.value
         FROM
-            bewxx_Settings AS s
+            bewx_Settings AS s
         JOIN
             json_each(s.Value, '$.mapping') AS j
         JOIN

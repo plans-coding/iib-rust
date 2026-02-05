@@ -57,14 +57,14 @@ body {backdrop-filter: none !important;} /* Position fixed do not work with back
 
               <div class="trip-details-container">
             <label class="trip-details-label">
-              {{ translation.trip.test | default(value="Overall Destination") }}
+              {{ translation.trip.overallDestination | default(value="Overall Destination") }}
             </label>
             <div class="trip-details-field" data-trip-domain=""><input class="form-control" type="text" placeholder="String" name="OverallDestination"></div>
           </div>
 
           <div class="trip-details-container">
             <label class="trip-details-label">
-              {{ translation.trip.test | default(value="Trip Description") }}
+              {{ translation.input.tripDescription | default(value="Trip Description") }}
             </label>
             <div class="trip-details-field" data-trip-domain=""><input class="form-control" type="text" placeholder="String" name="TripDescription"></div>
           </div>
@@ -90,7 +90,7 @@ body {backdrop-filter: none !important;} /* Position fixed do not work with back
 
         <div class="trip-details-container">
           <label class="trip-details-label">
-            {{ translation.trip.tripDomain | default(value="Trip Domain") }}
+            {{ translation.input.tripDomain | default(value="Trip Domain") }}
           </label>
           <div class="trip-details-field" data-trip-domain=""><select class="form-control">
             {% for item in common.common_trip_domains %}
@@ -104,14 +104,14 @@ body {backdrop-filter: none !important;} /* Position fixed do not work with back
 
               <div class="trip-details-container">
           <label class="trip-details-label">
-            {{ translation.trip.startTime | default(value="Photo Starttime") }}
+            {{ translation.input.photoStarttime | default(value="Photo Starttime") }}
           </label>
           <div class="trip-details-field" data-trip-domain=""><input type="text" name="PhotoStarttime" placeholder="xx:xx" class="form-control"></div>
         </div>
 
         <div class="trip-details-container">
           <label class="trip-details-label">
-            {{ translation.trip.endTime | default(value="Photo Endtime") }}
+            {{ translation.input.photoEndtime | default(value="Photo Endtime") }}
           </label>
           <div class="trip-details-field" data-trip-domain=""><input type="text" name="PhotoEndtime" placeholder="xx:xx" class="form-control"></div>
         </div>
@@ -137,30 +137,30 @@ body {backdrop-filter: none !important;} /* Position fixed do not work with back
 
                   <div class="trip-details-container">
             <label class="trip-details-label">
-              {{ translation.trip.test | default(value="Start Node") }}
+              {{ translation.input.startNode | default(value="Start Node") }}
             </label>
             <div class="trip-details-field" data-trip-domain=""><input class="form-control" type="text" name="StartNode" placeholder="{SE}"></div>
           </div>
 
                     <div class="trip-details-container">
             <label class="trip-details-label">
-              {{ translation.trip.test | default(value="End Node") }}
+              {{ translation.input.endNode | default(value="End Node") }}
             </label>
-            <div class="trip-details-field" data-trip-domain=""><input class="form-control" type="text" name="EndNode" placeholder="{SE}"></div>
+            <div class="trip-details-field" data-trip-domain=""><input class="form-control" type="text" name="EndNode" placeholder="String"></div>
           </div>
 
                     <div class="trip-details-container">
             <label class="trip-details-label">
-              {{ translation.trip.test | default(value="Inner Id") }}
+              {{ translation.input.innerId | default(value="Inner Id") }}
             </label>
-            <div class="trip-details-field" data-trip-domain=""><input class="form-control" type="text" name="EndNode" disabled value="??"></div>
+            <div class="trip-details-field" data-trip-domain=""><input class="form-control" type="text" name="InnerId" disabled placeholder="Auto"></div>
           </div>
 
                     <div class="trip-details-container">
             <label class="trip-details-label">
-              {{ translation.trip.test | default(value="Outer Id") }}
+              {{ translation.input.outerId | default(value="Outer Id") }}
             </label>
-            <div class="trip-details-field" data-trip-domain=""><input class="form-control" type="text" name="Outer Id" placeholder="P-1"></div>
+            <div class="trip-details-field" data-trip-domain=""><input class="form-control" type="text" name="OuterId" placeholder="P-1"></div>
           </div>
 
       </div>
@@ -169,21 +169,21 @@ body {backdrop-filter: none !important;} /* Position fixed do not work with back
 
         <div class="trip-details-container">
           <label class="trip-details-label">
-            {{ translation.trip.test | default(value="Cover Photo") }}
+            {{ translation.input.coverPhoto | default(value="Cover Photo") }}
           </label>
           <div class="trip-details-field" data-trip-domain=""><input class="form-control" placeholder="/original/path/to/photo.jpg" type="text" name="CoverPhoto"></div>
         </div>
 
                 <div class="trip-details-container">
           <label class="trip-details-label">
-            {{ translation.trip.test | default(value="Photo Albums") }}
+            {{ translation.input.photoAlbums | default(value="Photo Albums") }}
           </label>
           <div class="trip-details-field" data-trip-domain=""><textarea class="form-control" name="PhotoAlbums" placeholder="!desc[DESCRIPTION_SEARCH_STRING] [ALBUM_NAME_A](/original/path/to/photo1.jpg /original/path/to/photo2.jpg /original/path/to/photoN.jpg)"></textarea></div>
         </div>
 
         <div class="trip-details-container">
           <label class="trip-details-label">
-            {{ translation.trip.test | default(value="Documentation Note") }}
+            {{ translation.input.documentationNote | default(value="Documentation Note") }}
           </label>
           <div class="trip-details-field" data-trip-domain=""><input class="form-control" type="text" name="DocumentationNote" placeholder="String"></div>
         </div>
@@ -201,7 +201,7 @@ body {backdrop-filter: none !important;} /* Position fixed do not work with back
 
       <div class="trip-details-container">
           <label class="trip-details-label">
-            {{ translation.trip.test | default(value="Map Pins") }}
+            {{ translation.input.mapPins | default(value="Map Pins") }}
           </label>
           <div class="trip-details-field" data-trip-domain=""><textarea class="form-control" name="MapPins" placeholder="[PIN_NAME](lat, lng)"></textarea></div>
         </div>

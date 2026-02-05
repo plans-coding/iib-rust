@@ -4,5 +4,5 @@ SELECT
 FROM
     bewa_Overview
 /*WHERE
-    SUBSTR(InnerId, 1, 1) IN (TripDomain)
+    TripDomain IN (TripDomain)
     AND ParticipantGroup IN (ParticipantGroup)*/;

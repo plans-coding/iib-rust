@@ -31,7 +31,12 @@
     "delete_db": "Ta bort nuvarande databasfil",
     "delete_cache": "Ta bort webbappens cache",
     "missing": "Databasen finns inte lagrad på OPFS.",
-    "stored": "Databasen finns lagrad på OPFS."
+    "stored": "Databasen finns lagrad på OPFS.",
+    "immichInstance": "Immich-instans",
+    "immichLoggedOn": "Du är inloggad på din Immich-instans på",
+    "immichNotLoggedOn": "Du är INTE inloggad på din Immich-instans på",
+    "syncCoverAlbum": "Synkronisera Immich-omslagsalbum",
+    "saveCoverJson": "Spara Immich-omslagsalbumslista till OPFS"
   },
   "search": {
     "trips": "Resor",
@@ -149,6 +154,38 @@
     "registerOfTrips": "Reseregister",
     "myTripsUntil": "Mina resor fram till",
     "generated": "Genererad",
-    "startMessage": "Klicka på OK för att starta. Vänta sedan tills dialogrutan för utskrift visas. Detta kan ta flera minuter."
+    "startMessage": "Klicka på OK för att starta. Vänta sedan tills dialogrutan för utskrift visas. Detta kan ta flera minuter.",
+    "currentFilter": "Ditt nuvarande filter kommer att vara aktivt för rapporten."
+  },
+  "input": {
+    "title": "Skapa resa",
+    "generateSQL": "Generera SQL-kod",
+    "saveJson": "Spara till OPFS",
+    "downloadJson": "Ladda ner JSON",
+    "uploadJson": "Ladda upp JSON",
+    "tripSummary": "Resesammanfattning",
+    "tripDescription": "Resebeskrivning",
+    "tripDomain": "Resedomän",
+    "photoStarttime": "Fotostarttid",
+    "photoEndtime": "Fotosluttid",
+    "startNode": "Startnod",
+    "endNode": "Slutnod",
+    "innerId": "Universellt-id",
+    "outerId": "ID",
+    "coverPhoto": "Omslagsfoto",
+    "photoAlbums": "Fotoalbum",
+    "documentationNote": "Anteckning",
+    "mapPins": "Kartkoordinater",
+    "day": "Dag",
+    "events": "Händelser",
+    "accommodation": "Boende",
+    "accCountry": "Boendeland",
+    "accAccuracy": "Noggrannhet",
+    "accCoordinates": "Boendekoordinater",
+    "additionalNotes": "Ytterligare anteckningar",
+    "countriesDuringDay": "Länder under dagen",
+    "copyAccommodation": "Kopiera boende",
+    "copyTravelParticipants": "Kopiera deltagargrupp",
+    "reset": "Ta bort"
   }
 }
