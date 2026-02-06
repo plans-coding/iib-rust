@@ -76,10 +76,10 @@
 
     <div class="red-text" id="immich_authorization_status" style="display:block;">
 
-      <div id="immich_authorization_status_NOT_OK" style="display:none;">{{ translation.source.immichLoggedOn | default(value='You need to be logged in to you Immich instance for the synchronization to work, please login at') }} <a class="single-link" target="_blank" href="{{ settings.Feature.ImmichUrl }}">{{ settings.Feature.ImmichUrl }}</a>.</div>
+      <div id="immich_authorization_status_NOT_OK" style="display:none;">{{ translation.source.immichNotLoggedOn | default(value='You need to be logged in to you Immich instance for the synchronization to work, please login at') }} <a class="single-link" target="_blank" href="{{ settings.Feature.ImmichUrl }}">{{ settings.Feature.ImmichUrl }}</a>.</div>
 
       <div id="immich_authorization_status_OK" style="display:none;">
-        {{ translation.source.immichNotLoggedOn | default(value='You are logged in to you Immich instance at') }} <a class="single-link" target="_blank" href="{{ settings.Feature.ImmichUrl }}">{{ settings.Feature.ImmichUrl }}</a>.
+        {{ translation.source.immichLoggedOn | default(value='You are logged in to you Immich instance at') }} <a class="single-link" target="_blank" href="{{ settings.Feature.ImmichUrl }}">{{ settings.Feature.ImmichUrl }}</a>.
       </div>
 
     </div>

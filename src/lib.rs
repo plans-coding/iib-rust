@@ -7,32 +7,37 @@ use serde_json::Value;
 use wasm_bindgen_futures::future_to_promise;
 use js_sys::Promise;
 
+
 mod filecontent;
 mod sqlite_query;
 mod render;
 mod helper;
 
-// Templates
+
 const TEMPLATE_MENU: &str = include_str!("../templates/_menu.tera");
+
 const TEMPLATE_EXPLORE: &str = include_str!("../templates/explore.tera");
 const TEMPLATE_OVERVIEW_YEAR: &str = include_str!("../templates/overview_year.tera");
 const TEMPLATE_OVERVIEW_COUNTRY: &str = include_str!("../templates/overview_country.tera");
 const TEMPLATE_OVERVIEW_PLAIN: &str = include_str!("../templates/overview_plain.tera");
+
 const TEMPLATE_TRIP: &str = include_str!("../templates/trip.tera");
 const TEMPLATE_IMAGES: &str = include_str!("../templates/images.tera");
 const TEMPLATE_MAP: &str = include_str!("../templates/map.tera");
-const TEMPLATE_SEARCH: &str = include_str!("../templates/search.tera");
+
 const TEMPLATE_STATISTICS_SUMMARY: &str = include_str!("../templates/statistics_summary.tera");
 const TEMPLATE_STATISTICS_VISITS: &str = include_str!("../templates/statistics_visits.tera");
 const TEMPLATE_STATISTICS_OVERNIGHTS: &str = include_str!("../templates/statistics_overnights.tera");
 const TEMPLATE_STATISTICS_THEMES: &str = include_str!("../templates/statistics_themes.tera");
+
 const TEMPLATE_DATASET: &str = include_str!("../templates/dataset.tera");
-const TEMPLATE_ABOUT: &str = include_str!("../templates/about.tera");
 const TEMPLATE_SOURCE: &str = include_str!("../templates/source.tera");
+const TEMPLATE_ABOUT: &str = include_str!("../templates/about.tera");
+const TEMPLATE_SEARCH: &str = include_str!("../templates/search.tera");
+
 const TEMPLATE_TOOLBOX_REPORT: &str = include_str!("../templates/toolbox/toolbox_report.tera");
 const TEMPLATE_TOOLBOX_REPORT_OUTPUT: &str = include_str!("../templates/toolbox/toolbox_report_output.tera");
 const TEMPLATE_TOOLBOX_INPUT: &str = include_str!("../templates/toolbox/toolbox_input.tera");
-//const TEMPLATE_TOOLBOX_COVER: &str = include_str!("../templates/toolbox/toolbox_cover.tera");
 
 
 macro_rules! define_queries {
@@ -50,35 +55,44 @@ macro_rules! define_queries {
 }
 
 define_queries! {
-    // Advanced queries
+
     QUERY_EXPLORE => "../queries/explore.sql",
-    QUERY_OVERVIEW_YEAR => "../queries/overview_year.sql",
-    QUERY_OVERVIEW_COUNTRY => "../queries/overview_country.sql",
-    QUERY_TRIP_BORDER_CROSSINGS => "../queries/trip_border_crossings.sql",
-    QUERY_TRIP_MAP_PINS_ACCOMMODATION => "../queries/trip_map_pins_accommodation.sql",
-    QUERY_TRIP_MAP_PINS_OVERALL => "../queries/trip_map_pins_overall.sql",
+
+    QUERY_OVERVIEW_YEAR => "../queries/overview/overview_year.sql",
+    QUERY_OVERVIEW_COUNTRY => "../queries/overview/overview_country.sql",
+    QUERY_OVERVIEW_PLAIN => "../queries/overview/overview_plain.sql",
+
+    QUERY_TRIP_BORDER_CROSSINGS => "../queries/trip/trip_border_crossings.sql",
+    QUERY_TRIP_MAP_PINS_ACCOMMODATION => "../queries/trip/trip_map_pins_accommodation.sql",
+    QUERY_TRIP_MAP_PINS_OVERALL => "../queries/trip/trip_map_pins_overall.sql",
+    QUERY_TRIP_ALL_TRIPS => "../queries/trip/trip_all_trips.sql",
+    QUERY_TRIP_EVENTS => "../queries/trip/trip_events.sql",
+    QUERY_TRIP_SUMMARY => "../queries/trip/trip_summary.sql",
+    QUERY_TRIP_PREVIOUS => "../queries/trip/trip_previous.sql",
+    QUERY_TRIP_NEXT => "../queries/trip/trip_next.sql",
+    QUERY_TRIP_IMMICH_DESC_SEARCH => "../queries/trip/trip_immich_desc_search.sql",
+    QUERY_TRIP_IMMICH_ALBUM_NAME => "../queries/trip/trip_immich_album_name.sql",
+
     QUERY_STATISTICS_VISITS => "../queries/statistics_visits.sql",
     QUERY_STATISTICS_OVERNIGHTS => "../queries/statistics_overnights.sql",
     QUERY_STATISTICS_PER_DOMAIN_YEAR => "../queries/statistics_per_domain_year.sql",
     QUERY_STATISTICS_THEME_COUNT => "../queries/statistics_theme_count.sql",
+    QUERY_STATISTICS_TRIP_COUNT => "../queries/simple/statistics_trip_count.sql",
 
-    // Simple queries
-    QUERY_COMMON_PARTICIPANT_GROUPS => "../queries/simple/common_participant_groups.sql",
-    QUERY_COMMON_TRIP_DOMAINS => "../queries/simple/common_trip_domains.sql",
+    QUERY_COMMON_PARTICIPANT_GROUPS => "../queries/common_participant_groups.sql",
+    QUERY_COMMON_TRIP_DOMAINS => "../queries/common_trip_domains.sql",
+
     QUERY_IMAGES_DATE_LIST => "../queries/simple/images_date_list.sql",
     QUERY_IMAGES_PHOTO_TIME => "../queries/simple/images_photo_time.sql",
+
     QUERY_MAP_CONTOUR => "../queries/simple/map_contour.sql",
     QUERY_MAP_COUNTRY => "../queries/simple/map_country.sql",
     QUERY_MAP_COUNTRY_LIST => "../queries/simple/map_country_list.sql",
     QUERY_MAP_THEME => "../queries/simple/map_theme.sql",
+
     QUERY_SEARCH_EVENT => "../queries/simple/search_event.sql",
     QUERY_SEARCH_TRIP => "../queries/simple/search_trip.sql",
-    QUERY_STATISTICS_TRIP_COUNT => "../queries/simple/statistics_trip_count.sql",
-    QUERY_TRIP_ALL_TRIPS => "../queries/simple/trip_all_trips.sql",
-    QUERY_TRIP_EVENTS => "../queries/simple/trip_events.sql",
-    QUERY_TRIP_SUMMARY => "../queries/simple/trip_summary.sql",
-    QUERY_TRIP_PREVIOUS => "../queries/simple/trip_previous.sql",
-    QUERY_TRIP_NEXT => "../queries/simple/trip_next.sql",
+
 }
 
 static DB_BYTES: OnceCell<Vec<u8>> = OnceCell::new();
@@ -364,7 +378,7 @@ async fn page_load_internal() {
                     "title": render_structure.pointer("/all/translation/overview/plain").and_then(|v| v.as_str()).unwrap_or("Overview: Plain"),
                     "template": TEMPLATE_OVERVIEW_PLAIN,
                     "queries": [
-                        ["overviewYear", QUERY_OVERVIEW_YEAR.to_string().replace("/*","").replace("*/","")
+                        ["overviewYear", QUERY_OVERVIEW_PLAIN.to_string().replace("/*","").replace("*/","")
                         .replace("(ParticipantGroup)", &participant_group)
                         .replace("(TripDomain)", &trip_domain)],
                          // Replace "c.Continent = 'Europa'" in QUERY_OVERVIEW_COUNTRY with value from settings in future version
@@ -470,10 +484,10 @@ async fn page_load_internal() {
                     "title": render_structure.pointer("/all/translation/toolbox/input").and_then(|v| v.as_str()).unwrap_or("Input"),
                         "settings": render_structure["all"]["settings"],
                         "template": TEMPLATE_TOOLBOX_INPUT,
-                        "queries": [
+                        /*"queries": [
                             ["inner_id_max", "SELECT InnerId FROM bewa_Overview WHERE InnerId LIKE '$_INNER_ID_PREFIX_%' ORDER BY SUBSTR(InnerId, 2) + 0 DESC LIMIT 1;".replace("_INNER_ID_PREFIX_","")],
                             ["outer_id_max", "SELECT OuterId FROM bewa_Overview WHERE OuterId GLOB '_OUTER_ID_PREFIX_[0-9]*' ORDER BY CAST(substr(OuterId, length('_OUTER_ID_') + 1) AS INTEGER) DESC LIMIT 1;".replace("_OUTER_ID_PREFIX_","")]
-                        ]});
+                        ]*/});
                 }
             _ => {
             
@@ -499,8 +513,8 @@ async fn page_load_internal() {
                             ["trip_next", QUERY_TRIP_NEXT.replace("_OUTER_ID_",outer_id)
                                 .replace("(ParticipantGroup)", &participant_group)
                                 .replace("(TripDomain)", &trip_domain)],
-                            ["trip_immich_desc_search", "SELECT CASE WHEN PhotoAlbums LIKE '!desc[%]%' THEN substr(PhotoAlbums, instr(PhotoAlbums, '[') + 1, instr(PhotoAlbums, ']') - instr(PhotoAlbums, '[') - 1) ELSE NULL END AS ImmichDescSearch FROM bewa_Overview WHERE OuterId = '_OUTER_ID_';".replace("_OUTER_ID_",outer_id)],
-                            ["trip_immich_album_name", "SELECT substr(PhotoAlbums, instr(PhotoAlbums, '[') + 1, instr(PhotoAlbums, ']') - instr(PhotoAlbums, '[') - 1) AS ImmichAlbumName FROM bewa_Overview WHERE OuterId = '_OUTER_ID_' AND PhotoAlbums NOT LIKE '!desc[%]%' AND PhotoAlbums LIKE '%[%]%';".replace("_OUTER_ID_",outer_id)],
+                            ["trip_immich_desc_search", QUERY_TRIP_IMMICH_DESC_SEARCH.replace("_OUTER_ID_",outer_id)],
+                            ["trip_immich_album_name", QUERY_TRIP_IMMICH_ALBUM_NAME.replace("_OUTER_ID_",outer_id)],
                         ]});
                         render_structure["all"]["cover_photos_list"] = serde_json::to_value(&cover_photos_map).expect("Failed to convert map to Value");
                         map_request = "trip";
