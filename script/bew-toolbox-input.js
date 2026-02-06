@@ -150,7 +150,27 @@ async function generateSQLCode() {
         )
         ${overviewSQL}
         ${eventsSQL}
-        `;
+        `+`
+        WITH Ranked AS (
+            SELECT
+            rowid,
+            substr(TripDomain,1,1) ||
+            substr(ParticipantGroup,1,1) || '-' ||
+            printf('%01d',
+                   ROW_NUMBER() OVER (
+                       PARTITION BY substr(TripDomain,1,1), substr(ParticipantGroup,1,1)
+                       ORDER BY DepartureDate
+                   )
+            ) AS NewOuterId
+            FROM bewa_Overview
+        )
+        UPDATE bewa_Overview
+        SET OuterId = (
+            SELECT NewOuterId
+            FROM Ranked
+            WHERE Ranked.rowid = bewa_Overview.rowid
+        );`
+        ;
 
         document.getElementById('generated_sql_code').textContent = finalSQL.trim();
         document.getElementById('generated_sql_code').style.display = 'block';

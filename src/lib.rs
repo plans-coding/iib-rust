@@ -73,25 +73,25 @@ define_queries! {
     QUERY_TRIP_IMMICH_DESC_SEARCH => "../queries/trip/trip_immich_desc_search.sql",
     QUERY_TRIP_IMMICH_ALBUM_NAME => "../queries/trip/trip_immich_album_name.sql",
 
-    QUERY_STATISTICS_VISITS => "../queries/statistics_visits.sql",
-    QUERY_STATISTICS_OVERNIGHTS => "../queries/statistics_overnights.sql",
-    QUERY_STATISTICS_PER_DOMAIN_YEAR => "../queries/statistics_per_domain_year.sql",
-    QUERY_STATISTICS_THEME_COUNT => "../queries/statistics_theme_count.sql",
-    QUERY_STATISTICS_TRIP_COUNT => "../queries/simple/statistics_trip_count.sql",
+    QUERY_STATISTICS_VISITS => "../queries/statistics/statistics_visits.sql",
+    QUERY_STATISTICS_OVERNIGHTS => "../queries/statistics/statistics_overnights.sql",
+    QUERY_STATISTICS_PER_DOMAIN_YEAR => "../queries/statistics/statistics_per_domain_year.sql",
+    QUERY_STATISTICS_THEME_COUNT => "../queries/statistics/statistics_theme_count.sql",
+    QUERY_STATISTICS_TRIP_COUNT => "../queries/statistics/statistics_trip_count.sql",
 
     QUERY_COMMON_PARTICIPANT_GROUPS => "../queries/common_participant_groups.sql",
     QUERY_COMMON_TRIP_DOMAINS => "../queries/common_trip_domains.sql",
 
-    QUERY_IMAGES_DATE_LIST => "../queries/simple/images_date_list.sql",
-    QUERY_IMAGES_PHOTO_TIME => "../queries/simple/images_photo_time.sql",
+    QUERY_IMAGES_DATE_LIST => "../queries/images_date_list.sql",
+    QUERY_IMAGES_PHOTO_TIME => "../queries/images_photo_time.sql",
 
-    QUERY_MAP_CONTOUR => "../queries/simple/map_contour.sql",
-    QUERY_MAP_COUNTRY => "../queries/simple/map_country.sql",
-    QUERY_MAP_COUNTRY_LIST => "../queries/simple/map_country_list.sql",
-    QUERY_MAP_THEME => "../queries/simple/map_theme.sql",
+    QUERY_MAP_CONTOUR => "../queries/map/map_contour.sql",
+    QUERY_MAP_COUNTRY => "../queries/map/map_country.sql",
+    QUERY_MAP_COUNTRY_LIST => "../queries/map/map_country_list.sql",
+    QUERY_MAP_THEME => "../queries/map/map_theme.sql",
 
-    QUERY_SEARCH_EVENT => "../queries/simple/search_event.sql",
-    QUERY_SEARCH_TRIP => "../queries/simple/search_trip.sql",
+    QUERY_SEARCH_EVENT => "../queries/search_event.sql",
+    QUERY_SEARCH_TRIP => "../queries/search_trip.sql",
 
 }
 

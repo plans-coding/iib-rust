@@ -1,17 +1,4 @@
-WITH RECURSIVE Overview AS (
-    SELECT
-        substr(TripDomain,1,1) ||
-        substr(ParticipantGroup,1,1) ||
-        printf('%03d',
-            ROW_NUMBER() OVER (
-                PARTITION BY substr(TripDomain,1,1), substr(ParticipantGroup,1,1)
-                ORDER BY DepartureDate
-            )
-        ) AS OuterId,
-        *
-    FROM bewa_Overview
-),
-SplitPins AS
+WITH RECURSIVE SplitPins AS
     (
         -- Start by selecting the first portion of the string
         SELECT
@@ -19,7 +6,7 @@ SplitPins AS
             SUBSTR(MapPins, INSTR(MapPins, '[') + 2, INSTR(MapPins, ')') - INSTR(MapPins, '[') - 2) AS PinEntry,
             SUBSTR(MapPins, INSTR(MapPins, ')') + 2) AS Remaining
         FROM
-            Overview
+            bewa_Overview
         /*WHERE
             OuterId = "_OUTER_ID_"*/
         UNION ALL

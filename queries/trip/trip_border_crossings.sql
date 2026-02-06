@@ -21,26 +21,13 @@ ConsecutiveRemoval AS (
            END AS cleaned_country
     FROM SplittedCountries
 ),
-Overview AS (
-    SELECT
-        substr(TripDomain,1,1) ||
-        substr(ParticipantGroup,1,1) ||
-        printf('%03d',
-            ROW_NUMBER() OVER (
-                PARTITION BY substr(TripDomain,1,1), substr(ParticipantGroup,1,1)
-                ORDER BY DepartureDate
-            )
-        ) AS OuterId,
-        *
-    FROM bewa_Overview
-),
 BorderCrossings AS (
     SELECT 
         b.OuterId,
         a.InnerId, 
         GROUP_CONCAT(a.cleaned_country, ', ') AS AllBorderCrossings
     FROM ConsecutiveRemoval AS a
-    LEFT JOIN Overview AS b
+    LEFT JOIN bewa_Overview AS b
         ON a.InnerId = b.InnerId
     WHERE a.cleaned_country IS NOT NULL
     GROUP BY a.InnerId

@@ -1,61 +1,3 @@
-/* IMMICH  ----------------------------------------------------------------------- */
-/*
-a *sync function getCoverPhoto(path, immichApiUrl, immichApiKey) {
-try {
-const response = await fetch(JSON.parse(immichApiUrl) + 'search/metadata', {
-method: 'POST',
-headers: {
-'Content-Type': 'application/json',
-'x-api-key': JSON.parse(immichApiKey)
-},
-body: JSON.stringify({ originalPath: path })
-});
-
-if (!response.ok) {
-throw new Error(`HTTP error! Status: ${response.status}`);
-}
-
-const data = await response.json();
-
-if (!data.assets || !data.assets.items || data.assets.items.length === 0) {
-console.warn('No assets found for path', path);
-return null;
-}
-
-const coverPhotoUrl = JSON.parse(immichApiUrl) + "assets/" + data.assets.items[0].id + "/thumbnail?size=preview";
-return coverPhotoUrl; // <- This now returns to applyTripCoverPhotos
-} catch (error) {
-console.error('Fetch error:', error);
-return null;
-}
-}
-
-
-async function applyTripCoverPhotos(immichApiUrl, immichApiKey) {
-const cards = document.querySelectorAll(
-    '.explore-cover[data-trip-cover-photo-path]'
-    );
-
-    for (const card of cards) {
-        const path = card.dataset.tripCoverPhotoPath;
-        if (!path) continue;
-
-
-
-        try {
-        const url = await getCoverPhoto(path, immichApiUrl, immichApiKey);
-        if (!url) continue;
-
-        card.style.backgroundImage = `url("${url}")`;
-        card.style.backgroundSize = 'cover';
-        card.style.backgroundPosition = 'center';
-        card.style.backgroundRepeat = 'no-repeat';
-        } catch (err) {
-        console.warn('Failed to load cover photo for', path, err);
-        }
-        }
-        }*/
-
 /* IMMICH COVER PHOTOS ----------------------------------------------------------------------- */
 
 async function check_immich_authorization() {
@@ -112,27 +54,20 @@ async function add_photo_to_album(immichUrl, immichCoverAlbumId, assetIds) {
     return response.json();
 }
 
-
 async function searchByOriginalPath(immichUrl, originalPath) {
-    const response = await fetch(`${immichUrl}api/search/metadata`, {
+    if (!originalPath?.trim()) return null;
+
+    const response = await fetch(new URL("/api/search/metadata", immichUrl), {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-            originalPath
+            originalPath: originalPath.normalize("NFC")
         })
     });
 
-    if (!response.ok) {
-        //const text = await response.text();
-        //throw new Error(
-        //    `Immich search failed for ${originalPath}: ${response.status} ${text}`
-        //);
-    }
-
     return response.json();
 }
+
 
 async function searchMissingCoverPhotos(immichUrl, missingCoverPhotos) {
     const results = [];
@@ -156,11 +91,6 @@ async function searchMissingCoverPhotos(immichUrl, missingCoverPhotos) {
             }
         } catch (err) {
             console.error(err);
-            /*results.push({
-            *               coverPhoto: originalPath,
-            *               outerId: item.OuterId,
-            *               error: err.message
-        });*/
         }
     }
 
