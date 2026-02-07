@@ -40,7 +40,7 @@
 
 
 <div class="breadcrumb">
-  <img class="widescreen icon-color" src="images/database.svg" />
+  <img class="widescreen icon-color" src="images/frog.svg" />
   <div class="widescreen">{{ translation.menu.search | default(value="Search") }}</div>
   <img class="widescreen" src="images/arrow-right.svg" />
   <div class="breadcrumb-link active">{{ query_params.path | split(pat=":") | last }}</div>
@@ -94,22 +94,12 @@
         <div class="day-left">
         
           <div class="day-event">
-            <a class="iib-search-domain" href="?path=trip:{{ day.OuterId }}" style="text-decoration:none;display:inline-block;margin:2pt;" data-iib-tripDomain="{{ day.DomainAbbreviation }}">{{ day.OuterId }}</a>
-            <span class="day-label">{{ day.Weekday | default(value="") }} <span class="iib-search-date">{{ day.Date }}</span></span><br>{{ day.Events }}
-          </div>
-          <div class="day-foot" data-iib-tripDomain="{{ day.DomainAbbreviation }}">
-             &nbsp; <a style="text-decoration:none;" target="_blank" href="{{ settings.Base.ExternalMapProvider }}{{ day.AccommodationCoordinates }}" data-iib-tripDomain="{{ day.DomainAbbreviation }}">
-                <div class="acc-icon" data-iib-tripDomain='{{ day.DomainAbbreviation }}'></div>
-                <span class="acc-text">{{ day.Accommodation }} – {{ day.AccommodationCountry }} – {{ day.AccommodationCoordinates }} {{ day.AccommodationCoordinateAccuracy | default(value="") }}</span>
-            </a>
-          </div>
-        
-        </div>
-        <div class="day-right">
-        
-  
+
+
+            <div style="float:right;display:flex;flex-direction:column;gap:2pt;margin:0 0 5pt 5pt;">
+
             {# Immich photos #}
-            {% if settings.Base.Immich == "Enabled" and day.OuterId not in settings.Base.ExcludeDayPhotos %}
+            {% if settings.Photos.Immich == "Enabled" and day.OuterId not in settings.Other.ExcludeDayPhotos %}
 
                 <a class="to-image-viewer" href="?path=images:{{ day.OuterId }}:{{ day.Date }}" target="_blank">
                     <button type="button" class="item-viewer-button filter-button" data-iib-tripDomain="{{ day.DomainAbbreviation }}">
@@ -121,13 +111,18 @@
 
             {# Diary plugin #}
 
-            {% set_global day_year = day.Date | date(format="%G") %}
-            {% set_global day_week = day.Date | date(format="%V") %}
-            {% set_global day_date = day.Date | date(format="%Y%m%d") %}
+              {% set_global day_year = day.Date | date(format="%G") %}
+              {% set_global day_week = day.Date | date(format="W%V") %} {# You need W before the letter not to match 19 to 1989 (W19 not in 1989) #}
+              {% set_global day_date = day.Date | date(format="%Y%m%d") %}
 
-            {% if settings.Plugin.Diary.enabled %}
-              {% for file in settings.Plugin.Diary.filelist %}
-                {% if day_year in file and day_week in file %}
+              {% set diary_lines = settings.Extension.Diary | split(pat="\n") %}
+
+              {% set_global diary_config = diary_lines | first | split(pat=",") %}
+              {% set_global diary_filelist = diary_lines | slice(start=1) %}
+
+              {% if diary_config[0] == "Enabled" %}
+                {% for file in diary_filelist %}
+                  {% if day_year in file and day_week in file %}
 
                   <button class="item-viewer-button" onclick="document.getElementById('diary_{{ loop.index }}').showModal();" type="button" data-iib-tripDomain="{{ day.DomainAbbreviation }}">
                       <img src="images/diary.svg" />
@@ -135,7 +130,7 @@
 
                   <dialog class="item-viewer" id="diary_{{ loop.index }}"  onclick="this.close();">
                     <div class="item-viewer-filename" style="position:absolute;">{{ file }}</div>
-                    <img src="{{ settings.Plugin.Diary.path }}{{ file }}" title="{{ file }}">
+                    <img src="{{ diary_config[2] }}{{ file }}" title="{{ file }}">
                   </dialog>
 
                 {% endif %}
@@ -143,8 +138,13 @@
             {% endif %}
 
             {# Passport plugin #}
-            {% if settings.Plugin.Passport.enabled %}
-              {% for file in settings.Plugin.Passport.filelist %}
+            {% set passport_lines = settings.Extension.Passport | split(pat="\n") %}
+
+            {% set_global passport_config = passport_lines | first | split(pat=",") %}
+            {% set_global passport_filelist = passport_lines | slice(start=1) %}
+
+            {% if passport_config[0] == "Enabled" %}
+              {% for file in passport_filelist %}
                 {% if day_date in file %}
 
                   <button class="item-viewer-button" onclick="document.getElementById('passport_{{ loop.index }}').showModal();" type="button" data-iib-tripDomain="{{ day.DomainAbbreviation }}">
@@ -153,7 +153,7 @@
 
                   <dialog class="item-viewer" id="passport_{{ loop.index }}"  onclick="this.close();">
                     <div class="item-viewer-filename" style="position:absolute;">{{ file }}</div>
-                    <img src="{{ settings.Plugin.Passport.path }}{{ file }}" title="{{ file }}">
+                    <img src="{{ passport_config[2] }}{{ file }}" title="{{ file }}">
                   </dialog>
 
                 {% endif %}
@@ -161,7 +161,20 @@
             {% endif %}
 
         </div>
+
+
+
+            <a class="iib-search-domain" href="?path=trip:{{ day.OuterId }}" style="text-decoration:none;display:inline-block;margin:2pt;" data-iib-tripDomain="{{ day.DomainAbbreviation }}">{{ day.OuterId }}</a>
+            <span class="day-label">{{ day.Weekday | default(value="") }} <span class="iib-search-date">{{ day.Date }}</span></span><br>{{ day.Events }}
+          </div>
+          <div class="day-foot" data-iib-tripDomain="{{ day.DomainAbbreviation }}">
+             &nbsp; <a style="text-decoration:none;" target="_blank" href="{{ settings.Other.ExternalMapProvider }}{{ day.AccommodationCoordinates }}" data-iib-tripDomain="{{ day.DomainAbbreviation }}">
+                <div class="acc-icon" data-iib-tripDomain='{{ day.DomainAbbreviation }}'></div>
+                <span class="acc-text">{{ day.Accommodation }} – {{ day.AccommodationCountry }} – {{ day.AccommodationCoordinates }} {{ day.AccommodationCoordinateAccuracy | default(value="") }}</span>
+            </a>
+          </div>
               
+          </div>
   
       </div>
     {% endfor %}

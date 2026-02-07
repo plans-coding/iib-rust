@@ -6,7 +6,7 @@ use std::sync::Mutex;
 use serde_json::Value;
 use wasm_bindgen_futures::future_to_promise;
 use js_sys::Promise;
-
+use web_sys::{window,HtmlElement};
 
 mod filecontent;
 mod sqlite_query;
@@ -256,11 +256,11 @@ async fn session_load() -> (Vec<u8>, serde_json::Value) {
         let settings_response = sqlite_query::get_query_data(&db_bytes, settings_query).await;
 
         //crender_structure["all"]["settings"] = serde_json::to_value(&settings_response["settings"]).expect("ERROR");
-        web_sys::console::log_1(&serde_json::to_string(&settings_response["settings"]).expect("ERROR").into());
+        //web_sys::console::log_1(&serde_json::to_string(&settings_response["settings"]).expect("ERROR").into());
         render_structure["all"]["settings"] = helper::transform_settings(&settings_response["settings"].as_array().expect("ERROR"));
         render_structure["all"]["translation"] = translation_content;//.expect("Error with translation data.");
 
-        web_sys::console::log_1(&serde_json::to_string(&render_structure["all"]["settings"]).expect("ERROR").into());
+        //web_sys::console::log_1(&serde_json::to_string(&render_structure["all"]["settings"]).expect("ERROR").into());
 
         // RENDER TO 'MENU'  -----------------------------------------------------------------------
         let common_data = vec![
@@ -312,6 +312,7 @@ async fn page_load_internal() {
     .unwrap_or(serde_json::Value::Null);
 
     web_sys::console::log_1(&"----------------------".into());
+
     render_structure["all"]["filters"] = filters_value;
     web_sys::console::log_1(&serde_json::to_string(&render_structure["all"]["filters"]).expect("ERROR").into());
     
@@ -616,12 +617,12 @@ async fn page_load_internal() {
         // SET TITLE  -----------------------------------------------------------------------
     
         //web_sys::console::log_1(&"----------------------".into());
-        let title = render_structure["page"]["title"].as_str().unwrap_or("Default Title");
-        web_sys::window().expect("ERROR").document().expect("ERROR").set_title(&format!("{title} - Immer in Bewegung"));
+        //let title = render_structure["page"]["title"].as_str().unwrap_or("Default Title");
+        //web_sys::window().expect("ERROR").document().expect("ERROR").set_title(&format!("{title} - Immer in Bewegung"));
         //web_sys::console::log_1(&serde_json::to_string(&render_structure["page"]["title"]).expect("ERROR").into());
     
         // RUN SQLITE QUERIES  -----------------------------------------------------------------------
-    
+
         //web_sys::console::log_1(&"----------------------".into());
         let combined_query: Vec<(String, String)> = render_structure["page"]["queries"]
         .as_array().unwrap_or(&Vec::new()).iter().map(|row| {
@@ -631,12 +632,12 @@ async fn page_load_internal() {
             (k, v)
         })
         .collect();
-    
+
         let query_response: serde_json::Value = sqlite_query::get_query_data(&db_bytes, combined_query).await;
         //web_sys::console::log_1(&serde_json::to_string(&query_response).expect("ERROR").into());
     
         let mut merged_structure = render_structure["all"].clone();
-    
+
         // Merge if both are objects
         match (&mut merged_structure, query_response) {
             (serde_json::Value::Object(ref mut target), serde_json::Value::Object(source)) => {
@@ -648,10 +649,48 @@ async fn page_load_internal() {
                 merged_structure = other;
             }
         }
-    
+
         // RENDER TO 'APP'  -----------------------------------------------------------------------
-        let _ = render::render2dom(&render_structure["page"]["template"].as_str().expect("template must be a string"), &merged_structure, "app", true);
-        
+        //let _ = render::render2dom(&render_structure["page"]["template"].as_str().expect("template must be a string"), &merged_structure, "app", true);
+
+        let translate_iib_markdown_2link =!matches!(map_request, "trip" | "contour" | "country" | "theme");
+
+
+        let rendered_result = render::render2dom(
+            &render_structure["page"]["template"]
+            .as_str()
+            .expect("template must be a string"),
+                                                 &merged_structure,
+                                                 "app",
+                                                 translate_iib_markdown_2link,
+        );
+
+        match &rendered_result {
+            Ok(content) => web_sys::console::log_1(&JsValue::from_str(&format!(
+                "render2dom succeeded, content length: {}",
+                content.len()
+            ))),
+            /*Err(e) => web_sys::console::log_1(&JsValue::from_str(&format!(
+                "render2dom failed: {}",
+                e
+            ))),*/
+            Err(e) => {
+                let msg = format!("render2dom failed: {}", e);
+
+                web_sys::console::log_1(&JsValue::from_str(&msg));
+
+                if let Some(document) = window().and_then(|w| w.document()) {
+                    if let Some(el) = document.get_element_by_id("error_msg") {
+                        if let Ok(html) = el.dyn_into::<HtmlElement>() {
+                            html.set_inner_text(&msg); // safer than inner_html
+                        }
+                    }
+                }
+            }
+        }
+
+        let _ = rendered_result;
+
         helper::apply_filter_from_opfs_to_selects();
         helper::attach_select_listener();
         
@@ -665,23 +704,6 @@ async fn page_load_internal() {
             _ => {}
         }
 
-        initializeChart();
-        initializeChartOvernights();
-
-
-/*
-        if page == "trip" {
-            //applyTripCoverPhotos(&render_structure["all"]["settings"]["Feature"]["ImmichApiUrl"].to_string(),&render_structure["all"]["settings"]["Feature"]["ImmichApiKey"].to_string());
-        } else if page == "dataset" {
-            load_code_editor();
-            initiate_spreadsheet();
-            custom_queries();
-        } else if page == "more:source" {
-            check_immich_authorization();
-        } else if page == "toolbox:input" {
-            init_create_trip();
-        }*/
-
         match page {
             "trip" => {
                 //applyTripCoverPhotos(&render_structure["all"]["settings"]["Feature"]["ImmichApiUrl"].to_string(),&render_structure["all"]["settings"]["Feature"]["ImmichApiKey"].to_string());
@@ -691,9 +713,15 @@ async fn page_load_internal() {
                 initiate_spreadsheet();
                 custom_queries();
             }
+            "statistics:summary" => {
+                initializeChart();
+            }
+            "statistics:overnights" => {
+                initializeChartOvernights();
+            }
             "more:source" => check_immich_authorization(),
             "toolbox:input" => init_create_trip(),
             _ => {}
         }
-        
+
 }

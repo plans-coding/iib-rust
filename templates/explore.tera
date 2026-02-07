@@ -20,7 +20,7 @@
 
       <a href="?path=trip:{{ row.OuterId }}" class="card" data-trip-domain="{{ row.TripDomain }}">
         <div class="explore-cover" data-trip-domain="{{ row.TripDomain }}" data-trip-cover-photo-path="{{ row.CoverPhoto }}" style="
-            background-image: {%if cover_photo_id != "NO" %}url('{{ settings.Feature.ImmichUrl | safe }}api/assets/{{cover_photo_id}}/thumbnail'), linear-gradient(rgba(255,255,255,1)), {% endif %}url('images/travel.svg');
+            background-image: {%if cover_photo_id != "NO" %}url('{{ settings.Photos.ImmichUrl | safe }}api/assets/{{cover_photo_id}}/thumbnail'), linear-gradient(rgba(255,255,255,1)), {% endif %}url('images/travel.svg');
             background-size: {%if cover_photo_id != "NO" %}cover, {% endif %}contain;
             background-position: {%if cover_photo_id != "NO" %}center, {% endif %}center;
             background-repeat: {%if cover_photo_id != "NO" %}no-repeat, {% endif %}no-repeat;

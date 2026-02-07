@@ -33,17 +33,28 @@ section {max-width:100%!important;width:100%!important;margin:0!important;}
         {% endfor %}
     </select>
 
-    {% if settings.Plugin.Theme.enabled %}
+    {% set theme_lines = settings.Extension.Theme | split(pat="\n") %}
+
+    {% set_global theme_config = theme_lines | first | split(pat=",") %}
+    {% set_global theme_list = theme_lines | slice(start=1) %}
+
+    {% if theme_config[0] == "Enabled" %}
+
     <select id="themeSelector" class="form-control text-center" style="max-width:200pt; display:inline-block;" onchange="history.pushState(null,'','?path=map:theme:'+this.value);page_load();">
-        <option value="">{{ settings.Plugin.Theme.translation }}</option>
-        {% for item in settings.Plugin.Theme.mapping %}
-            {% for key, value in item %}
-                {% set theme_key = query_params.path | replace(from=("map:theme:"), to=("")) %}
-                <option value="{{ key }}" {% if theme_key == key %}selected{% endif %}>
-                    {{ value }}
-                </option>
-            {% endfor %}
+
+        <option value="">{{ theme_config[1] }}</option>
+
+        {% for item in theme_list %}
+
+            {% set_global parts = item | split(pat=":") %}
+            {% set theme_key = query_params.path | replace(from=("map:theme:"), to=("")) %}
+
+            <option value="{{ parts[0] }}" {% if theme_key == parts[0] %}selected{% endif %}>
+                {{ parts[1] }}
+            </option>
+
         {% endfor %}
+
     </select>
     {% endif %}
 
@@ -51,9 +62,4 @@ section {max-width:100%!important;width:100%!important;margin:0!important;}
 
 <div id="map" style="height:100%; width:100%;"></div>
 
-<div id="map-pin-data" data-map='{{ map_data | json_encode }}' data-settings-assets='{{ settings | json_encode }}'></div>
-
-
-
-
-
+<div id="map-pin-data" data-map='{{ map_data | json_encode }}' data-settings-assets='{{ settings.Extension.Theme }}'></div>

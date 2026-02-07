@@ -1,6 +1,6 @@
 SELECT
-    bewa_Overview.OuterId,
-    bewb_Events.TripDomain AS DomainAbbreviation,
+    OuterId,
+    TripDomain AS DomainAbbreviation,
     bewb_Events.Date
 FROM
     bewa_Overview

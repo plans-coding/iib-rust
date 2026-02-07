@@ -64,7 +64,7 @@
       {{ translation.source.delete_cache | default(value='Delete web app cache') }}
     </button>
 
-        <script id="immichUrl" type="application/json">{{ settings.Feature.ImmichUrl | safe }}</script>
+        <script id="immichUrl" type="application/json">{{ settings.Photos.ImmichUrl | safe }}</script>
     <script id="coverPhotoOriginalPaths" type="application/json">{{ cover_photo_original_paths | json_encode | safe }}</script>
 
 
@@ -76,17 +76,17 @@
 
     <div class="red-text" id="immich_authorization_status" style="display:block;">
 
-      <div id="immich_authorization_status_NOT_OK" style="display:none;">{{ translation.source.immichNotLoggedOn | default(value='You need to be logged in to you Immich instance for the synchronization to work, please login at') }} <a class="single-link" target="_blank" href="{{ settings.Feature.ImmichUrl }}">{{ settings.Feature.ImmichUrl }}</a>.</div>
+      <div id="immich_authorization_status_NOT_OK" style="display:none;">{{ translation.source.immichNotLoggedOn | default(value='You need to be logged in to you Immich instance for the synchronization to work, please login at') }} <a class="single-link" target="_blank" href="{{ settings.Photos.ImmichUrl }}">{{ settings.Photos.ImmichUrl }}</a>.</div>
 
       <div id="immich_authorization_status_OK" style="display:none;">
-        {{ translation.source.immichLoggedOn | default(value='You are logged in to you Immich instance at') }} <a class="single-link" target="_blank" href="{{ settings.Feature.ImmichUrl }}">{{ settings.Feature.ImmichUrl }}</a>.
+        {{ translation.source.immichLoggedOn | default(value='You are logged in to you Immich instance at') }} <a class="single-link" target="_blank" href="{{ settings.Photos.ImmichUrl }}">{{ settings.Photos.ImmichUrl }}</a>.
       </div>
 
     </div>
 
     <div id="immich_authorization_status_OK_buttons" style="display:none;margin:auto;">
-        <button class="filter-button" onclick="sync_album_covers('{{ settings.Feature.ImmichUrl }}', '{{ settings.Feature.ImmichCoverAlbumId }}');">{{ translation.source.syncCoverAlbum | default(value='Synchronize Immich Cover Photo Album') }}</button> &nbsp;&nbsp;<span id="count_missing_photos"></span>
-        <button class="filter-button" onclick="save_album_covers_ids2OPFS('{{ settings.Feature.ImmichUrl }}', '{{ settings.Feature.ImmichCoverAlbumId }}');">{{ translation.source.saveCoverJson | default(value='Save Immich Cover Photo Album List to OPFS') }}</button> &nbsp;&nbsp;<span id="cover2opfs"></span>
+        <button class="filter-button" onclick="sync_album_covers('{{ settings.Photos.ImmichUrl }}', '{{ settings.Photos.ImmichCoverAlbumId }}');">{{ translation.source.syncCoverAlbum | default(value='Synchronize Immich Cover Photo Album') }}</button> &nbsp;&nbsp;<span id="count_missing_photos"></span>
+        <button class="filter-button" onclick="save_album_covers_ids2OPFS('{{ settings.Photos.ImmichUrl }}', '{{ settings.Photos.ImmichCoverAlbumId }}');">{{ translation.source.saveCoverJson | default(value='Save Immich Cover Photo Album List to OPFS') }}</button> &nbsp;&nbsp;<span id="cover2opfs"></span>
       </div>
 
 

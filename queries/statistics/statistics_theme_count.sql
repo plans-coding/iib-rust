@@ -1,31 +1,49 @@
+WITH RECURSIVE ThemeLines(line, rest) AS (
+    SELECT
+        CASE
+            WHEN instr(Value, CHAR(10)) > 0 THEN substr(Value, 1, instr(Value, CHAR(10)) - 1)
+            ELSE Value
+        END AS line,
+        CASE
+            WHEN instr(Value, CHAR(10)) > 0 THEN substr(Value, instr(Value, CHAR(10)) + 1)
+            ELSE ''
+        END AS rest
+    FROM bewx_Settings
+    WHERE Attribute = 'Theme'
+
+    UNION ALL
+
+    SELECT
+        CASE
+            WHEN instr(rest, CHAR(10)) > 0 THEN substr(rest, 1, instr(rest, CHAR(10)) - 1)
+            ELSE rest
+        END AS line,
+        CASE
+            WHEN instr(rest, CHAR(10)) > 0 THEN substr(rest, instr(rest, CHAR(10)) + 1)
+            ELSE ''
+        END AS rest
+    FROM ThemeLines
+    WHERE rest <> ''
+),
+
+ThemeMapping AS (
+    SELECT
+        TRIM(substr(line, 1, instr(line, ':') - 1)) AS key,
+        TRIM(substr(line, instr(line, ':') + 1)) AS value
+    FROM ThemeLines
+    WHERE line LIKE '%:%'
+)
+
 SELECT
-    kv.key   AS ThemeAbbreviation,
-    kv.value AS ThemeDescription,
+    tm.key AS ThemeAbbreviation,
+    tm.value AS ThemeDescription,
     SUM(
         (LENGTH(e.AdditionalNotes)
-         - LENGTH(REPLACE(e.AdditionalNotes, '| ' || kv.key, '')))
-        / LENGTH('| ' || kv.key)
+         - LENGTH(REPLACE(e.AdditionalNotes, '| ' || tm.key, '')))
+        / LENGTH('| ' || tm.key)
     ) AS ThemeCount
-FROM
-    bewb_Events AS e
-CROSS JOIN
-    (
-        SELECT
-            kv.key,
-            kv.value
-        FROM
-            bewx_Settings AS s
-        JOIN
-            json_each(s.Value, '$.mapping') AS j
-        JOIN
-            json_each(j.value) AS kv
-        WHERE
-            s.Attribute = 'Theme'
-    ) AS kv
-WHERE
-    e.AdditionalNotes LIKE '%| ' || kv.key || '%'
-GROUP BY
-    kv.key,
-    kv.value
-ORDER BY
-	ThemeCount DESC;
+FROM bewb_Events AS e
+CROSS JOIN ThemeMapping AS tm
+WHERE e.AdditionalNotes LIKE '%| ' || tm.key || '%'
+GROUP BY tm.key, tm.value
+ORDER BY ThemeCount DESC;

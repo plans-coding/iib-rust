@@ -505,6 +505,9 @@ function __wbg_get_imports() {
         getDataViewMemory0().setInt32(arg0 + 4 * 1, len1, true);
         getDataViewMemory0().setInt32(arg0 + 4 * 0, ptr1, true);
     };
+    imports.wbg.__wbg_init_create_trip_430eac979aa71f3a = function() {
+        init_create_trip();
+    };
     imports.wbg.__wbg_initializeChartOvernights_66d834959fb75994 = function() {
         initializeChartOvernights();
     };
@@ -722,9 +725,6 @@ function __wbg_get_imports() {
     imports.wbg.__wbg_set_selected_8d90d26ae3bb995b = function(arg0, arg1) {
         arg0.selected = arg1 !== 0;
     };
-    imports.wbg.__wbg_set_title_68ffc586125a93b4 = function(arg0, arg1, arg2) {
-        arg0.title = getStringFromWasm0(arg1, arg2);
-    };
     imports.wbg.__wbg_size_82fbdb656de23326 = function(arg0) {
         const ret = arg0.size;
         return ret;
@@ -793,13 +793,13 @@ function __wbg_get_imports() {
         const ret = getStringFromWasm0(arg0, arg1);
         return ret;
     };
-    imports.wbg.__wbindgen_cast_413f4dc051c0c594 = function(arg0, arg1) {
-        // Cast intrinsic for `Closure(Closure { dtor_idx: 1575, function: Function { arguments: [Externref], shim_idx: 1576, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+    imports.wbg.__wbindgen_cast_77e28df0742b4e4e = function(arg0, arg1) {
+        // Cast intrinsic for `Closure(Closure { dtor_idx: 1574, function: Function { arguments: [Externref], shim_idx: 1575, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
         const ret = makeMutClosure(arg0, arg1, wasm.wasm_bindgen__closure__destroy__h9461008e47dcd1fa, wasm_bindgen__convert__closures_____invoke__h83adf183fa3daf7d);
         return ret;
     };
-    imports.wbg.__wbindgen_cast_a456262b69efa16e = function(arg0, arg1) {
-        // Cast intrinsic for `Closure(Closure { dtor_idx: 79, function: Function { arguments: [], shim_idx: 80, ret: Unit, inner_ret: Some(Unit) }, mutable: false }) -> Externref`.
+    imports.wbg.__wbindgen_cast_ca7f348de8fc79e6 = function(arg0, arg1) {
+        // Cast intrinsic for `Closure(Closure { dtor_idx: 65, function: Function { arguments: [], shim_idx: 66, ret: Unit, inner_ret: Some(Unit) }, mutable: false }) -> Externref`.
         const ret = makeClosure(arg0, arg1, wasm.wasm_bindgen__closure__destroy__hb9926c4ff3384788, wasm_bindgen__convert__closures_____invoke__h8225d6a622aa143e);
         return ret;
     };

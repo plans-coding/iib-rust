@@ -172,33 +172,6 @@ pub fn transform_settings(settings_array: &Vec<Value>) -> Value {
     let mut result = Map::new();
 
     for setting in settings_array {
-        let attribute = setting["Attribute"].as_str().expect("ERROR");
-        let group = setting["AttributeGroup"].as_str().expect("ERROR");
-        let value_str = setting["Value"].as_str().expect("ERROR");
-
-        // Parse the value if it's a JSON object string, else keep as string
-        let value: Value = if value_str.starts_with('{') || value_str.starts_with('[') {
-            serde_json::from_str(value_str).unwrap_or(Value::String(value_str.to_string()))
-        } else {
-            Value::String(value_str.to_string())
-        };
-
-        // Insert into the correct group
-        result
-            .entry(group)
-            .or_insert_with(|| Value::Object(Map::new()))
-            .as_object_mut()
-            .expect("ERROR")
-            .insert(attribute.to_string(), value);
-    }
-
-    Value::Object(result)
-}*/
-
-pub fn transform_settings(settings_array: &Vec<Value>) -> Value {
-    let mut result = Map::new();
-
-    for setting in settings_array {
         let attribute = setting["Attribute"].as_str().unwrap_or("unknown");
         let group = setting["AttributeGroup"].as_str().unwrap_or("unknown");
 
@@ -212,6 +185,26 @@ pub fn transform_settings(settings_array: &Vec<Value>) -> Value {
             }
             other => other.clone(), // handles null, numbers, booleans
         };
+
+        result
+        .entry(group)
+        .or_insert_with(|| Value::Object(Map::new()))
+        .as_object_mut()
+        .unwrap()
+        .insert(attribute.to_string(), value);
+    }
+
+    Value::Object(result)
+}*/
+pub fn transform_settings(settings_array: &[Value]) -> Value {
+    let mut result = Map::new();
+
+    for setting in settings_array {
+        let attribute = setting["Attribute"].as_str().unwrap_or("unknown");
+        let group = setting["AttributeGroup"].as_str().unwrap_or("unknown");
+
+        // Just clone the value as-is, no JSON parsing
+        let value = setting["Value"].clone();
 
         result
         .entry(group)

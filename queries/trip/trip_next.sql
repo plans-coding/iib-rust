@@ -3,11 +3,13 @@ SELECT
     TripDomain
 FROM bewa_Overview
 WHERE OuterId IS NOT NULL
-  AND DepartureDate > (
-    SELECT
-		DepartureDate
-    FROM bewa_Overview
-    WHERE OuterId = '_OUTER_ID_'
-) AND TripDomain IN (TripDomain) AND ParticipantGroup IN (ParticipantGroup)
-ORDER BY DepartureDate ASC
+  AND TripDomain IN (TripDomain)
+  AND ParticipantGroup IN (ParticipantGroup)
+ORDER BY
+    DepartureDate <= (
+        SELECT DepartureDate
+        FROM bewa_Overview
+        WHERE OuterId = '_OUTER_ID_'
+    ),
+    DepartureDate
 LIMIT 1;

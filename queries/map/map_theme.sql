@@ -1,4 +1,6 @@
-SELECT o.OuterId AS OuterId, e.InnerId,
+SELECT
+	   o.OuterId AS OuterId,
+	   e.InnerId,
        o.OverallDestination AS OverallDestination,
 	   e.Date AS Date,
 	   e.Events AS Events,

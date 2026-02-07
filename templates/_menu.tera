@@ -128,8 +128,11 @@ details.trip[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}],
         <a href="?path=statistics:summary">{{ translation.statistics.summary | default(value="Summary") }}</a>
         <a href="?path=statistics:visits">{{ translation.statistics.visits | default(value="Visits") }}</a>
         <a href="?path=statistics:overnights">{{ translation.statistics.overnights | default(value="Overnights") }}</a>
-        {% if settings.Plugin.Theme.enabled == true %}
-            <a href="?path=statistics:themes">{{ settings.Plugin.Theme.translation | default(value="Themes") }}</a>
+
+        {% set theme_config = settings.Extension.Theme | split(pat="\n") | first | split(pat=",") %}
+
+        {% if theme_config[0] == "Enabled" %}
+            <a href="?path=statistics:themes">{{ theme_config[1] | default(value="Themes") }}</a>
         {% endif %}
     </div>
 

@@ -57,7 +57,10 @@ body.dark {
 
 }
 
-
+#error_msg {    margin: 20pt;
+background-color: var(--color-hover-background-alpha);
+border-radius: 5pt;
+color: var(--color-hover-background);}
 
 .table td {padding:5pt;}
 

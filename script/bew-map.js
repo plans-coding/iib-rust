@@ -355,13 +355,11 @@ function load_theme_map() {
     const mapContainer = document.getElementById('map');
     const mapPinDataContainer = document.getElementById('map-pin-data');
     const rawData = mapPinDataContainer.getAttribute('data-map');
-    const assetsSettings = JSON.parse(
-        mapPinDataContainer.getAttribute("data-settings-assets")
-    );
+    const assetsSettings = mapPinDataContainer.getAttribute("data-settings-assets");
 
 
     if (!rawData) return;
-
+    console.log(assetsSettings);
     try {
         const jsonData = JSON.parse(rawData);
         const bounds = new maplibregl.LngLatBounds();
@@ -377,8 +375,14 @@ function load_theme_map() {
                     .split(',')
                     .map(v => parseFloat(v.trim()));
 
-                    const theme = assetsSettings.Plugin.Theme.mapping
-                    .find(t => t.key === match[3].trim());
+                    const themes = Object.fromEntries(
+                        assetsSettings
+                        .split('\n')
+                        .slice(1)
+                        .map(l => l.split(':'))
+                    );
+
+                    const theme = themes[match[3].trim()];
 
                     allSubThemes.push({
                         InnerId: item.InnerId,
