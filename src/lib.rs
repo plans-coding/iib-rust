@@ -452,6 +452,7 @@ async fn page_load_internal() {
                     "template": TEMPLATE_DATASET,
                     "queries": [
                         ["table_list", "SELECT name FROM sqlite_master WHERE type IN ('table', 'view') ORDER BY name;"],
+                        ["stored_custom_queries", "SELECT ROWID, Name FROM com_CodeCollection WHERE Target = 'BewDataset';"],
                     ]});
                 render_structure["all"]["query_templates"] = json!(ALL_QUERIES.iter().map(|(name, _)| name).collect::<Vec<_>>());
             }
@@ -460,7 +461,7 @@ async fn page_load_internal() {
                     "title": render_structure.pointer("/all/translation/source/title").and_then(|v| v.as_str()).unwrap_or("Source"),
                     "template": TEMPLATE_SOURCE,
                     "queries": [
-                        ["cover_photo_original_paths", "SELECT OuterId, CoverPhoto from bewa_Overview WHERE CoverPhoto IS NOT NULL;"],
+                        ["cover_photo_original_paths", "SELECT OuterId, CoverPhoto FROM bewa_Overview WHERE CoverPhoto IS NOT NULL;"],
                     ]});
                 render_structure["all"]["db_loaded"] = json!(if !&db_bytes.is_empty() { "stored" } else { "missing" });
             }
@@ -494,41 +495,82 @@ async fn page_load_internal() {
             
                 web_sys::console::log_1(&"Second tier.".into());
                 
-                if let Some(outer_id) = page.strip_prefix("trip:") {
-                    // Title med outer id + dagbok + pass
-                    render_structure["page"] = json!({
-                        "title": outer_id,
-                        "template": TEMPLATE_TRIP,
-                        "queries": [
-                            ["trip_summary", QUERY_TRIP_SUMMARY.to_string().replace("/*_OUTER_ID_*/",outer_id)],
-                            ["trip_events", QUERY_TRIP_EVENTS.to_string().replace("/*_OUTER_ID_*/",outer_id)],
-                            ["trip_all_trips", QUERY_TRIP_ALL_TRIPS.to_string()],
-                            ["common_trip_domains", QUERY_COMMON_TRIP_DOMAINS.to_string()],
-                            // Lägg till filter
-                            ["trip_border_crossings", QUERY_TRIP_BORDER_CROSSINGS.replace("/*","").replace("*/","").replace("_OUTER_ID_",outer_id)],
-                            ["trip_map_pins_overall", QUERY_TRIP_MAP_PINS_OVERALL.replace("/*","").replace("*/","").replace("_OUTER_ID_",outer_id)],
-                            ["trip_map_pins_accommodation", QUERY_TRIP_MAP_PINS_ACCOMMODATION.replace("_OUTER_ID_",outer_id)],
-                            ["trip_previous", QUERY_TRIP_PREVIOUS.replace("_OUTER_ID_",outer_id)
-                                .replace("(ParticipantGroup)", &participant_group)
-                                .replace("(TripDomain)", &trip_domain)],
-                            ["trip_next", QUERY_TRIP_NEXT.replace("_OUTER_ID_",outer_id)
-                                .replace("(ParticipantGroup)", &participant_group)
-                                .replace("(TripDomain)", &trip_domain)],
-                            ["trip_immich_desc_search", QUERY_TRIP_IMMICH_DESC_SEARCH.replace("_OUTER_ID_",outer_id)],
-                            ["trip_immich_album_name", QUERY_TRIP_IMMICH_ALBUM_NAME.replace("_OUTER_ID_",outer_id)],
-                        ]});
-                        render_structure["all"]["cover_photos_list"] = serde_json::to_value(&cover_photos_map).expect("Failed to convert map to Value");
-                        map_request = "trip";
+
+                if let Some(rest) = page.strip_prefix("trip:") {
+                    let mut parts = rest.splitn(2, ':');
+
+                    let outer_id = parts.next().filter(|s| !s.is_empty());
+                    let inner_id = parts.next().filter(|s| !s.is_empty());
+
+                    match (outer_id, inner_id) {
+                        // trip::yyy  → only inner
+                        (None, Some(inner_id)) => {
+                            render_structure["page"] = json!({
+                                "title": inner_id,
+                                "template": TEMPLATE_TRIP,
+                                "queries": [
+                                    ["trip_summary", QUERY_TRIP_SUMMARY.to_string().replace("= InnerId", &format!("= '{}'", inner_id))],
+                                    ["trip_events", QUERY_TRIP_EVENTS.to_string().replace("= InnerId", &format!("= '{}'", inner_id))],
+                                    ["trip_all_trips", QUERY_TRIP_ALL_TRIPS.to_string()],
+                                    ["common_trip_domains", QUERY_COMMON_TRIP_DOMAINS.to_string()],
+                                    // Lägg till filter
+                                    ["trip_border_crossings", QUERY_TRIP_BORDER_CROSSINGS.replace("= InnerId", &format!("= '{}'", inner_id))],
+                                    ["trip_map_pins_overall", QUERY_TRIP_MAP_PINS_OVERALL.replace("= InnerId", &format!("= '{}'", inner_id))],
+                                    ["trip_map_pins_accommodation", QUERY_TRIP_MAP_PINS_ACCOMMODATION.replace("= InnerId", &format!("= '{}'", inner_id))],
+                                    ["trip_previous", QUERY_TRIP_PREVIOUS.replace("= InnerId", &format!("= '{}'", inner_id))
+                                    .replace("(ParticipantGroup)", &participant_group)
+                                    .replace("(TripDomain)", &trip_domain)],
+                                    ["trip_next", QUERY_TRIP_NEXT.replace("= InnerId", &format!("= '{}'", inner_id))
+                                    .replace("(ParticipantGroup)", &participant_group)
+                                    .replace("(TripDomain)", &trip_domain)],
+                                    ["trip_immich_desc_search", QUERY_TRIP_IMMICH_DESC_SEARCH.replace("= InnerId", &format!("= '{}'", inner_id))],
+                                    ["trip_immich_album_name", QUERY_TRIP_IMMICH_ALBUM_NAME.replace("= InnerId", &format!("= '{}'", inner_id))],
+                                ]});
+                            render_structure["all"]["cover_photos_list"] = serde_json::to_value(&cover_photos_map).expect("Failed to convert map to Value");
+                            map_request = "trip";
+                        }
+
+                        // trip:xxx or trip:xxx:yyy → outer exists
+                        (Some(outer_id), _) => {
+
+                        // Title med outer id + dagbok + pass
+                        render_structure["page"] = json!({
+                            "title": outer_id,
+                            "template": TEMPLATE_TRIP,
+                            "queries": [
+                                ["trip_summary", QUERY_TRIP_SUMMARY.to_string().replace("= OuterId", &format!("= '{}'", outer_id))],
+                                ["trip_events", QUERY_TRIP_EVENTS.to_string().replace("= OuterId", &format!("= '{}'", outer_id))],
+                                ["trip_all_trips", QUERY_TRIP_ALL_TRIPS.to_string()],
+                                ["common_trip_domains", QUERY_COMMON_TRIP_DOMAINS.to_string()],
+                                // Lägg till filter
+                                ["trip_border_crossings", QUERY_TRIP_BORDER_CROSSINGS.replace("= OuterId", &format!("= '{}'", outer_id))],
+                                ["trip_map_pins_overall", QUERY_TRIP_MAP_PINS_OVERALL.replace("= OuterId", &format!("= '{}'", outer_id))],
+                                ["trip_map_pins_accommodation", QUERY_TRIP_MAP_PINS_ACCOMMODATION.replace("= OuterId", &format!("= '{}'", outer_id))],
+                                ["trip_previous", QUERY_TRIP_PREVIOUS.replace("= OuterId", &format!("= '{}'", outer_id))
+                                    .replace("(ParticipantGroup)", &participant_group)
+                                    .replace("(TripDomain)", &trip_domain)],
+                                ["trip_next", QUERY_TRIP_NEXT.replace("= OuterId", &format!("= '{}'", outer_id))
+                                    .replace("(ParticipantGroup)", &participant_group)
+                                    .replace("(TripDomain)", &trip_domain)],
+                                ["trip_immich_desc_search", QUERY_TRIP_IMMICH_DESC_SEARCH.replace("= OuterId", &format!("= '{}'", outer_id))],
+                                ["trip_immich_album_name", QUERY_TRIP_IMMICH_ALBUM_NAME.replace("= OuterId", &format!("= '{}'", outer_id))],
+                            ]});
+                            render_structure["all"]["cover_photos_list"] = serde_json::to_value(&cover_photos_map).expect("Failed to convert map to Value");
+                            map_request = "trip";
+
+                        }
+                        _ => {}
+                    }
                 }
-                
+
                 if let Some(suffix) = page.strip_prefix("images:") {
-                
+
                     let mut parts = suffix.splitn(2, ':');
-                    
+
                     if let (Some(trip_id), Some(trip_date)) = (parts.next(), parts.next()) {
                         let trip_id = trip_id.to_string();
                         let trip_date = trip_date.to_string();
-                
+
                         render_structure["page"] = json!({
                             "title": suffix,
                             "template": TEMPLATE_IMAGES,
@@ -711,7 +753,7 @@ async fn page_load_internal() {
             "dataset" => {
                 load_code_editor();
                 initiate_spreadsheet();
-                custom_queries();
+                //custom_queries(); // Need input value (e.g. get code editor content)
             }
             "statistics:summary" => {
                 initializeChart();

@@ -111,6 +111,14 @@ WHERE m.type='table' ORDER BY table_name;"
     <details>
       <summary style="cursor:pointer;">{{ translation.dataset.customQueries | default(value="Custom queries") }}</summary>
       <div style="background-color:var(--color-background);padding:2pt;border-radius:5pt;" id="custom_queries">
+
+      {% for query in stored_custom_queries %}
+          <div style="cursor:pointer;"
+              onclick="custom_queries('{{ query.rowid }}');">
+              {{ query.Name }}
+          </div>
+      {% endfor %}
+
       </div>
     </details>
 

@@ -53,8 +53,8 @@ body {
   </div>
 
 
-  <details open class="trip" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}" style="user-select:none;">
-  <summary data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}" style="border-radius:3pt;">
+  <details open class="trip" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
+  <summary data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}" style="border-radius:3pt;user-select:none;">
     {{ trip_summary[0].TripDescription }}
   </summary>
 
@@ -98,7 +98,7 @@ body {
           <label class="trip-details-label">
             {{ translation.trip.outerId | default(value="ID") }}
           </label>
-          <div class="trip-details-field" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">{{ trip_summary[0].OuterId }}</div>
+          <div class="trip-details-field" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">{{ trip_summary[0].OuterId }} <span style="font-size: 0.7rem;color:var(--color-hover-background);">{{ trip_summary[0].InnerId }}</span></div>
         </div>
 
         <div class="trip-details-container">

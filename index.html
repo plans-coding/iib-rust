@@ -176,26 +176,12 @@
                 load_code_editor(text);
             }
 
-            async function custom_queries() {
-                const response = await fetch("personal/custom-queries.txt");
-                const text = await response.text();
+            async function custom_queries(rowid) {
 
-                const html = text
-                    .split("\n")
-                    .map(line => line.trim())
-                    .filter(line => line.length > 0)
-                    .map(txt_row => {
-                        const label = txt_row.split("/").pop();
-                        return `
-                            <div style="cursor:pointer;"
-                                onclick="load_query_from_file('personal/${txt_row}');">
-                                ${label}
-                            </div>
-                        `;
-                    })
-                    .join("");
+                const sql_req  = await user_run_sql('SELECT * FROM com_CodeCollection WHERE ROWID = "' + rowid + '";');
+                const custom_reponse = JSON.parse(document.getElementById("sql_output_data").textContent);
+                load_code_editor(custom_reponse.rows[0][2]);
 
-                document.getElementById("custom_queries").innerHTML = html;
             }
 
         // THEME  -----------------------------------------------------------------------

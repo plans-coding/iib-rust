@@ -7,8 +7,7 @@ WITH RECURSIVE SplitPins AS
             SUBSTR(MapPins, INSTR(MapPins, ')') + 2) AS Remaining
         FROM
             bewa_Overview
-        /*WHERE
-            OuterId = "_OUTER_ID_"*/
+        WHERE OuterId = OuterId AND InnerId = InnerId
         UNION ALL
         -- Recursively extract subsequent portions
         SELECT

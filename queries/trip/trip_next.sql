@@ -9,7 +9,7 @@ ORDER BY
     DepartureDate <= (
         SELECT DepartureDate
         FROM bewa_Overview
-        WHERE OuterId = '_OUTER_ID_'
+        WHERE OuterId = OuterId AND InnerId = InnerId
     ),
     DepartureDate
 LIMIT 1;

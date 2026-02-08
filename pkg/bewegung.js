@@ -422,9 +422,6 @@ function __wbg_get_imports() {
         const ret = arg0.crypto;
         return ret;
     };
-    imports.wbg.__wbg_custom_queries_47e6cfba825ad4c2 = function() {
-        custom_queries();
-    };
     imports.wbg.__wbg_dispatchEvent_50a40ea5c664f9f4 = function() { return handleError(function (arg0, arg1) {
         const ret = arg0.dispatchEvent(arg1);
         return ret;

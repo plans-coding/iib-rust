@@ -267,28 +267,6 @@ function scheduleSave() {
     }, 500); // 0.5s after last change
 }
 
-/* any input/textarea/select change triggers save */
-document.addEventListener("input", scheduleSave);
-document.addEventListener("change", scheduleSave);
-
-
-/* attempt final save on tab close */
-window.addEventListener("beforeunload", (e) => {
-    if (!isDirty) return;
-
-    // try save (best effort)
-    saveTrip2OPFS();
-
-    // show native browser warning
-    e.preventDefault();
-    e.returnValue = "";
-});
-
-
-const fileName = "tripData.json";
-let fsRootHandle = null;
-
-
 async function initOPFS() {
     fsRootHandle = await navigator.storage.getDirectory();
 }
@@ -478,6 +456,27 @@ function buildJSONFromForm() {
 
 async function init_create_trip() {
     await initOPFS();
+
+    /* any input/textarea/select change triggers save */
+    document.addEventListener("input", scheduleSave);
+    document.addEventListener("change", scheduleSave);
+
+
+    /* attempt final save on tab close */
+    window.addEventListener("beforeunload", (e) => {
+        if (!isDirty) return;
+
+        // try save (best effort)
+        saveTrip2OPFS();
+
+        // show native browser warning
+        e.preventDefault();
+        e.returnValue = "";
+    });
+
+
+    const fileName = "tripData.json";
+    let fsRootHandle = null;
 
     const depInput = document.querySelector('input[name="DepartureDate"]');
     const retInput = document.querySelector('input[name="ReturnDate"]');

@@ -33,4 +33,4 @@ BorderCrossings AS (
     GROUP BY a.InnerId
 )
 SELECT *
-FROM BorderCrossings/* WHERE OuterId = '_OUTER_ID_'*/;
+FROM BorderCrossings WHERE OuterId = OuterId AND InnerId = InnerId;

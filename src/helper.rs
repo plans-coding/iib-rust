@@ -167,35 +167,6 @@ pub async fn get_latest_version_number() -> String {
     latest_version_number.expect("No version number found")
 }
 
-/*
-pub fn transform_settings(settings_array: &Vec<Value>) -> Value {
-    let mut result = Map::new();
-
-    for setting in settings_array {
-        let attribute = setting["Attribute"].as_str().unwrap_or("unknown");
-        let group = setting["AttributeGroup"].as_str().unwrap_or("unknown");
-
-        let value: Value = match &setting["Value"] {
-            Value::String(s) => {
-                if s.starts_with('{') || s.starts_with('[') {
-                    serde_json::from_str(s).unwrap_or(Value::String(s.clone()))
-                } else {
-                    Value::String(s.clone())
-                }
-            }
-            other => other.clone(), // handles null, numbers, booleans
-        };
-
-        result
-        .entry(group)
-        .or_insert_with(|| Value::Object(Map::new()))
-        .as_object_mut()
-        .unwrap()
-        .insert(attribute.to_string(), value);
-    }
-
-    Value::Object(result)
-}*/
 pub fn transform_settings(settings_array: &[Value]) -> Value {
     let mut result = Map::new();
 
