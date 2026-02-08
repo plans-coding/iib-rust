@@ -15,5 +15,5 @@ SELECT
 FROM bewb_Events e
 JOIN bewa_Overview o ON e.InnerId = o.InnerId
 WHERE
-    o.OuterId = OuterId AND InnerId = InnerId
+    o.OuterId = o.OuterId AND e.InnerId = e.InnerId
 ORDER BY Date ASC;

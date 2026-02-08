@@ -509,14 +509,14 @@ async fn page_load_internal() {
                                 "title": inner_id,
                                 "template": TEMPLATE_TRIP,
                                 "queries": [
-                                    ["trip_summary", QUERY_TRIP_SUMMARY.to_string().replace("= InnerId", &format!("= '{}'", inner_id))],
-                                    ["trip_events", QUERY_TRIP_EVENTS.to_string().replace("= InnerId", &format!("= '{}'", inner_id))],
-                                    ["trip_all_trips", QUERY_TRIP_ALL_TRIPS.to_string()],
-                                    ["common_trip_domains", QUERY_COMMON_TRIP_DOMAINS.to_string()],
+                                    ["trip_summary", QUERY_TRIP_SUMMARY.replace("= InnerId", &format!("= '{}'", inner_id))],
+                                    ["trip_events", QUERY_TRIP_EVENTS.replace("= e.InnerId", &format!("= '{}'", inner_id))],
+                                    ["trip_all_trips", QUERY_TRIP_ALL_TRIPS],
+                                    ["common_trip_domains", QUERY_COMMON_TRIP_DOMAINS],
                                     // Lägg till filter
-                                    ["trip_border_crossings", QUERY_TRIP_BORDER_CROSSINGS.replace("= InnerId", &format!("= '{}'", inner_id))],
+                                    ["trip_border_crossings", QUERY_TRIP_BORDER_CROSSINGS.replace("= a.InnerId", &format!("= '{}'", inner_id))],
                                     ["trip_map_pins_overall", QUERY_TRIP_MAP_PINS_OVERALL.replace("= InnerId", &format!("= '{}'", inner_id))],
-                                    ["trip_map_pins_accommodation", QUERY_TRIP_MAP_PINS_ACCOMMODATION.replace("= InnerId", &format!("= '{}'", inner_id))],
+                                    ["trip_map_pins_accommodation", QUERY_TRIP_MAP_PINS_ACCOMMODATION.replace("= o.InnerId", &format!("= '{}'", inner_id))],
                                     ["trip_previous", QUERY_TRIP_PREVIOUS.replace("= InnerId", &format!("= '{}'", inner_id))
                                     .replace("(ParticipantGroup)", &participant_group)
                                     .replace("(TripDomain)", &trip_domain)],
@@ -539,13 +539,13 @@ async fn page_load_internal() {
                             "template": TEMPLATE_TRIP,
                             "queries": [
                                 ["trip_summary", QUERY_TRIP_SUMMARY.to_string().replace("= OuterId", &format!("= '{}'", outer_id))],
-                                ["trip_events", QUERY_TRIP_EVENTS.to_string().replace("= OuterId", &format!("= '{}'", outer_id))],
+                                ["trip_events", QUERY_TRIP_EVENTS.to_string().replace("= o.OuterId", &format!("= '{}'", outer_id))],
                                 ["trip_all_trips", QUERY_TRIP_ALL_TRIPS.to_string()],
                                 ["common_trip_domains", QUERY_COMMON_TRIP_DOMAINS.to_string()],
                                 // Lägg till filter
-                                ["trip_border_crossings", QUERY_TRIP_BORDER_CROSSINGS.replace("= OuterId", &format!("= '{}'", outer_id))],
+                                ["trip_border_crossings", QUERY_TRIP_BORDER_CROSSINGS.replace("= b.OuterId", &format!("= '{}'", outer_id))],
                                 ["trip_map_pins_overall", QUERY_TRIP_MAP_PINS_OVERALL.replace("= OuterId", &format!("= '{}'", outer_id))],
-                                ["trip_map_pins_accommodation", QUERY_TRIP_MAP_PINS_ACCOMMODATION.replace("= OuterId", &format!("= '{}'", outer_id))],
+                                ["trip_map_pins_accommodation", QUERY_TRIP_MAP_PINS_ACCOMMODATION.replace("= o.OuterId", &format!("= '{}'", outer_id))],
                                 ["trip_previous", QUERY_TRIP_PREVIOUS.replace("= OuterId", &format!("= '{}'", outer_id))
                                     .replace("(ParticipantGroup)", &participant_group)
                                     .replace("(TripDomain)", &trip_domain)],
@@ -659,8 +659,10 @@ async fn page_load_internal() {
         // SET TITLE  -----------------------------------------------------------------------
     
         //web_sys::console::log_1(&"----------------------".into());
-        //let title = render_structure["page"]["title"].as_str().unwrap_or("Default Title");
-        //web_sys::window().expect("ERROR").document().expect("ERROR").set_title(&format!("{title} - Immer in Bewegung"));
+
+        let title = render_structure["page"]["title"].as_str().unwrap_or("Default Title");
+        web_sys::window().expect("ERROR").document().expect("ERROR").set_title(&format!("{title} - Immer in Bewegung"));
+
         //web_sys::console::log_1(&serde_json::to_string(&render_structure["page"]["title"]).expect("ERROR").into());
     
         // RUN SQLITE QUERIES  -----------------------------------------------------------------------
