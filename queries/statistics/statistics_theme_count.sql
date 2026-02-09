@@ -43,7 +43,9 @@ SELECT
         / LENGTH('| ' || tm.key)
     ) AS ThemeCount
 FROM bewb_Events AS e
+JOIN bewa_Overview o ON e.InnerId = o.InnerId
 CROSS JOIN ThemeMapping AS tm
 WHERE e.AdditionalNotes LIKE '%| ' || tm.key || '%'
+AND TripDomain IN (TripDomain) AND ParticipantGroup IN (ParticipantGroup)
 GROUP BY tm.key, tm.value
 ORDER BY ThemeCount DESC;

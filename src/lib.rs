@@ -1,6 +1,5 @@
 use wasm_bindgen::prelude::*;
 use serde_json::json;
-use helper::SqlFilterReplace;
 use once_cell::sync::OnceCell;
 use std::sync::Mutex;
 use serde_json::Value;
@@ -129,6 +128,11 @@ extern "C" {
     );*/
     fn check_immich_authorization();
     fn init_create_trip();
+
+    fn load_filter_OPFS();
+
+    #[wasm_bindgen(catch)]
+    async fn get_filter_value_OPFS() -> Result<JsValue, JsValue>;
 }
 
 // -----------------------------------------------------------------------
@@ -283,6 +287,10 @@ async fn session_load() -> (Vec<u8>, serde_json::Value) {
 // HOT RELOAD
 // -----------------------------------------------------------------------
 async fn page_load_internal() {
+
+
+    //web_sys::console::log_1(&">>----------------------".into());
+
     let db_bytes = DB_BYTES.get().expect("DB not initialized");
     let render_structure_mutex = RENDER_STRUCTURE.get().expect("Render structure missing");
     let mut map_request = "";
@@ -304,28 +312,20 @@ async fn page_load_internal() {
     //web_sys::console::log_1(&serde_json::to_string(&render_structure["all"]).expect("ERROR").into());
 
     // READ APPLIED FILTERS  -----------------------------------------------------------------------
-    
-    let filters_value = filecontent::load_filter_from_opfs()
-    .await
-    .and_then(|bytes| String::from_utf8(bytes).ok())
-    .and_then(|s| serde_json::from_str::<serde_json::Value>(&s).ok())
-    .unwrap_or(serde_json::Value::Null);
 
-    web_sys::console::log_1(&"----------------------".into());
+    let filter_values = get_filter_value_OPFS().await.unwrap();
+    render_structure["all"]["filters"] = serde_wasm_bindgen::from_value(filter_values).unwrap();
 
-    render_structure["all"]["filters"] = filters_value;
-    web_sys::console::log_1(&serde_json::to_string(&render_structure["all"]["filters"]).expect("ERROR").into());
-    
     // Prepare filters
-    let participant_group = if render_structure["all"]["filters"]["ParticipantGroup"].as_array().map_or(true, |a| a.is_empty()) {
+    let participant_group = if render_structure["all"]["filters"]["participantGroup"].as_array().map_or(true, |a| a.is_empty()) {
         "(ParticipantGroup)".to_string()
     } else {
-        format!("({})", render_structure["all"]["filters"]["ParticipantGroup"].as_array().expect("ERROR").iter().filter_map(|v| v.as_str()).map(|s| format!("'{}'", s)).collect::<Vec<_>>().join(","))
+        format!("({})", render_structure["all"]["filters"]["participantGroup"].as_array().expect("ERROR").iter().filter_map(|v| v.as_str()).map(|s| format!("'{}'", s)).collect::<Vec<_>>().join(","))
     };
-    let trip_domain = if render_structure["all"]["filters"]["TripDomain"].as_array().map_or(true, |a| a.is_empty()) {
+    let trip_domain = if render_structure["all"]["filters"]["tripDomain"].as_array().map_or(true, |a| a.is_empty()) {
         "(TripDomain)".to_string()
     } else {
-        format!("({})", render_structure["all"]["filters"]["TripDomain"].as_array().expect("ERROR").iter().filter_map(|v| v.as_str()).map(|s| format!("'{}'", s)).collect::<Vec<_>>().join(","))
+        format!("({})", render_structure["all"]["filters"]["tripDomain"].as_array().expect("ERROR").iter().filter_map(|v| v.as_str()).map(|s| format!("'{}'", s)).collect::<Vec<_>>().join(","))
     };
 
 
@@ -347,9 +347,9 @@ async fn page_load_internal() {
                     "title": render_structure.pointer("/all/translation/explore/title").and_then(|v| v.as_str()).unwrap_or("Explore"),
                     "template": TEMPLATE_EXPLORE,
                     "queries": [
-                        ["explore", QUERY_EXPLORE.to_string().replace("/*","").replace("*/","")
-                        .replace_filter("(TripDomain)", &render_structure["all"]["query_params"]["f"])
-                        .replace_filter("(ParticipantGroup)", &render_structure["all"]["query_params"]["f"])],
+                        ["explore", QUERY_EXPLORE.replace("/*","").replace("*/","")
+                        .replace("(ParticipantGroup)", &participant_group)
+                        .replace("(TripDomain)", &trip_domain)],
                     ]});
                 render_structure["all"]["cover_photos_list"] = serde_json::to_value(&cover_photos_map).expect("Failed to convert map to Value");
             }
@@ -358,7 +358,7 @@ async fn page_load_internal() {
                     "title": render_structure.pointer("/all/translation/overview/year").and_then(|v| v.as_str()).unwrap_or("Overview: Year"),
                     "template": TEMPLATE_OVERVIEW_YEAR,
                     "queries": [
-                        ["overviewYear", QUERY_OVERVIEW_YEAR.to_string().replace("/*","").replace("*/","")
+                        ["overviewYear", QUERY_OVERVIEW_YEAR.replace("/*","").replace("*/","")
                         .replace("(ParticipantGroup)", &participant_group)
                         .replace("(TripDomain)", &trip_domain)]
                     ]});
@@ -393,8 +393,11 @@ async fn page_load_internal() {
                     "title": render_structure.pointer("/all/translation/map/title").and_then(|v| v.as_str()).unwrap_or("Map"),
                     "template": TEMPLATE_MAP,
                     "queries": [
-                        ["map_country_list", QUERY_MAP_COUNTRY_LIST.to_string()],
-                        ["map_data", QUERY_MAP_CONTOUR.to_string()], //contour
+                        ["map_country_list", QUERY_MAP_COUNTRY_LIST.replace("(ParticipantGroup)", &participant_group)
+                        .replace("(TripDomain)", &trip_domain)],
+                        ["map_data", QUERY_MAP_CONTOUR.replace("/*","").replace("*/","")
+                        .replace("(ParticipantGroup)", &participant_group)
+                        .replace("(TripDomain)", &trip_domain)], //contour
                         ["common_trip_domains", QUERY_COMMON_TRIP_DOMAINS.to_string()],
                     ]});
                 map_request = "contour";
@@ -442,7 +445,8 @@ async fn page_load_internal() {
                     "title": render_structure.pointer("/all/settings/Plugin/Theme/translation").and_then(|v| v.as_str()).unwrap_or("Themes"),
                     "template": TEMPLATE_STATISTICS_THEMES,
                     "queries": [
-                         ["statistics_theme_count", QUERY_STATISTICS_THEME_COUNT.to_string()]
+                        ["statistics_theme_count", QUERY_STATISTICS_THEME_COUNT.replace("(ParticipantGroup)", &participant_group)
+                        .replace("(TripDomain)", &trip_domain)]
                     ]});
             }
             "dataset" => {
@@ -593,8 +597,10 @@ async fn page_load_internal() {
                             "title": render_structure.pointer("/all/translation/map/title").and_then(|v| v.as_str()).unwrap_or("Map"),
                             "template": TEMPLATE_MAP,
                             "queries": [
-                                ["map_country_list", QUERY_MAP_COUNTRY_LIST.to_string()],
-                                ["map_data", QUERY_MAP_COUNTRY.replace("/*","").replace("*/","").replace("_COUNTRY_",country)], //country
+                                ["map_country_list", QUERY_MAP_COUNTRY_LIST.replace("(ParticipantGroup)", &participant_group)
+                                .replace("(TripDomain)", &trip_domain)],
+                                ["map_data", QUERY_MAP_COUNTRY.replace("_COUNTRY_",country).replace("(ParticipantGroup)", &participant_group)
+                                .replace("(TripDomain)", &trip_domain)], //country
                                 ["common_trip_domains", QUERY_COMMON_TRIP_DOMAINS.to_string()],
                             ]});
                         map_request = "country";
@@ -606,8 +612,10 @@ async fn page_load_internal() {
                             "title": render_structure.pointer("/all/translation/map/title").and_then(|v| v.as_str()).unwrap_or("Map"),
                             "template": TEMPLATE_MAP,
                             "queries": [
-                                ["map_country_list", QUERY_MAP_COUNTRY_LIST.to_string()],
-                                ["map_data", QUERY_MAP_THEME.replace("/*","").replace("*/","").replace("_THEME_",theme)], //theme
+                                ["map_country_list", QUERY_MAP_COUNTRY_LIST.replace("(ParticipantGroup)", &participant_group)
+                                .replace("(TripDomain)", &trip_domain)],
+                                ["map_data", QUERY_MAP_THEME.replace("_THEME_",theme).replace("(ParticipantGroup)", &participant_group)
+                                .replace("(TripDomain)", &trip_domain)], //theme
                                 ["common_trip_domains", QUERY_COMMON_TRIP_DOMAINS.to_string()],
                             ]});
                         map_request = "theme";
@@ -735,8 +743,7 @@ async fn page_load_internal() {
 
         let _ = rendered_result;
 
-        helper::apply_filter_from_opfs_to_selects();
-        helper::attach_select_listener();
+        load_filter_OPFS();
         
         // POST CODE  -----------------------------------------------------------------------
 

@@ -186,6 +186,7 @@
     "countriesDuringDay": "Länder under dagen",
     "copyAccommodation": "Kopiera boende",
     "copyTravelParticipants": "Kopiera deltagargrupp",
-    "reset": "Ta bort"
+    "reset": "Ta bort",
+    "selectStartEnd": "Välj ett start- och slutdatum"
   }
 }
