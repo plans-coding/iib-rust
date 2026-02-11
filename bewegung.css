@@ -35,7 +35,7 @@ body.dark {
 
     --color-submenu-background: #1d655e;
 
-    #filter {color:#000;}
+    #filter {color:#000;display:flex;align-items: center;}
 
     color:var(--color-text);
 

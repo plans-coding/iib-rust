@@ -62,6 +62,7 @@ define_queries! {
     QUERY_OVERVIEW_PLAIN => "../queries/overview/overview_plain.sql",
 
     QUERY_TRIP_BORDER_CROSSINGS => "../queries/trip/trip_border_crossings.sql",
+    QUERY_TRIP_UNIQUE_COUNTRIES => "../queries/trip/trip_unique_countries.sql",
     QUERY_TRIP_MAP_PINS_ACCOMMODATION => "../queries/trip/trip_map_pins_accommodation.sql",
     QUERY_TRIP_MAP_PINS_OVERALL => "../queries/trip/trip_map_pins_overall.sql",
     QUERY_TRIP_ALL_TRIPS => "../queries/trip/trip_all_trips.sql",
@@ -518,6 +519,7 @@ async fn page_load_internal() {
                                     ["trip_all_trips", QUERY_TRIP_ALL_TRIPS],
                                     ["common_trip_domains", QUERY_COMMON_TRIP_DOMAINS],
                                     // Lägg till filter
+	                            ["trip_unique_countries", QUERY_TRIP_UNIQUE_COUNTRIES.replace("= InnerId", &format!("= '{}'", inner_id))],
                                     ["trip_border_crossings", QUERY_TRIP_BORDER_CROSSINGS.replace("= a.InnerId", &format!("= '{}'", inner_id))],
                                     ["trip_map_pins_overall", QUERY_TRIP_MAP_PINS_OVERALL.replace("= InnerId", &format!("= '{}'", inner_id))],
                                     ["trip_map_pins_accommodation", QUERY_TRIP_MAP_PINS_ACCOMMODATION.replace("= o.InnerId", &format!("= '{}'", inner_id))],
@@ -547,6 +549,7 @@ async fn page_load_internal() {
                                 ["trip_all_trips", QUERY_TRIP_ALL_TRIPS.to_string()],
                                 ["common_trip_domains", QUERY_COMMON_TRIP_DOMAINS.to_string()],
                                 // Lägg till filter
+                                ["trip_unique_countries", QUERY_TRIP_UNIQUE_COUNTRIES.replace("= OuterId", &format!("= '{}'", outer_id))],
                                 ["trip_border_crossings", QUERY_TRIP_BORDER_CROSSINGS.replace("= b.OuterId", &format!("= '{}'", outer_id))],
                                 ["trip_map_pins_overall", QUERY_TRIP_MAP_PINS_OVERALL.replace("= OuterId", &format!("= '{}'", outer_id))],
                                 ["trip_map_pins_accommodation", QUERY_TRIP_MAP_PINS_ACCOMMODATION.replace("= o.OuterId", &format!("= '{}'", outer_id))],

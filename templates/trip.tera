@@ -80,9 +80,9 @@ body {
 
         <div class="trip-details-container">
           <label class="trip-details-label">
-            {{ translation.trip.outerId | default(value="ID") }}
+            {{ translation.trip.outerId | default(value="ID") }} ({{ trip_summary[0].InnerId }})
           </label>
-          <div class="trip-details-field" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">{{ trip_summary[0].OuterId }} <span style="font-size: 0.7rem;color:var(--color-hover-background);">{{ trip_summary[0].InnerId }}</span></div>
+          <div class="trip-details-field" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">{{ trip_summary[0].OuterId }} <span style="font-size: 0.7rem;color:var(--color-hover-background);"></span></div>
         </div>
 
         <div class="trip-details-container">
@@ -105,8 +105,12 @@ body {
           <label class="trip-details-label">
             {{ translation.trip.uniqueCountries | default(value="Unique Countries") }}
           </label>
-          <div class="trip-details-field" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
-          {{ trip_border_crossings[0].UniqueCountries | default(value="-") }}</div>
+          	<div class="trip-details-field" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
+          		{# trip_border_crossings[0].UniqueCountries | default(value="-") #}
+			{% for country in trip_unique_countries %}
+				{{ country.Flag }}&nbsp;{{ country.Country }}{% if not loop.last %}, {% endif %}
+			{% endfor %}
+		</div>
         </div>
 
         <div class="trip-details-container">
@@ -293,7 +297,7 @@ body {
           <div class="day-label"><div class="day-icon" data-iib-tripDomain='{{ trip_summary[0].DomainAbbreviation }}'>{{ loop.index - 1 }}</div> {{ day.Weekday | default(value="") }} {{ day.Date }}</div>
            &nbsp; <a style="text-decoration:none;" target="_blank" href="{{ settings.Other.ExternalMapProvider }}{{ day.AccommodationCoordinates }}" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
               <div class="acc-icon" data-iib-tripDomain='{{ trip_summary[0].DomainAbbreviation }}'></div>
-              <span class="acc-text">{{ day.Accommodation }} – {{ day.AccommodationCountry }} – {{ day.AccommodationCoordinates }} {{ day.AccommodationCoordinateAccuracy | default(value="") }}</span>
+              <span class="acc-text">{{ day.Accommodation }} – {{ day.AccommodationCountryFlag }} {{ day.AccommodationCountry }} – {{ day.AccommodationCoordinates }} {{ day.AccommodationCoordinateAccuracy | default(value="") }}</span>
           </a>
         </div>
       
