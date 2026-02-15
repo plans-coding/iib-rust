@@ -33,12 +33,14 @@ section {max-width:100%!important;width:100%!important;margin:0!important;}
         {% endfor %}
     </select>
 
-    {% set theme_lines = settings.Extension.Theme | split(pat="\n") %}
+    {% set theme_config = [] %}
+    {% if settings.Extension is defined and settings.Extension.Theme is defined %}
+        {% set theme_lines = settings.Extension.Theme | split(pat="\n") %}
+        {% set_global theme_config = theme_lines | first | split(pat=",") %}
+        {% set_global theme_list = theme_lines | slice(start=1) %}
+    {% endif %}
 
-    {% set_global theme_config = theme_lines | first | split(pat=",") %}
-    {% set_global theme_list = theme_lines | slice(start=1) %}
-
-    {% if theme_config[0] == "Enabled" %}
+    {% if theme_config | length >= 2 and theme_config[0] == "Enabled" %}
 
     <select id="themeSelector" class="form-control text-center" style="max-width:200pt; display:inline-block;" onchange="history.pushState(null,'','?path=map:theme:'+this.value);page_load();">
 
@@ -62,4 +64,4 @@ section {max-width:100%!important;width:100%!important;margin:0!important;}
 
 <div id="map" style="height:100%; width:100%;"></div>
 
-<div id="map-pin-data" data-map='{{ map_data | json_encode }}' data-settings-assets='{{ settings.Extension.Theme }}'></div>
+<div id="map-pin-data" data-map='{{ map_data | json_encode }}' data-settings-assets='{% if theme_config | length >= 2 and theme_config[0] == "Enabled" %}{{ settings.Extension.Theme }}{% endif %}'></div>

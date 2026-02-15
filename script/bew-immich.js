@@ -163,7 +163,7 @@ async function save_album_covers_ids2OPFS(immichUrl, immichCoverAlbumId) {
     .createWritable()
     .then(w => (w.write(JSON.stringify(outerIdToAssetId, null, 2)), w.close())).then(() => {
         document.getElementById("cover2opfs").textContent = "OK";
-    });
+    }).then(()=>{location.reload()});
 
 
 }

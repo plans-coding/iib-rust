@@ -64,7 +64,7 @@ body {
 
         <div class="trip-details-container">
           <label class="trip-details-label">
-            {{ translation.trip.numberOfDays | default(value="Number of Days") }}
+            {{ translation.trip.numberOfDays | default(value="Days Count") }}
           </label>
           <div class="trip-details-field" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">{{ trip_summary[0].NumberOfDays }}</div>
         </div>
@@ -87,7 +87,7 @@ body {
 
         <div class="trip-details-container">
           <label class="trip-details-label">
-            {{ translation.trip.numberOfCountries | default(value="Number of Countries") }}
+            {{ translation.trip.numberOfCountries | default(value="Countries Count") }}
           </label>
           <div class="trip-details-field" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
           {% set uniqueCountries = trip_border_crossings[0].UniqueCountries | default(value="-") %}
@@ -241,12 +241,14 @@ body {
               {% set_global day_week = day.Date | date(format="W%V") %} {# You need W before the letter not to match 19 to 1989 (W19 not in 1989) #}
               {% set_global day_date = day.Date | date(format="%Y%m%d") %}
 
-              {% set diary_lines = settings.Extension.Diary | split(pat="\n") %}
+              {% set diary_config = [] %}
+              {% if settings.Extension is defined and settings.Extension.Diary is defined %}
+                  {% set diary_lines = settings.Extension.Diary | split(pat="\n") %}
+                  {% set_global diary_config = diary_lines | first | split(pat=",") %}
+                  {% set_global diary_filelist = diary_lines | slice(start=1) %}
+              {% endif %}
 
-              {% set_global diary_config = diary_lines | first | split(pat=",") %}
-              {% set_global diary_filelist = diary_lines | slice(start=1) %}
-
-              {% if diary_config[0] == "Enabled" %}
+              {% if diary_config | length >= 2 and diary_config[0] == "Enabled" %}
                 {% for file in diary_filelist %}
                   {% if day_year in file and day_week in file %}
 
@@ -265,12 +267,14 @@ body {
 
               {# Passport plugin #}
 
-              {% set passport_lines = settings.Extension.Passport | split(pat="\n") %}
+              {% set passport_config = [] %}
+              {% if settings.Extension is defined and settings.Extension.Passport is defined %}
+                  {% set passport_lines = settings.Extension.Diary | split(pat="\n") %}
+                  {% set_global passport_config = passport_lines | first | split(pat=",") %}
+                  {% set_global passport_filelist = passport_lines | slice(start=1) %}
+              {% endif %}
 
-              {% set_global passport_config = passport_lines | first | split(pat=",") %}
-              {% set_global passport_filelist = passport_lines | slice(start=1) %}
-
-              {% if passport_config[0] == "Enabled" %}
+              {% if passport_config | length >= 2 and passport_config[0] == "Enabled" %}
                 {% for file in passport_filelist %}
                   {% if day_date in file %}
 

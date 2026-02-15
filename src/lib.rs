@@ -208,9 +208,6 @@ async fn session_load() -> (Vec<u8>, serde_json::Value) {
             web_sys::console::log_1(&format!("DB size: {}", db_bytes.len()).into());
         } else {
             web_sys::console::log_1(&"No DB loaded.".into());
-            // Set query parameter 'p' to 'source'
-            //query_params::set_query_params(&json!({"path":"more:source"}));
-            // set page = configure -- needed?
         }
     
     // -----------------------------------------------------------------------
@@ -232,26 +229,38 @@ async fn session_load() -> (Vec<u8>, serde_json::Value) {
     
         let mut render_structure = json!({});
         render_structure["all"]["query_params"]["path"] = path.into();
-        //render_structure["all"]["query_params"] = query_params.clone();
-        //render_structure["all"]["query_params"] = query_params.clone();
-    
-        // If "path" is missing or empty, set it to "overview"
-        //let p_is_empty = render_structure["all"]["query_params"]["path"].as_str().map(|s| s.is_empty()).unwrap_or(true);
-        //if p_is_empty { render_structure["all"]["query_params"]["path"] = json!("explore"); }
-    
         render_structure["all"]["time"] = helper::build_time_json();
-        //web_sys::console::log_1(&serde_json::to_string(&render_structure["all"]).expect("ERROR").into());
     
         // Get translation
-        let translation_query = vec![
-            ("translation_filename".to_string(), "SELECT Value FROM bewx_Settings WHERE AttributeGroup = 'Base' AND Attribute = 'LanguageFile';".to_string())
-        ];
-        let translation_filename = sqlite_query::get_query_data(&db_bytes, translation_query).await;
-        let json_obj: serde_json::Value = serde_json::to_value(&translation_filename).expect("ERROR");
-        let translation_filename_extracted = format!("languages/{}",json_obj["translation_filename"][0]["Value"].as_str().expect("Expected settings[0].Value to be a string"));
-        web_sys::console::log_1(&translation_filename_extracted.as_str().into());
-        let translation_content = filecontent::fetch_json(&translation_filename_extracted).await.unwrap_or(serde_json::Value::String("".to_string()));
-        //web_sys::console::log_1(&serde_json::to_string(&translation_content).expect("ERROR").into());
+        let translation_query = vec![(
+            "translation_filename".to_string(),
+                                      "SELECT Value FROM bewx_Settings
+                                      WHERE AttributeGroup = 'Base'
+        AND Attribute = 'LanguageFile';".to_string(),
+        )];
+
+        let translation_filename =
+        sqlite_query::get_query_data(&db_bytes, translation_query).await;
+
+        let json_obj = serde_json::to_value(&translation_filename).unwrap_or_default();
+
+        let translation_content = if let Some(filename) = json_obj
+        .get("translation_filename")
+        .and_then(|v| v.get(0))
+        .and_then(|v| v.get("Value"))
+        .and_then(|v| v.as_str())
+        {
+            let path = format!("languages/{filename}");
+
+            web_sys::console::log_1(&path.clone().into());
+
+            filecontent::fetch_json(&path)
+            .await
+            .unwrap_or_default() // missing file -> empty json
+        } else {
+            // no row OR null OR not string
+            serde_json::Value::Null
+        };
 
         // Get all settings
         let settings_query = vec![
@@ -263,8 +272,13 @@ async fn session_load() -> (Vec<u8>, serde_json::Value) {
         //crender_structure["all"]["settings"] = serde_json::to_value(&settings_response["settings"]).expect("ERROR");
         //web_sys::console::log_1(&serde_json::to_string(&settings_response["settings"]).expect("ERROR").into());
         render_structure["all"]["settings"] = helper::transform_settings(&settings_response["settings"].as_array().expect("ERROR"));
-        render_structure["all"]["translation"] = translation_content;//.expect("Error with translation data.");
+        //render_structure["all"]["translation"] = translation_content;//.expect("Error with translation data.");
 
+        render_structure["all"]["translation"] = if translation_content.is_null() {
+            serde_json::json!({})
+        } else {
+            translation_content
+        };
         //web_sys::console::log_1(&serde_json::to_string(&render_structure["all"]["settings"]).expect("ERROR").into());
 
         // RENDER TO 'MENU'  -----------------------------------------------------------------------
@@ -272,14 +286,42 @@ async fn session_load() -> (Vec<u8>, serde_json::Value) {
             ("common_trip_domains".to_string(), QUERY_COMMON_TRIP_DOMAINS.to_string()),
             ("common_participant_groups".to_string(), QUERY_COMMON_PARTICIPANT_GROUPS.to_string())
         ];
-
         render_structure["all"]["common"] = sqlite_query::get_query_data(&db_bytes, common_data).await;
 
-        let _ = render::render2dom(TEMPLATE_MENU, &render_structure["all"], "menu", false);
+        //let _ = render::render2dom(TEMPLATE_MENU, &render_structure["all"], "menu", false);
+
+        let rendered_menu = render::render2dom(TEMPLATE_MENU, &render_structure["all"], "menu", false);
+
+        match &rendered_menu {
+            Ok(content) => web_sys::console::log_1(&JsValue::from_str(&format!(
+                "render2dom succeeded, content length: {}",
+                content.len()
+            ))),
+            /*Err(e) => web_sys::console::log_1(&JsValue::from_str(&format!(
+             " render2dom fail*ed: {}",
+             e
+             ))),*/
+            Err(e) => {
+                let msg = format!("render2dom failed: {}", e);
+
+                web_sys::console::log_1(&JsValue::from_str(&msg));
+
+                if let Some(document) = window().and_then(|w| w.document()) {
+                    if let Some(el) = document.get_element_by_id("error_msg") {
+                        if let Ok(html) = el.dyn_into::<HtmlElement>() {
+                            html.set_inner_text(&msg); // safer than inner_html
+                        }
+                    }
+                }
+            }
+        }
+
+        let _ = rendered_menu;
 
         //web_sys::console::log_1(&serde_json::to_string(&render_structure["all"]).expect("ERROR").into());
+
         initialize_theme_color();
-        
+
         (db_bytes, render_structure)
 
 }
@@ -291,14 +333,14 @@ async fn page_load_internal() {
 
 
     //web_sys::console::log_1(&">>----------------------".into());
-
+    web_sys::console::log_1(&">hoho5>----------------------".into());
     let db_bytes = DB_BYTES.get().expect("DB not initialized");
     let render_structure_mutex = RENDER_STRUCTURE.get().expect("Render structure missing");
     let mut map_request = "";
 
     // Lock the Mutex to get a mutable reference
     let mut render_structure = render_structure_mutex.lock().expect("ERROR");
-        
+        web_sys::console::log_1(&">>----------------------".into());
 
     let path = web_sys::window().expect("No window available").location().search().ok()
     .as_deref().and_then(|s| web_sys::UrlSearchParams::new_with_str(s).ok()).and_then(|params| params.get("path"));
@@ -329,7 +371,7 @@ async fn page_load_internal() {
         format!("({})", render_structure["all"]["filters"]["tripDomain"].as_array().expect("ERROR").iter().filter_map(|v| v.as_str()).map(|s| format!("'{}'", s)).collect::<Vec<_>>().join(","))
     };
 
-
+    web_sys::console::log_1(&">>----------------------".into());
     use std::collections::HashMap;
     let cover_photos_list_opt = filecontent::cover_photos_list_from_opfs().await;
     let cover_photos_map: HashMap<String, String> = match cover_photos_list_opt {
@@ -341,7 +383,7 @@ async fn page_load_internal() {
     // -----------------------------------------------------------------------
     // Fourth: Page specific data
     // -----------------------------------------------------------------------
-
+    web_sys::console::log_1(&">>----------------------".into());
         match page {
             "explore" => {
                 render_structure["page"] = json!({
@@ -497,7 +539,7 @@ async fn page_load_internal() {
                         ]*/});
                 }
             _ => {
-            
+                    web_sys::console::log_1(&">>----------------------".into());
                 web_sys::console::log_1(&"Second tier.".into());
                 
 
@@ -715,9 +757,9 @@ async fn page_load_internal() {
             &render_structure["page"]["template"]
             .as_str()
             .expect("template must be a string"),
-                                                 &merged_structure,
-                                                 "app",
-                                                 translate_iib_markdown_2link,
+                &merged_structure,
+                "app",
+                translate_iib_markdown_2link,
         );
 
         match &rendered_result {

@@ -66,6 +66,8 @@ SELECT DISTINCT
           127462 + unicode(substr(l.ISO,1,1)) - unicode('A'),
           127462 + unicode(substr(l.ISO,2,1)) - unicode('A')
         )
+      ELSE
+	char(127757)
     END AS Flag
 FROM (
     SELECT

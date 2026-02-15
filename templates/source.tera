@@ -47,8 +47,7 @@
     navigator.storage.getDirectory()
     .then(d=>d.removeEntry('chronik.db'))
     .catch(()=>{})
-    .then(()=>{document.getElementById('opfsStatus').textContent='{{ translation.source.missing | default(value='Database file missing in OPFS.') }}';document.getElementById('opfsStatus').className='red-text';})
-    ">
+    .then(()=>{document.getElementById('opfsStatus').textContent='{{ translation.source.missing | default(value='Database file missing in OPFS.') }}';document.getElementById('opfsStatus').className='red-text';}).then(()=>{location.reload()});">
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
       <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
       <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
@@ -56,7 +55,7 @@
     {{ translation.source.delete_db | default(value='Delete database file') }}
     </button>
 
-    <button class="source-button" onclick="localStorage.clear(); caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))); navigator.serviceWorker.getRegistrations().then(r => r.forEach(reg => reg.unregister()));">
+    <button class="source-button" onclick="localStorage.clear(); caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))); navigator.serviceWorker.getRegistrations().then(r => r.forEach(reg => reg.unregister())).then(()=>{location.reload()});">
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
         <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
         <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
@@ -68,6 +67,7 @@
     <script id="coverPhotoOriginalPaths" type="application/json">{{ cover_photo_original_paths | json_encode | safe }}</script>
 
 
+      {% if settings.Photos and settings.Photos.Immich == "Enabled" %}
 
     <div class="breadcrumb">
       <!--<img class="icon-color" src="images/frog.svg" />-->
@@ -89,7 +89,7 @@
         <button class="filter-button" onclick="save_album_covers_ids2OPFS('{{ settings.Photos.ImmichUrl }}', '{{ settings.Photos.ImmichCoverAlbumId }}');">{{ translation.source.saveCoverJson | default(value='Save Immich Cover Photo Album List to OPFS') }}</button> &nbsp;&nbsp;<span id="cover2opfs"></span>
       </div>
 
-
+{% endif %}
   </div>
 
 

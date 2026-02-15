@@ -57,7 +57,8 @@ SELECT
             127462 + unicode(substr(cm.ISO,1,1)) - unicode('A'),
             127462 + unicode(substr(cm.ISO,2,1)) - unicode('A')
         )
-        ELSE NULL
+        ELSE
+		char(127757)
     END AS AccommodationCountryFlag,
     e.AccommodationCoordinatesAccuracy AS AccommodationCoordinatesAccuracy,
     e.AccommodationCoordinates AS AccommodationCoordinates,

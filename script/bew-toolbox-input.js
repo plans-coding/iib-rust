@@ -4,7 +4,7 @@ async function downloadTripDataFromOPFS() {
     try {
         const root = await navigator.storage.getDirectory();
 
-        const fileHandle = await root.getFileHandle("tripData.json");
+        const fileHandle = await root.getFileHandle("trip.json");
         const file = await fileHandle.getFile();
 
         const blob = await file.arrayBuffer();
@@ -15,7 +15,7 @@ async function downloadTripDataFromOPFS() {
 
         const a = document.createElement("a");
         a.href = url;
-        a.download = "tripData.json";
+        a.download = "trip.json";
         document.body.appendChild(a);
         a.click();
 
@@ -24,7 +24,7 @@ async function downloadTripDataFromOPFS() {
 
     } catch (err) {
         console.error("Download failed:", err);
-        alert("tripData.json not found in OPFS");
+        alert("trip.json not found in OPFS");
     }
 }
 
@@ -43,13 +43,13 @@ async function uploadTripDataToOPFS() {
 
         const root = await navigator.storage.getDirectory();
 
-        const opfsHandle = await root.getFileHandle("tripData.json", { create: true });
+        const opfsHandle = await root.getFileHandle("trip.json", { create: true });
 
         const writable = await opfsHandle.createWritable();
         await writable.write(data);   // replaces content
         await writable.close();
 
-        console.log("tripData.json replaced in OPFS");
+        console.log("trip.json replaced in OPFS");
 
     } catch (err) {
         console.error("Upload failed:", err);
@@ -59,17 +59,17 @@ async function uploadTripDataToOPFS() {
 async function removeTripDataFromOPFS() {
     try {
         // Ask user for confirmation
-        const confirmDelete = confirm("Are you sure you want to delete tripData.json?");
+        const confirmDelete = confirm("Are you sure you want to delete trip.json?");
         if (!confirmDelete) return; // exit if user cancels
 
         const root = await navigator.storage.getDirectory();
-        await root.removeEntry("tripData.json");
-        console.log("tripData.json removed from OPFS");
-        alert("tripData.json has been deleted");
+        await root.removeEntry("trip.json");
+        console.log("trip.json removed from OPFS");
+        alert("trip.json has been deleted");
 
     } catch (err) {
         console.error("Remove failed:", err);
-        alert("tripData.json does not exist in OPFS");
+        alert("trip.json does not exist in OPFS");
     }
 }
 
@@ -136,7 +136,7 @@ function buildEventsInsert(events) {
 async function generateSQLCode() {
     try {
         const root = await navigator.storage.getDirectory();
-        const fileHandle = await root.getFileHandle("tripData.json");
+        const fileHandle = await root.getFileHandle("trip.json");
         const file = await fileHandle.getFile();
 
         const jsonData = JSON.parse(await file.text());
@@ -176,7 +176,7 @@ async function generateSQLCode() {
         document.getElementById('generated_sql_code').style.display = 'block';
 
     } catch (err) {
-        console.error("Failed to read tripData.json:", err);
+        console.error("Failed to read trip.json:", err);
     }
 }
 
@@ -272,7 +272,10 @@ async function initOPFS() {
 }
 
 async function saveTrip2OPFS() {
-    const data = buildJSONFromForm();
+    
+	const fileName = "trip.json";
+
+	const data = buildJSONFromForm();
 
     const fileHandle = await fsRootHandle.getFileHandle(fileName, { create: true });
     const writable = await fileHandle.createWritable();
@@ -284,7 +287,8 @@ async function saveTrip2OPFS() {
 }
 
 async function loadTripFromOPFS() {
-    try {
+    const fileName = 'trip.json';
+	try {
         const fileHandle = await fsRootHandle.getFileHandle(fileName);
         const file = await fileHandle.getFile();
         return JSON.parse(await file.text());
@@ -475,7 +479,7 @@ async function init_create_trip() {
     });
 
 
-    const fileName = "tripData.json";
+    const fileName = "trip.json";
     let fsRootHandle = null;
 
     const depInput = document.querySelector('input[name="DepartureDate"]');

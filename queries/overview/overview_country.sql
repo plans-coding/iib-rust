@@ -1,27 +1,29 @@
 WITH ContinentCountriesParsed AS (
-    -- Parses the ContinentCountries setting from bewx_Settings
-    WITH RECURSIVE split(str, line, rest) AS (
-      SELECT
-        Value,
-        substr(Value || char(10), 1, instr(Value || char(10), char(10)) - 1),
-        substr(Value || char(10), instr(Value || char(10), char(10)) + 1)
-      FROM bewx_Settings
-      WHERE Attribute = 'ContinentCountries'
-
-      UNION ALL
-
-      SELECT
-        str,
-        substr(rest, 1, instr(rest, char(10)) - 1),
-        substr(rest, instr(rest, char(10)) + 1)
-      FROM split
-      WHERE rest != ''
-    )
+  WITH RECURSIVE split(line, rest) AS (
     SELECT
-      substr(line, 1, instr(line, ':') - 1) AS Continent,
-      substr(line, instr(line, ':') + 1) AS Country
+      substr(Value || char(10), 1, instr(Value || char(10), char(10)) - 1),
+      substr(Value || char(10), instr(Value || char(10), char(10)) + 1)
+    FROM bewx_Settings
+    WHERE Attribute = 'ContinentCountries'
+
+    UNION ALL
+
+    SELECT
+      substr(rest, 1, instr(rest, char(10)) - 1),
+      substr(rest, instr(rest, char(10)) + 1)
     FROM split
-    WHERE line != ''
+    WHERE rest <> ''
+  )
+    SELECT
+    json_extract(js, '$[0]') AS Continent,
+    json_extract(js, '$[1]') AS Country,
+    json_extract(js, '$[2]') AS ISO
+    FROM (
+    SELECT
+        '["' || replace(line, ':', '","') || '"]' AS js
+    FROM split
+    WHERE line <> ''
+    )
 ),
 OrderedEvents AS (
     -- Orders events by date to process country sequences correctly
