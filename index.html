@@ -214,7 +214,7 @@
         // Register Service Worker
         if ('serviceWorker' in navigator) {
             const basePath = (location.origin + location.pathname.replace(/\/[^/]*$/, '/')).replace(/\/+$/, '/');
-            navigator.serviceWorker.register(basePath + '/script/service-worker.js')
+            navigator.serviceWorker.register(basePath + 'script/bew-service-worker.js')
                 .then(r => console.log('Service Worker registered', r))
                 .catch(e => console.error('SW registration failed:', e));
         }
