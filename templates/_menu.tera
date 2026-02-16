@@ -10,7 +10,7 @@ details.trip[data-trip-domain=''],
 {% for tripDomain in common.common_trip_domains %}
 
 .days[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}] .theme-link {color:{{ tripDomain.Color }};background-color:{{ tripDomain.Color }}22;text-decoration:underline;}
-.card[data-trip-domain={{ tripDomain.DomainAbbreviation }}] {text-decoration:none;color:var(--color-text);border-radius:5pt; border:2pt solid var(--color-hover-background);border-top:5pt solid {{ tripDomain.Color }};padding:5pt;}
+.card[data-trip-domain={{ tripDomain.DomainAbbreviation }}] {text-decoration:none;color:var(--color-text);border-radius:5pt; border:1pt solid var(--color-hover-background-alpha);border-left:5pt solid {{ tripDomain.Color }};padding:5pt;}
 .explore-cover[data-trip-domain={{ tripDomain.DomainAbbreviation }}] {background-color:{{ tripDomain.Color }}22;}
 
 details.trip summary[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}] { background-color: {{ tripDomain.Color }}; }

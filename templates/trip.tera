@@ -118,7 +118,7 @@ body {
             {{ translation.trip.overallRoute | default(value="Overall Route") }}
           </label>
           <div class="trip-details-field" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
-            {{ trip_border_crossings[0].OverallRoute }}
+            {{ trip_border_crossings[0].OverallRoute | default(value="-") }}
           </div>
         </div>
 
@@ -127,7 +127,7 @@ body {
             {{ translation.trip.countryTripMovements | default(value="Country Trip Movements") }}
           </label>
           <div class="trip-details-field" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
-          {{ trip_border_crossings[0].AllBorderCrossings }}</div>
+          {{ trip_border_crossings[0].AllBorderCrossings | default(value="-") }}</div>
         </div>
 
         {# Optional Immich photo albums #}
@@ -213,6 +213,7 @@ body {
   </div>
 </details>
 
+{% if trip_events %}
 <div class="days" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
   {% for day in trip_events %}
   
@@ -311,5 +312,6 @@ body {
     </div>
   {% endfor %}
 </div>
+{% endif %}
 
 </div>

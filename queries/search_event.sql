@@ -27,4 +27,4 @@ WHERE
     COALESCE(e.TravelParticipants, '') || ' ' ||
     COALESCE(e.AdditionalNotes, '') || ' ' ||
     COALESCE(e.CountriesDuringDay, '')
-) LIKE '%/*_STRING_*/%';
+) LIKE '%/*_STRING_*/%' AND TripDomain IN (TripDomain) AND ParticipantGroup IN (ParticipantGroup);
