@@ -55,6 +55,11 @@ lookup AS (
     END AS ISO
   FROM settings_split
   WHERE line LIKE '%:%'
+),
+home_country AS (
+	SELECT Value AS Country
+	FROM bewx_Settings
+	WHERE Attribute='HomeCountry'
 )
 
 SELECT DISTINCT
@@ -81,4 +86,6 @@ FROM (
       AND substr(country,1,1) <> '+'
 ) c
 LEFT JOIN lookup l USING (Country)
+LEFT JOIN home_country h USING (Country)
+WHERE h.Country IS NULL
 ORDER BY c.Country;

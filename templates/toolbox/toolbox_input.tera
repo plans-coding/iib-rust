@@ -139,7 +139,7 @@ body {backdrop-filter: none !important;} /* Position fixed do not work with back
             <label class="trip-details-label">
               {{ translation.input.startNode | default(value="Start Node") }}
             </label>
-            <div class="trip-details-field" data-trip-domain=""><input class="form-control" type="text" name="StartNode" placeholder="{SE}"></div>
+            <div class="trip-details-field" data-trip-domain=""><input class="form-control" type="text" name="StartNode" placeholder="String"></div>
           </div>
 
                     <div class="trip-details-container">
@@ -160,7 +160,7 @@ body {backdrop-filter: none !important;} /* Position fixed do not work with back
             <label class="trip-details-label">
               {{ translation.input.outerId | default(value="Outer Id") }}
             </label>
-            <div class="trip-details-field" data-trip-domain=""><input class="form-control" type="text" name="OuterId" placeholder="P-1"></div>
+            <div class="trip-details-field" data-trip-domain=""><input class="form-control" type="text" name="OuterId" disabled placeholder="Auto"></div>
           </div>
 
       </div>

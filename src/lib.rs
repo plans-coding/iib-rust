@@ -61,15 +61,15 @@ define_queries! {
     QUERY_OVERVIEW_COUNTRY => "../queries/overview/overview_country.sql",
     QUERY_OVERVIEW_PLAIN => "../queries/overview/overview_plain.sql",
 
-    QUERY_TRIP_BORDER_CROSSINGS => "../queries/trip/trip_border_crossings.sql",
+    QUERY_TRIP_PREVIOUS => "../queries/trip/trip_previous.sql",
+//    QUERY_TRIP_ALL_TRIPS => "../queries/trip/trip_all_trips.sql",
+    QUERY_TRIP_NEXT => "../queries/trip/trip_next.sql",
+    QUERY_TRIP_SUMMARY => "../queries/trip/trip_summary.sql",
+    QUERY_TRIP_EVENTS => "../queries/trip/trip_events.sql",
     QUERY_TRIP_UNIQUE_COUNTRIES => "../queries/trip/trip_unique_countries.sql",
+    QUERY_TRIP_BORDER_CROSSINGS => "../queries/trip/trip_border_crossings.sql",
     QUERY_TRIP_MAP_PINS_ACCOMMODATION => "../queries/trip/trip_map_pins_accommodation.sql",
     QUERY_TRIP_MAP_PINS_OVERALL => "../queries/trip/trip_map_pins_overall.sql",
-    QUERY_TRIP_ALL_TRIPS => "../queries/trip/trip_all_trips.sql",
-    QUERY_TRIP_EVENTS => "../queries/trip/trip_events.sql",
-    QUERY_TRIP_SUMMARY => "../queries/trip/trip_summary.sql",
-    QUERY_TRIP_PREVIOUS => "../queries/trip/trip_previous.sql",
-    QUERY_TRIP_NEXT => "../queries/trip/trip_next.sql",
     QUERY_TRIP_IMMICH_DESC_SEARCH => "../queries/trip/trip_immich_desc_search.sql",
     QUERY_TRIP_IMMICH_ALBUM_NAME => "../queries/trip/trip_immich_album_name.sql",
 
@@ -333,14 +333,13 @@ async fn page_load_internal() {
 
 
     //web_sys::console::log_1(&">>----------------------".into());
-    web_sys::console::log_1(&">hoho5>----------------------".into());
+
     let db_bytes = DB_BYTES.get().expect("DB not initialized");
     let render_structure_mutex = RENDER_STRUCTURE.get().expect("Render structure missing");
     let mut map_request = "";
 
     // Lock the Mutex to get a mutable reference
     let mut render_structure = render_structure_mutex.lock().expect("ERROR");
-        web_sys::console::log_1(&">>----------------------".into());
 
     let path = web_sys::window().expect("No window available").location().search().ok()
     .as_deref().and_then(|s| web_sys::UrlSearchParams::new_with_str(s).ok()).and_then(|params| params.get("path"));
@@ -371,7 +370,6 @@ async fn page_load_internal() {
         format!("({})", render_structure["all"]["filters"]["tripDomain"].as_array().expect("ERROR").iter().filter_map(|v| v.as_str()).map(|s| format!("'{}'", s)).collect::<Vec<_>>().join(","))
     };
 
-    web_sys::console::log_1(&">>----------------------".into());
     use std::collections::HashMap;
     let cover_photos_list_opt = filecontent::cover_photos_list_from_opfs().await;
     let cover_photos_map: HashMap<String, String> = match cover_photos_list_opt {
@@ -383,7 +381,6 @@ async fn page_load_internal() {
     // -----------------------------------------------------------------------
     // Fourth: Page specific data
     // -----------------------------------------------------------------------
-    web_sys::console::log_1(&">>----------------------".into());
         match page {
             "explore" => {
                 render_structure["page"] = json!({
@@ -539,7 +536,6 @@ async fn page_load_internal() {
                         ]*/});
                 }
             _ => {
-                    web_sys::console::log_1(&">>----------------------".into());
                 web_sys::console::log_1(&"Second tier.".into());
                 
 
@@ -558,7 +554,7 @@ async fn page_load_internal() {
                                 "queries": [
                                     ["trip_summary", QUERY_TRIP_SUMMARY.replace("= InnerId", &format!("= '{}'", inner_id))],
                                     ["trip_events", QUERY_TRIP_EVENTS.replace("= e.InnerId", &format!("= '{}'", inner_id))],
-                                    ["trip_all_trips", QUERY_TRIP_ALL_TRIPS],
+//                                    ["trip_all_trips", QUERY_TRIP_ALL_TRIPS],
                                     ["common_trip_domains", QUERY_COMMON_TRIP_DOMAINS],
                                     // Lägg till filter
 	                            ["trip_unique_countries", QUERY_TRIP_UNIQUE_COUNTRIES.replace("= InnerId", &format!("= '{}'", inner_id))],
@@ -588,7 +584,7 @@ async fn page_load_internal() {
                             "queries": [
                                 ["trip_summary", QUERY_TRIP_SUMMARY.to_string().replace("= OuterId", &format!("= '{}'", outer_id))],
                                 ["trip_events", QUERY_TRIP_EVENTS.to_string().replace("= o.OuterId", &format!("= '{}'", outer_id))],
-                                ["trip_all_trips", QUERY_TRIP_ALL_TRIPS.to_string()],
+//                                ["trip_all_trips", QUERY_TRIP_ALL_TRIPS.to_string()],
                                 ["common_trip_domains", QUERY_COMMON_TRIP_DOMAINS.to_string()],
                                 // Lägg till filter
                                 ["trip_unique_countries", QUERY_TRIP_UNIQUE_COUNTRIES.replace("= OuterId", &format!("= '{}'", outer_id))],
@@ -676,8 +672,10 @@ async fn page_load_internal() {
                         "template": TEMPLATE_SEARCH,
                         "settings": serde_json::to_value(&render_structure["all"]["settings"]).expect("ERROR"),
                         "queries": [
-                            ["search_trip", QUERY_SEARCH_TRIP.to_string().replace("/*_STRING_*/", suffix)],
-                            ["search_event", QUERY_SEARCH_EVENT.to_string().replace("/*_STRING_*/", suffix)],
+                            ["search_trip", QUERY_SEARCH_TRIP.to_string().replace("/*_STRING_*/", suffix).replace("(ParticipantGroup)", &participant_group)
+                            .replace("(TripDomain)", &trip_domain)],
+                            ["search_event", QUERY_SEARCH_EVENT.to_string().replace("/*_STRING_*/", suffix).replace("(ParticipantGroup)", &participant_group)
+                            .replace("(TripDomain)", &trip_domain)],
                         ]});
                 }
 

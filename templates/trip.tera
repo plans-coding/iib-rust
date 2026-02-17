@@ -90,12 +90,13 @@ body {
             {{ translation.trip.numberOfCountries | default(value="Countries Count") }}
           </label>
           <div class="trip-details-field" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
-          {% set uniqueCountries = trip_border_crossings[0].UniqueCountries | default(value="-") %}
+          {# set uniqueCountries = trip_border_crossings[0].UniqueCountries | default(value="-") %}
           {% if uniqueCountries == "-" %}
             -
           {% else %}
             {{ uniqueCountries | split(pat=", ") | length }}
-          {% endif %}
+          {% endif #}
+	  {% if trip_unique_countries | length > 0 %}{{ trip_unique_countries | length }}{% else %}-{% endif %}
           </div>
         </div>
       </div>
@@ -106,10 +107,11 @@ body {
             {{ translation.trip.uniqueCountries | default(value="Unique Countries") }}
           </label>
           	<div class="trip-details-field" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
-          		{# trip_border_crossings[0].UniqueCountries | default(value="-") #}
-			{% for country in trip_unique_countries %}
-				{{ country.Flag }}&nbsp;{{ country.Country }}{% if not loop.last %}, {% endif %}
-			{% endfor %}
+			{% if trip_unique_countries | length > 0 %}
+				{% for country in trip_unique_countries %}
+					{{ country.Flag }}&nbsp;{{ country.Country }}{% if not loop.last %}, {% endif %}
+				{% endfor %}
+			{% else %} - {% endif %}
 		</div>
         </div>
 
