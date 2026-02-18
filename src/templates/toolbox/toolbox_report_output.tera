@@ -1,0 +1,16 @@
+<style>
+#menu, #iib-foot { display:none; }
+body { background-color:#fff; }
+.report_toc { display:; }
+</style>
+
+{{ title_string }}
+{{ backside_string }}
+
+<div class="report_toc">
+{% for trip in all_overview %}
+	<div class="report_toc_trip">
+		<div>{{ trip.TripDescription }}</div>
+	</div>
+{% endfor %}
+</div>

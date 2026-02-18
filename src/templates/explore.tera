@@ -1,0 +1,65 @@
+<div id="path-explore">
+  <div class="breadcrumb">
+    <img class="icon-color" src="static/images/frog.svg" />
+    <div>{{ translation.explore.title | default(value="Explore") }}</div>
+    <!--<img src="static/images/arrow-right.svg" />
+    <div class="breadcrumb-link active warning"><span class="immer-in-font-uc" style="font-weight:normal;">Immer in</span>&nbsp;<span class="bewegung-font-uc">Bewegung</span></div>
+    -->
+  </div>
+
+  <input type="search" placeholder="{{ translation.menu.searchTrip | default(value="Search trip") }}" class="form-control" onkeydown="if(event.key==='Enter'){ history.pushState(null,'','?path=search:'+encodeURIComponent(this.value));page_load();}" />
+  <br />
+
+
+  <div class="card-container">
+
+
+  {% for row in explore %}
+
+      {% set cover_photo_id = cover_photos_list | get(key=row.OuterId, default="NO") %}
+
+      {% if row.CoverPhoto %}
+          {% if row.CoverPhoto is containing("!genre") %}
+              {% set cover_photo_url = row.CoverPhoto | replace(from="!genre[", to="") | replace(from="]", to="") %}
+          {% else %}
+              {% set cover_photo_url = settings.Photos.ImmichUrl ~ "api/assets/" ~ cover_photo_id ~ "/thumbnail" %}
+          {% endif %}
+      {% endif %}
+
+      <a href="?path=trip:{{ row.OuterId }}" class="card" data-trip-domain="{{ row.TripDomain }}">
+        {% if row.CoverPhoto and row.CoverPhoto is containing("!genre") %}
+          <div style="position:absolute;margin:5pt 0 0 5pt;color:#82ec3e;z-index:1000;"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bandaid-fill" viewBox="0 0 16 16">
+  <path d="m2.68 7.676 6.49-6.504a4 4 0 0 1 5.66 5.653l-1.477 1.529-5.006 5.006-1.523 1.472a4 4 0 0 1-5.653-5.66l.001-.002 1.505-1.492.001-.002Zm5.71-2.858a.5.5 0 1 0-.708.707.5.5 0 0 0 .707-.707ZM6.974 6.939a.5.5 0 1 0-.707-.707.5.5 0 0 0 .707.707M5.56 8.354a.5.5 0 1 0-.707-.708.5.5 0 0 0 .707.708m2.828 2.828a.5.5 0 1 0-.707-.707.5.5 0 0 0 .707.707m1.414-2.121a.5.5 0 1 0-.707.707.5.5 0 0 0 .707-.707m1.414-.707a.5.5 0 1 0-.706-.708.5.5 0 0 0 .707.708Zm-4.242.707a.5.5 0 1 0-.707.707.5.5 0 0 0 .707-.707m1.414-.707a.5.5 0 1 0-.707-.708.5.5 0 0 0 .707.708m1.414-2.122a.5.5 0 1 0-.707.707.5.5 0 0 0 .707-.707M8.646 3.354l4 4 .708-.708-4-4zm-1.292 9.292-4-4-.708.708 4 4z"/>
+</svg></div>
+        {% endif %}
+        <div class="explore-cover" data-trip-domain="{{ row.TripDomain }}" data-trip-cover-photo-path="{{ row.CoverPhoto }}" style="
+            background-image: {%if row.CoverPhoto %}url('{{ cover_photo_url }}'), linear-gradient(rgba(255,255,255,1)), {% endif %}url('static/images/travel.svg');
+            background-size: {%if row.CoverPhoto %}cover, {% endif %}contain;
+            background-position: {%if row.CoverPhoto %}center, {% endif %}center;
+            background-repeat: {%if row.CoverPhoto %}no-repeat, {% endif %}no-repeat;
+            height:120pt;
+          ">
+          </div>
+        <!--<img src="{{ row.CoverPhoto }}" class="card-img-top" alt="...">-->
+        <div class="card-body">
+          <div class="card-title" data-trip-domain="{{ row.TripDomain }}">{{ row.OuterId }} {{ row.OverallDestination }}</div>
+          <div class="card-text">{{ row.TripDescription }}</div>
+        </div>
+        <div style="flex:1;"></div>
+        <div class="card-footer" data-trip-domain="{{ row.TripDomain }}">
+          <small class="text-body-secondary">{{ row.TripYear }} &#x2022; {{ row.NumberOfDays }} {{ translation.explore.days | default(value="days") }}</small>
+        </div>
+      </a>
+
+  {% endfor %}
+  </div>
+
+  <br />
+  <h2>{{ translation.explore.seeAllTripsPer | default(value="See all trips per") }}</h2>
+
+  <div class="breadcrumb" style="justify-content: center;">
+    <a href="?path=overview:year" class="breadcrumb-link {% if query_params.path == 'overview:year' %}active{% endif %}">{{ translation.overview.year | default(value="Year") }}</a>
+    <a href="?path=overview:country" class="breadcrumb-link {% if query_params.path == 'overview:country' %}active{% endif %}">{{ translation.overview.country | default(value="Country") }}</a>
+    <a href="?path=overview:plain" class="breadcrumb-link {% if query_params.path == 'overview:plain' %}active{% endif %}">{{ translation.overview.plain | default(value="Plain") }}</a>
+  </div>
+</div>

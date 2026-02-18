@@ -13,30 +13,30 @@ mod render;
 mod helper;
 
 
-const TEMPLATE_MENU: &str = include_str!("../templates/_menu.tera");
+const TEMPLATE_MENU: &str = include_str!("../src/templates/_menu.tera");
 
-const TEMPLATE_EXPLORE: &str = include_str!("../templates/explore.tera");
-const TEMPLATE_OVERVIEW_YEAR: &str = include_str!("../templates/overview_year.tera");
-const TEMPLATE_OVERVIEW_COUNTRY: &str = include_str!("../templates/overview_country.tera");
-const TEMPLATE_OVERVIEW_PLAIN: &str = include_str!("../templates/overview_plain.tera");
+const TEMPLATE_EXPLORE: &str = include_str!("../src/templates/explore.tera");
+const TEMPLATE_OVERVIEW_YEAR: &str = include_str!("../src/templates/overview_year.tera");
+const TEMPLATE_OVERVIEW_COUNTRY: &str = include_str!("../src/templates/overview_country.tera");
+const TEMPLATE_OVERVIEW_PLAIN: &str = include_str!("../src/templates/overview_plain.tera");
 
-const TEMPLATE_TRIP: &str = include_str!("../templates/trip.tera");
-const TEMPLATE_IMAGES: &str = include_str!("../templates/images.tera");
-const TEMPLATE_MAP: &str = include_str!("../templates/map.tera");
+const TEMPLATE_TRIP: &str = include_str!("../src/templates/trip.tera");
+const TEMPLATE_IMAGES: &str = include_str!("../src/templates/images.tera");
+const TEMPLATE_MAP: &str = include_str!("../src/templates/map.tera");
 
-const TEMPLATE_STATISTICS_SUMMARY: &str = include_str!("../templates/statistics_summary.tera");
-const TEMPLATE_STATISTICS_VISITS: &str = include_str!("../templates/statistics_visits.tera");
-const TEMPLATE_STATISTICS_OVERNIGHTS: &str = include_str!("../templates/statistics_overnights.tera");
-const TEMPLATE_STATISTICS_THEMES: &str = include_str!("../templates/statistics_themes.tera");
+const TEMPLATE_STATISTICS_SUMMARY: &str = include_str!("../src/templates/statistics_summary.tera");
+const TEMPLATE_STATISTICS_VISITS: &str = include_str!("../src/templates/statistics_visits.tera");
+const TEMPLATE_STATISTICS_OVERNIGHTS: &str = include_str!("../src/templates/statistics_overnights.tera");
+const TEMPLATE_STATISTICS_THEMES: &str = include_str!("../src/templates/statistics_themes.tera");
 
-const TEMPLATE_DATASET: &str = include_str!("../templates/dataset.tera");
-const TEMPLATE_SOURCE: &str = include_str!("../templates/source.tera");
-const TEMPLATE_ABOUT: &str = include_str!("../templates/about.tera");
-const TEMPLATE_SEARCH: &str = include_str!("../templates/search.tera");
+const TEMPLATE_DATASET: &str = include_str!("../src/templates/dataset.tera");
+const TEMPLATE_SOURCE: &str = include_str!("../src/templates/source.tera");
+const TEMPLATE_ABOUT: &str = include_str!("../src/templates/about.tera");
+const TEMPLATE_SEARCH: &str = include_str!("../src/templates/search.tera");
 
-const TEMPLATE_TOOLBOX_REPORT: &str = include_str!("../templates/toolbox/toolbox_report.tera");
-const TEMPLATE_TOOLBOX_REPORT_OUTPUT: &str = include_str!("../templates/toolbox/toolbox_report_output.tera");
-const TEMPLATE_TOOLBOX_INPUT: &str = include_str!("../templates/toolbox/toolbox_input.tera");
+const TEMPLATE_TOOLBOX_REPORT: &str = include_str!("../src/templates/toolbox/toolbox_report.tera");
+const TEMPLATE_TOOLBOX_REPORT_OUTPUT: &str = include_str!("../src/templates/toolbox/toolbox_report_output.tera");
+const TEMPLATE_TOOLBOX_INPUT: &str = include_str!("../src/templates/toolbox/toolbox_input.tera");
 
 
 macro_rules! define_queries {
@@ -55,43 +55,44 @@ macro_rules! define_queries {
 
 define_queries! {
 
-    QUERY_EXPLORE => "../queries/explore.sql",
+    QUERY_EXPLORE => "../src/queries/explore.sql",
 
-    QUERY_OVERVIEW_YEAR => "../queries/overview/overview_year.sql",
-    QUERY_OVERVIEW_COUNTRY => "../queries/overview/overview_country.sql",
-    QUERY_OVERVIEW_PLAIN => "../queries/overview/overview_plain.sql",
+    QUERY_OVERVIEW_YEAR => "../src/queries/overview/overview_year.sql",
+    QUERY_OVERVIEW_COUNTRY => "../src/queries/overview/overview_country.sql",
+    QUERY_OVERVIEW_PLAIN => "../src/queries/overview/overview_plain.sql",
 
-    QUERY_TRIP_PREVIOUS => "../queries/trip/trip_previous.sql",
-//    QUERY_TRIP_ALL_TRIPS => "../queries/trip/trip_all_trips.sql",
-    QUERY_TRIP_NEXT => "../queries/trip/trip_next.sql",
-    QUERY_TRIP_SUMMARY => "../queries/trip/trip_summary.sql",
-    QUERY_TRIP_EVENTS => "../queries/trip/trip_events.sql",
-    QUERY_TRIP_UNIQUE_COUNTRIES => "../queries/trip/trip_unique_countries.sql",
-    QUERY_TRIP_BORDER_CROSSINGS => "../queries/trip/trip_border_crossings.sql",
-    QUERY_TRIP_MAP_PINS_ACCOMMODATION => "../queries/trip/trip_map_pins_accommodation.sql",
-    QUERY_TRIP_MAP_PINS_OVERALL => "../queries/trip/trip_map_pins_overall.sql",
-    QUERY_TRIP_IMMICH_DESC_SEARCH => "../queries/trip/trip_immich_desc_search.sql",
-    QUERY_TRIP_IMMICH_ALBUM_NAME => "../queries/trip/trip_immich_album_name.sql",
+    QUERY_TRIP_PREVIOUS => "../src/queries/trip/trip_previous.sql",
+//    QUERY_TRIP_ALL_TRIPS => "../src/queries/trip/trip_all_trips.sql",
+    QUERY_TRIP_NEXT => "../src/queries/trip/trip_next.sql",
+    QUERY_TRIP_SUMMARY => "../src/queries/trip/trip_summary.sql",
+    QUERY_TRIP_EVENTS => "../src/queries/trip/trip_events.sql",
+    QUERY_TRIP_UNIQUE_COUNTRIES => "../src/queries/trip/trip_unique_countries.sql",
+    QUERY_TRIP_BORDER_CROSSINGS => "../src/queries/trip/trip_border_crossings.sql",
+    QUERY_TRIP_MAP_PINS_ACCOMMODATION => "../src/queries/trip/trip_map_pins_accommodation.sql",
+    QUERY_TRIP_MAP_PINS_OVERALL => "../src/queries/trip/trip_map_pins_overall.sql",
+    QUERY_TRIP_IMMICH_DESC_SEARCH => "../src/queries/trip/trip_immich_desc_search.sql",
+    QUERY_TRIP_IMMICH_ALBUM_NAME => "../src/queries/trip/trip_immich_album_name.sql",
+    QUERY_TRIP_EXTENSION_MOVIE => "../src/queries/extensions/trip_movie.sql",
 
-    QUERY_STATISTICS_VISITS => "../queries/statistics/statistics_visits.sql",
-    QUERY_STATISTICS_OVERNIGHTS => "../queries/statistics/statistics_overnights.sql",
-    QUERY_STATISTICS_PER_DOMAIN_YEAR => "../queries/statistics/statistics_per_domain_year.sql",
-    QUERY_STATISTICS_THEME_COUNT => "../queries/statistics/statistics_theme_count.sql",
-    QUERY_STATISTICS_TRIP_COUNT => "../queries/statistics/statistics_trip_count.sql",
+    QUERY_STATISTICS_VISITS => "../src/queries/statistics/statistics_visits.sql",
+    QUERY_STATISTICS_OVERNIGHTS => "../src/queries/statistics/statistics_overnights.sql",
+    QUERY_STATISTICS_PER_DOMAIN_YEAR => "../src/queries/statistics/statistics_per_domain_year.sql",
+    QUERY_STATISTICS_THEME_COUNT => "../src/queries/statistics/statistics_theme_count.sql",
+    QUERY_STATISTICS_TRIP_COUNT => "../src/queries/statistics/statistics_trip_count.sql",
 
-    QUERY_COMMON_PARTICIPANT_GROUPS => "../queries/common_participant_groups.sql",
-    QUERY_COMMON_TRIP_DOMAINS => "../queries/common_trip_domains.sql",
+    QUERY_COMMON_PARTICIPANT_GROUPS => "../src/queries/common_participant_groups.sql",
+    QUERY_COMMON_TRIP_DOMAINS => "../src/queries/common_trip_domains.sql",
 
-    QUERY_IMAGES_DATE_LIST => "../queries/images_date_list.sql",
-    QUERY_IMAGES_PHOTO_TIME => "../queries/images_photo_time.sql",
+    QUERY_IMAGES_DATE_LIST => "../src/queries/images_date_list.sql",
+    QUERY_IMAGES_PHOTO_TIME => "../src/queries/images_photo_time.sql",
 
-    QUERY_MAP_CONTOUR => "../queries/map/map_contour.sql",
-    QUERY_MAP_COUNTRY => "../queries/map/map_country.sql",
-    QUERY_MAP_COUNTRY_LIST => "../queries/map/map_country_list.sql",
-    QUERY_MAP_THEME => "../queries/map/map_theme.sql",
+    QUERY_MAP_CONTOUR => "../src/queries/map/map_contour.sql",
+    QUERY_MAP_COUNTRY => "../src/queries/map/map_country.sql",
+    QUERY_MAP_COUNTRY_LIST => "../src/queries/map/map_country_list.sql",
+    QUERY_MAP_THEME => "../src/queries/map/map_theme.sql",
 
-    QUERY_SEARCH_EVENT => "../queries/search_event.sql",
-    QUERY_SEARCH_TRIP => "../queries/search_trip.sql",
+    QUERY_SEARCH_EVENT => "../src/queries/search_event.sql",
+    QUERY_SEARCH_TRIP => "../src/queries/search_trip.sql",
 
 }
 
@@ -547,6 +548,7 @@ async fn page_load_internal() {
 
                     match (outer_id, inner_id) {
                         // trip::yyy  → only inner
+                        // TO DO: rebuild to redirect to corresponding outerid
                         (None, Some(inner_id)) => {
                             render_structure["page"] = json!({
                                 "title": inner_id,
@@ -599,6 +601,7 @@ async fn page_load_internal() {
                                     .replace("(TripDomain)", &trip_domain)],
                                 ["trip_immich_desc_search", QUERY_TRIP_IMMICH_DESC_SEARCH.replace("= OuterId", &format!("= '{}'", outer_id))],
                                 ["trip_immich_album_name", QUERY_TRIP_IMMICH_ALBUM_NAME.replace("= OuterId", &format!("= '{}'", outer_id))],
+                                ["trip_extension_movie", QUERY_TRIP_EXTENSION_MOVIE.replace("_OUTER_ID_", &outer_id)],
                             ]});
                             render_structure["all"]["cover_photos_list"] = serde_json::to_value(&cover_photos_map).expect("Failed to convert map to Value");
                             map_request = "trip";
@@ -691,7 +694,8 @@ async fn page_load_internal() {
                             "title": suffix,
                             "template": TEMPLATE_TOOLBOX_REPORT_OUTPUT,
                             "queries": [
-                                ["output", ""],
+                                ["all_overview", "SELECT * FROM bewa_Overview WHERE OuterId IS NOT NULL;"],
+				["all_events", "SELECT * FROM bewb_Events WHERE InnerId IS NOT NULL;"],
                             ]});
                         render_structure["all"]["title_string"] = json!(title_string);
                         render_structure["all"]["backside_string"] = json!(backside_string);
