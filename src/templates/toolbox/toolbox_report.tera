@@ -1,6 +1,6 @@
 <div class="path-toolbox">
   <div class="breadcrumb">
-    <img class="icon-color" src="images/frog.svg" />
+    <img class="icon-color" src="static/images/frog.svg" />
     <div>{{ translation.menu.report | default(value="Generate report") }}</div>
 
   </div>

@@ -207,10 +207,10 @@ body {
 </details>
 
 {% if trip_events %}
-<div class="days" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
+<div class="days" data-iib-tripDomain="{{ trip_summary[0].TripDomain }}">
   {% for day in trip_events %}
   
-    <div class="day" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
+    <div class="day" data-iib-tripDomain="{{ trip_summary[0].TripDomain }}">
     
       <div class="day-left">
       
@@ -222,7 +222,7 @@ body {
               {% if settings.Photos.Immich == "Enabled" and day.OuterId not in settings.Other.ExcludeDayPhotos %}
 
                   <a class="to-image-viewer" href="?path=images:{{ day.OuterId }}:{{ day.Date }}" target="_blank">
-                      <button type="button" class="item-viewer-button filter-button" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
+                      <button type="button" class="item-viewer-button filter-button" data-iib-tripDomain="{{ trip_summary[0].TripDomain }}">
                           <img src="static/images/photos.svg" />
                       </button>
                   </a>

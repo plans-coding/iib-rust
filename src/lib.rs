@@ -94,6 +94,9 @@ define_queries! {
     QUERY_SEARCH_EVENT => "../src/queries/search_event.sql",
     QUERY_SEARCH_TRIP => "../src/queries/search_trip.sql",
 
+    QUERY_REPORT_ALL_OVERVIEW => "../src/queries/report/report_all_overview.sql",
+    QUERY_REPORT_ALL_EVENTS => "../src/queries/report/report_all_events.sql",
+
 }
 
 static DB_BYTES: OnceCell<Vec<u8>> = OnceCell::new();
@@ -251,7 +254,7 @@ async fn session_load() -> (Vec<u8>, serde_json::Value) {
         .and_then(|v| v.get("Value"))
         .and_then(|v| v.as_str())
         {
-            let path = format!("languages/{filename}");
+            let path = format!("static/languages/{filename}");
 
             web_sys::console::log_1(&path.clone().into());
 
@@ -694,8 +697,10 @@ async fn page_load_internal() {
                             "title": suffix,
                             "template": TEMPLATE_TOOLBOX_REPORT_OUTPUT,
                             "queries": [
-                                ["all_overview", "SELECT * FROM bewa_Overview WHERE OuterId IS NOT NULL;"],
-				["all_events", "SELECT * FROM bewb_Events WHERE InnerId IS NOT NULL;"],
+                                ["all_overview", QUERY_REPORT_ALL_OVERVIEW.replace("(ParticipantGroup)", &participant_group)
+                                .replace("(TripDomain)", &trip_domain)],
+                                ["all_events", QUERY_REPORT_ALL_EVENTS.replace("(ParticipantGroup)", &participant_group)
+                                .replace("(TripDomain)", &trip_domain)],
                             ]});
                         render_structure["all"]["title_string"] = json!(title_string);
                         render_structure["all"]["backside_string"] = json!(backside_string);
