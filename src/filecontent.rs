@@ -1,10 +1,20 @@
 use wasm_bindgen::JsCast;
+use wasm_bindgen::JsValue;
 use wasm_bindgen_futures::JsFuture;
 use web_sys::{window, Response};
 //use opfs::persistent::{DirectoryHandle, app_specific_dir};
 use opfs::persistent::app_specific_dir;
 use opfs::{GetFileHandleOptions, CreateWritableOptions};
 use opfs::{DirectoryHandle as _, FileHandle as _, WritableFileStream as _}; // traits
+
+#[wasm_bindgen::prelude::wasm_bindgen]
+extern "C" {
+    #[wasm_bindgen::prelude::wasm_bindgen(catch)]
+    async fn read_opfs_file(path: &str) -> Result<JsValue, JsValue>;
+
+    #[wasm_bindgen::prelude::wasm_bindgen(catch)]
+    async fn read_opfs_text(path: &str) -> Result<JsValue, JsValue>;
+}
 
 // Fetch plain text from URL
 pub async fn fetch_text(url: &str) -> Option<String> {
@@ -44,25 +54,17 @@ async fn fetch_bytes(url: &str) -> Option<Vec<u8>> {
 }
 
 // Get SQLite database as bytes
-pub async fn get_sqlite_binary() -> Vec<u8> {
-    let dir = match app_specific_dir().await {
-        Ok(d) => d,
-        Err(e) => {
-            web_sys::console::log_1(&format!("Failed to access OPFS dir: {:?}", e).into());
-            return Vec::new();
-        }
-    };
 
+pub async fn get_sqlite_binary() -> Vec<u8> {
     // 1) Check if file exists in OPFS
-    if let Ok(file) = dir.get_file_handle_with_options(
-        "chronik.db",
-        &GetFileHandleOptions { create: false }
-    ).await {
-        web_sys::console::log_1(&"Found chronik.db in OPFS".into());
-        return file.read().await.unwrap_or_default();
+    if let Ok(value) = read_opfs_file("chronik.sqlite").await {
+        if !value.is_null() && !value.is_undefined() {
+            web_sys::console::log_1(&"Found chronik.sqlite in OPFS".into());
+            return js_sys::Uint8Array::new(&value).to_vec();
+        }
     }
 
-    web_sys::console::log_1(&"No chronik.db → checking server fallback...".into());
+    web_sys::console::log_1(&"No chronik.sqlite → checking server fallback...".into());
 
     // 2) Load server_db_path.txt
     let server_path = match fetch_text("server_db_path.txt").await {
@@ -85,8 +87,16 @@ pub async fn get_sqlite_binary() -> Vec<u8> {
     };
 
     // Save to OPFS
+    let dir = match app_specific_dir().await {
+        Ok(d) => d,
+        Err(e) => {
+            web_sys::console::log_1(&format!("Failed to access OPFS dir: {:?}", e).into());
+            return Vec::new();
+        }
+    };
+
     match dir.get_file_handle_with_options(
-        "chronik.db",
+        "chronik.sqlite",
         &GetFileHandleOptions { create: true }
     ).await {
         Ok(mut file) => {
@@ -113,38 +123,14 @@ pub async fn get_sqlite_binary() -> Vec<u8> {
 }
 
 pub async fn cover_photos_list_from_opfs() -> Option<String> {
-    // Get app-specific directory
-    let dir = match app_specific_dir().await {
-        Ok(d) => d,
-        Err(e) => {
-            web_sys::console::log_1(&format!("Failed to access OPFS dir: {:?}", e).into());
-            return None;
-        }
-    };
-
-    // Try to get the file handle
-    let file = match dir
-    .get_file_handle_with_options("cover_photos.json", &GetFileHandleOptions { create: false })
-    .await
-    {
-        Ok(f) => f,
-        Err(_) => {
+    match read_opfs_text("cover_photos.json").await {
+        Ok(value) if !value.is_null() && !value.is_undefined() => value.as_string(),
+        Ok(_) => {
             web_sys::console::log_1(&"cover_photos.json not found in OPFS".into());
-            return None;
+            None
         }
-    };
-
-    // Read file content
-    match file.read().await {
-        Ok(bytes) => match String::from_utf8(bytes) {
-            Ok(content) => Some(content),
-            Err(e) => {
-                web_sys::console::log_1(&format!("File is not valid UTF-8: {:?}", e).into());
-                None
-            }
-        },
         Err(e) => {
-            web_sys::console::log_1(&format!("Failed to read file: {:?}", e).into());
+            web_sys::console::log_1(&format!("Failed to read cover_photos.json via JS: {:?}", e).into());
             None
         }
     }

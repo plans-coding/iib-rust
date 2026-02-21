@@ -210,6 +210,7 @@ async fn session_load() -> (Vec<u8>, serde_json::Value) {
         let db_bytes = filecontent::get_sqlite_binary().await;
         if !db_bytes.is_empty() {
             web_sys::console::log_1(&format!("DB size: {}", db_bytes.len()).into());
+            sqlite_query::init_db(&db_bytes);
         } else {
             web_sys::console::log_1(&"No DB loaded.".into());
         }
@@ -540,8 +541,8 @@ async fn page_load_internal() {
                         ]*/});
                 }
             _ => {
-                web_sys::console::log_1(&"Second tier.".into());
                 
+                //web_sys::console::log_1(&"Second tier.".into());
 
                 if let Some(rest) = page.strip_prefix("trip:") {
                     let mut parts = rest.splitn(2, ':');

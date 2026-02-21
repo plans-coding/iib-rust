@@ -1,8 +1,58 @@
 use sqlite_wasm_rs as ffi;
 
+use once_cell::sync::OnceCell;
+use serde_json::{Value, Map};
 use std::ffi::CString;
 use std::ptr;
-use serde_json::{Value, Map};
+use std::sync::Mutex;
+
+struct SqliteDb {
+    db: *mut ffi::sqlite3,
+}
+
+// wasm runs single-threaded here, but OnceCell/Mutex require Send.
+unsafe impl Send for SqliteDb {}
+
+static SQLITE_DB: OnceCell<Mutex<SqliteDb>> = OnceCell::new();
+
+unsafe fn open_and_deserialize(db_vec: &[u8]) -> *mut ffi::sqlite3 {
+    let mut db: *mut ffi::sqlite3 = ptr::null_mut();
+    let flags = ffi::SQLITE_OPEN_READWRITE | ffi::SQLITE_OPEN_CREATE | ffi::SQLITE_OPEN_MEMORY;
+
+    let ret = ffi::sqlite3_open_v2(
+        b"memdb\0".as_ptr().cast(),
+        &mut db,
+        flags,
+        ptr::null(),
+    );
+    assert_eq!(ret, ffi::SQLITE_OK, "Failed to open SQLite");
+
+    let ret = ffi::sqlite3_deserialize(
+        db,
+        b"main\0".as_ptr() as *const _,
+        db_vec.as_ptr() as *mut u8,
+        db_vec.len() as i64,
+        db_vec.len() as i64,
+        ffi::SQLITE_DESERIALIZE_READONLY,
+    );
+    assert_eq!(ret, ffi::SQLITE_OK, "Failed to deserialize DB");
+
+    db
+}
+
+pub fn init_db(db_vec: &[u8]) {
+    SQLITE_DB.get_or_init(|| {
+        let db = unsafe { open_and_deserialize(db_vec) };
+        Mutex::new(SqliteDb { db })
+    });
+}
+
+fn get_db(db_vec: &[u8]) -> &'static Mutex<SqliteDb> {
+    SQLITE_DB.get_or_init(|| {
+        let db = unsafe { open_and_deserialize(db_vec) };
+        Mutex::new(SqliteDb { db })
+    })
+}
 
 unsafe fn run_query(db: *mut ffi::sqlite3, sql: &str) -> Vec<Value> {
     let mut stmt: *mut ffi::sqlite3_stmt = ptr::null_mut();
@@ -57,27 +107,9 @@ pub async fn get_query_data(
     queries: Vec<(String, String)>,
 ) -> Value {
     unsafe {
-        let mut db: *mut ffi::sqlite3 = ptr::null_mut();
-        let flags = ffi::SQLITE_OPEN_READWRITE | ffi::SQLITE_OPEN_CREATE | ffi::SQLITE_OPEN_MEMORY;
-
-        let ret = ffi::sqlite3_open_v2(
-            b"memdb\0".as_ptr().cast(),
-                                       &mut db,
-                                       flags,
-                                       ptr::null(),
-        );
-        assert_eq!(ret, ffi::SQLITE_OK, "Failed to open SQLite");
-
-        // Deserialize the database into memory
-        let ret = ffi::sqlite3_deserialize(
-            db,
-            b"main\0".as_ptr() as *const _,
-                                           db_vec.as_ptr() as *mut u8,
-                                           db_vec.len() as i64,
-                                           db_vec.len() as i64,
-                                           ffi::SQLITE_DESERIALIZE_READONLY,
-        );
-        assert_eq!(ret, ffi::SQLITE_OK, "Failed to deserialize DB");
+        let db_lock = get_db(db_vec);
+        let db_guard = db_lock.lock().expect("Failed to lock SQLite DB");
+        let db = db_guard.db;
 
         // Run each query and insert results into a JSON object
         let mut out = Map::new();
@@ -86,7 +118,6 @@ pub async fn get_query_data(
             out.insert(name, Value::Array(rows));
         }
 
-        ffi::sqlite3_close(db);
         Value::Object(out)
     }
 }
@@ -94,28 +125,9 @@ pub async fn get_query_data(
 
 pub async fn get_query_data_preserve_order(db_vec: &[u8], queries: Vec<(String, String)>) -> Value {
     unsafe {
-        // Open in-memory database
-        let mut db: *mut ffi::sqlite3 = ptr::null_mut();
-        let flags = ffi::SQLITE_OPEN_READWRITE | ffi::SQLITE_OPEN_CREATE | ffi::SQLITE_OPEN_MEMORY;
-
-        let ret = ffi::sqlite3_open_v2(
-            b"memdb\0".as_ptr().cast(),
-                                       &mut db,
-                                       flags,
-                                       ptr::null(),
-        );
-        assert_eq!(ret, ffi::SQLITE_OK, "Failed to open SQLite");
-
-        // Deserialize the database into memory
-        let ret = ffi::sqlite3_deserialize(
-            db,
-            b"main\0".as_ptr() as *const _,
-                                           db_vec.as_ptr() as *mut u8,
-                                           db_vec.len() as i64,
-                                           db_vec.len() as i64,
-                                           ffi::SQLITE_DESERIALIZE_READONLY,
-        );
-        assert_eq!(ret, ffi::SQLITE_OK, "Failed to deserialize DB");
+        let db_lock = get_db(db_vec);
+        let db_guard = db_lock.lock().expect("Failed to lock SQLite DB");
+        let db = db_guard.db;
 
         let mut out = Map::new();
 
@@ -177,7 +189,6 @@ pub async fn get_query_data_preserve_order(db_vec: &[u8], queries: Vec<(String, 
             out.insert(name, Value::Object(query_obj));
         }
 
-        ffi::sqlite3_close(db);
         Value::Object(out)
     }
 }

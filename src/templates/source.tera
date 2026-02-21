@@ -27,11 +27,11 @@
     <input type="file" accept=".db,.sqlite,.sqlite3" onchange="
     document.getElementById('opfsStatus').textContent='Waiting for confirmation.';
     navigator.storage.getDirectory()
-    .then(d=>d.getFileHandle('chronik.db',{create:true}))
+    .then(d=>d.getFileHandle('chronik.sqlite',{create:true}))
     .then(h=>h.createWritable())
     .then(w=>w.write(this.files[0]).then(()=>w.close()))
     .then(()=>navigator.storage.getDirectory())
-    .then(d=>d.getFileHandle('chronik.db'))
+    .then(d=>d.getFileHandle('chronik.sqlite'))
     .then(()=>{document.getElementById('opfsStatus').textContent='{{ translation.source.stored | default(value='Database file stored in OPFS.') }}';document.getElementById('opfsStatus').className='green-text';})
     .catch(()=>{document.getElementById('opfsStatus').textContent='{{ translation.source.missing | default(value='Database file missing in OPFS.') }}';document.getElementById('opfsStatus').className='red-text';})
     ">
@@ -45,7 +45,7 @@
 
     <button class="source-button" onclick="
     navigator.storage.getDirectory()
-    .then(d=>d.removeEntry('chronik.db'))
+    .then(d=>d.removeEntry('chronik.sqlite'))
     .catch(()=>{})
     .then(()=>{document.getElementById('opfsStatus').textContent='{{ translation.source.missing | default(value='Database file missing in OPFS.') }}';document.getElementById('opfsStatus').className='red-text';}).then(()=>{location.reload()});">
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">

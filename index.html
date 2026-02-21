@@ -21,6 +21,7 @@
 
         <!--<script src="bundle/pagedjs/paged.polyfill.js"></script>-->
 
+        <script src="static/script/bew-file-access.js"></script>
         <script src="static/script/bew-filter.js"></script>
         <script src="static/script/bew-immich.js"></script>
         <script src="static/script/bew-chart.js"></script>
@@ -66,6 +67,7 @@
         </dialog>
 
         <script type="module">
+            
             import init, { page_load, chart_js, user_run_sql, get_predefined_query } from "./pkg/bewegung.js";
             await init();
             
@@ -120,20 +122,6 @@
             const url_chartjs = URL.createObjectURL(blob_chartjs);
             await import(url_chartjs);
             URL.revokeObjectURL(url_chartjs); 
-            
-            /*const jsCode_maplibre = maplibre_js();
-            const blob_maplibre = new Blob([jsCode_maplibre], { type: "text/javascript" });
-            const url_maplibre = URL.createObjectURL(blob_maplibre);
-            await import(url_maplibre);
-            URL.revokeObjectURL(url_maplibre);*/
-            
-            // Css code called from rusts
-            /*function inject_css(cssText) {
-                const style = document.createElement("style");
-                style.textContent = cssText;
-                document.head.appendChild(style);
-            }*/
-
 
 
             // CODE EDITOR  -----------------------------------------------------------------------
@@ -180,6 +168,11 @@
 
         <script>
 
+        (async () => {
+            const { buffer, opfsHandle } = await bindSQLiteFile();
+            console.log("SQLite buffer ready for WASM in-memory load:", buffer.byteLength, "bytes");
+        })();
+
         // CUSTOM QUERIES  -----------------------------------------------------------------------
 
             async function load_query_from_file(path) {
@@ -220,8 +213,10 @@
 
         // Register Service Worker
         if ('serviceWorker' in navigator) {
-            const basePath = (location.origin + location.pathname.replace(/\/[^/]*$/, '/')).replace(/\/+$/, '/');
-            navigator.serviceWorker.register(basePath + 'static/script/bew-service-worker.js')
+            const baseUrl = new URL('./', window.location.href);
+            navigator.serviceWorker.register(new URL('bew-service-worker.js', baseUrl), {
+                scope: baseUrl.pathname
+            })
                 .then(r => console.log('Service Worker registered', r))
                 .catch(e => console.error('SW registration failed:', e));
         }

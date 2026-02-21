@@ -171,7 +171,7 @@ body {
 
               {% for photoAlbum in photoAlbums %}
                   <div type="button" class="filter-button"
-			onclick="openAlbum('{{ photoAlbum }}', '{{ settings.Photo.ImmichUrl }}api/', '{{ settings.Photos.ImmichApiKey }}')">
+			onclick="openAlbum('{{ photoAlbum }}', '{{ settings.Photos.ImmichUrl }}api/', '{{ settings.Photos.ImmichApiKey }}')">
                       Immich {{ photoAlbum }}
                   </div>
               {% endfor %}#}

@@ -1,43 +1,130 @@
 // MAP SCRIPT  -----------------------------------------------------------------------
 
-function initiate_map() {
-    const map = new maplibregl.Map({
-        container: "map",
-        style: {
-            version: 8,
-            sources: {
-                "osm-tiles": {
-                    type: "raster",
-                    tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
-                    tileSize: 256,
-                    attribution: "© OpenStreetMap contributors"
-                }
-            },
-            layers: [{
-                id: "osm-tiles",
-                type: "raster",
-                source: "osm-tiles",
-                minzoom: 0,
-                maxzoom: 19
-            }]
-        },
-        zoom: 8,
-        attributionControl: false
+const BEW_MAP_STYLE = {
+    version: 8,
+    sources: {
+        "osm-tiles": {
+            type: "raster",
+            tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
+            tileSize: 256,
+            attribution: "© OpenStreetMap contributors"
+        }
+    },
+    layers: [{
+        id: "osm-tiles",
+        type: "raster",
+        source: "osm-tiles",
+        minzoom: 0,
+        maxzoom: 19
+    }]
+};
+
+const BEW_DYNAMIC_LAYER_IDS = [
+    "overview-markers",
+    "overview-labels",
+    "accommodation-line-layer",
+    "accommodation-markers",
+    "contour-line"
+];
+
+const BEW_DYNAMIC_SOURCE_IDS = [
+    "markers",
+    "accommodation-line",
+    "contour-line"
+];
+
+function get_map_state() {
+    if (!window.__bewMapState) {
+        window.__bewMapState = {
+            map: null,
+            markers: [],
+            layerClickHandlers: []
+        };
+    }
+    return window.__bewMapState;
+}
+
+function execute_when_map_ready(map, callback) {
+    if (map.isStyleLoaded()) {
+        callback();
+        return;
+    }
+    map.once("load", callback);
+}
+
+function register_map_marker(marker) {
+    get_map_state().markers.push(marker);
+}
+
+function clear_map_markers() {
+    const state = get_map_state();
+    state.markers.forEach(marker => marker.remove());
+    state.markers = [];
+}
+
+function register_layer_click_handler(map, layerId, handler) {
+    map.on("click", layerId, handler);
+    get_map_state().layerClickHandlers.push({ layerId, handler });
+}
+
+function clear_layer_click_handlers(map) {
+    const state = get_map_state();
+    state.layerClickHandlers.forEach(({ layerId, handler }) => {
+        map.off("click", layerId, handler);
     });
+    state.layerClickHandlers = [];
+}
 
-    map.addControl(new maplibregl.NavigationControl(), "top-right");
-    map.addControl(new maplibregl.FullscreenControl(), "top-right");
+function reset_dynamic_map_content(map) {
+    clear_layer_click_handlers(map);
+    clear_map_markers();
+    BEW_DYNAMIC_LAYER_IDS.forEach(layerId => {
+        if (map.getLayer(layerId)) {
+            map.removeLayer(layerId);
+        }
+    });
+    BEW_DYNAMIC_SOURCE_IDS.forEach(sourceId => {
+        if (map.getSource(sourceId)) {
+            map.removeSource(sourceId);
+        }
+    });
+}
 
-    return map
+function initiate_map() {
+    const state = get_map_state();
+    const mapSlot = document.getElementById("map");
+    if (!mapSlot) return null;
+
+    if (!state.map) {
+        state.map = new maplibregl.Map({
+            container: mapSlot,
+            style: BEW_MAP_STYLE,
+            zoom: 8,
+            attributionControl: false
+        });
+        state.map.addControl(new maplibregl.NavigationControl(), "top-right");
+        state.map.addControl(new maplibregl.FullscreenControl(), "top-right");
+        return state.map;
+    }
+
+    const existingContainer = state.map.getContainer();
+    if (existingContainer !== mapSlot) {
+        mapSlot.replaceWith(existingContainer);
+        existingContainer.id = "map";
+    }
+
+    state.map.resize();
+    return state.map;
 }
 
 
 function load_trip_map() {
 
     let map = initiate_map();
+    if (!map) return;
 
-    const mapContainer = document.getElementById('map');
     const mapPinDataContainer = document.getElementById('map-pin-data');
+    if (!mapPinDataContainer) return;
 
 
     const overviewData = JSON.parse(mapPinDataContainer.getAttribute("data-trip-map-overall"));
@@ -51,7 +138,8 @@ function load_trip_map() {
 
     const bounds = new maplibregl.LngLatBounds();
 
-    map.on('load', () => {
+    execute_when_map_ready(map, () => {
+        reset_dynamic_map_content(map);
 
         // Prepare marker features
         const overviewFeatures = overviewData.map(loc => {
@@ -168,7 +256,7 @@ function load_trip_map() {
             closeOnClick: true
         });
 
-        map.on('click', 'overview-markers', (e) => {
+        register_layer_click_handler(map, "overview-markers", (e) => {
             const feature = e.features[0];
             const title = feature.properties.title;
 
@@ -178,7 +266,7 @@ function load_trip_map() {
             .addTo(map);
         });
 
-        map.on('click', 'accommodation-markers', (e) => {
+        register_layer_click_handler(map, "accommodation-markers", (e) => {
             const feature = e.features[0];
             const { title, date, accuracy } = feature.properties;
 
@@ -200,9 +288,10 @@ function load_trip_map() {
 function load_contour_map() {
 
     let map = initiate_map();
+    if (!map) return;
 
-    const mapContainer = document.getElementById('map');
     const mapPinDataContainer = document.getElementById('map-pin-data');
+    if (!mapPinDataContainer) return;
 
     try {
         const rawData = mapPinDataContainer.getAttribute('data-map');
@@ -237,7 +326,8 @@ function load_contour_map() {
             return;
         }
 
-        map.on('load', () => {
+        execute_when_map_ready(map, () => {
+            reset_dynamic_map_content(map);
             map.addSource('contour-line', {
                 type: 'geojson',
                 data: {
@@ -276,9 +366,10 @@ function load_contour_map() {
 function load_country_map() {
 
     let map = initiate_map();
+    if (!map) return;
 
-    const mapContainer = document.getElementById('map');
     const mapPinDataContainer = document.getElementById('map-pin-data');
+    if (!mapPinDataContainer) return;
 
 
     try {
@@ -289,7 +380,10 @@ function load_country_map() {
 
         const bounds = new maplibregl.LngLatBounds();
 
-        jsonData.forEach(pin => {
+        execute_when_map_ready(map, () => {
+            reset_dynamic_map_content(map);
+
+            jsonData.forEach(pin => {
             const { InnerId, OuterId, OverallDestination, AccommodationCoordinates, AccommodationCoordinatesAccuracy, Accommodation, ParticipantGroup, TravelParticipants, Date } = pin;
 
             // Split coordinates [lat, lon] -> [lng, lat] for MapLibre
@@ -330,17 +424,19 @@ function load_country_map() {
             `;
 
             // Add marker with popup
-            new maplibregl.Marker(el)
+            const marker = new maplibregl.Marker(el)
             .setLngLat(coordinates)
             .setPopup(new maplibregl.Popup({ offset: 25 }).setHTML(popupContent))
             .addTo(map);
+            register_map_marker(marker);
 
             bounds.extend(coordinates);
+            });
+
+            map.fitBounds(bounds, { padding: 50, maxZoom: 12, linear: true });
+
+            console.log("Map initialized with auto-zoom");
         });
-
-        map.fitBounds(bounds, { padding: 50, maxZoom: 12, linear: true });
-
-        console.log("Map initialized with auto-zoom");
     } catch (error) {
         console.error("JSON Parse Error:", error);
     }
@@ -351,9 +447,10 @@ function load_theme_map() {
 
 
     let map = initiate_map();
+    if (!map) return;
 
-    const mapContainer = document.getElementById('map');
     const mapPinDataContainer = document.getElementById('map-pin-data');
+    if (!mapPinDataContainer) return;
     const rawData = mapPinDataContainer.getAttribute('data-map');
     const assetsSettings = mapPinDataContainer.getAttribute("data-settings-assets");
 
@@ -403,7 +500,10 @@ function load_theme_map() {
 
         console.log("allSubThemes", allSubThemes);
 
-        allSubThemes.forEach(item => {
+        execute_when_map_ready(map, () => {
+            reset_dynamic_map_content(map);
+
+            allSubThemes.forEach(item => {
             const { ThemeLat: lat, ThemeLon: lon } = item;
 
             const popupContent = `
@@ -431,19 +531,21 @@ function load_theme_map() {
             const popup = new maplibregl.Popup({ offset: 25 })
             .setHTML(popupContent);
 
-            new maplibregl.Marker({ element: el })
+            const marker = new maplibregl.Marker({ element: el })
             .setLngLat([lon, lat])
             .setPopup(popup)
             .addTo(map);
+            register_map_marker(marker);
 
             bounds.extend([lon, lat]);
+            });
+
+            if (allSubThemes.length > 0) {
+                map.fitBounds(bounds, { padding: 50, maxZoom: 12, linear: true });
+            }
+
+            console.log("MapLibre map initialized with auto-zoom");
         });
-
-        if (allSubThemes.length > 0) {
-            map.fitBounds(bounds, { padding: 50, maxZoom: 12, linear: true });
-        }
-
-        console.log("MapLibre map initialized with auto-zoom");
 
     } catch (err) {
         console.error("JSON Parse Error:", err);

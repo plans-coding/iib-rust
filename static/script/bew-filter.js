@@ -46,7 +46,7 @@ async function load_filter_OPFS() {
         updateFilterButtonVisibility();
 
     } catch (err) {
-        console.warn("No saved filter found or failed to load:", err);
+        //console.warn("No saved filter found or failed to load:", err);
     }
 
 }
@@ -61,7 +61,7 @@ async function get_filter_value_OPFS() {
         //console.log("Get filter value from OPFS:", filterObj);
         return filterObj;
     } catch (err) {
-        console.warn("No saved filter found or failed to load:", err);
+        //console.warn("No saved filter found or failed to load:", err);
     }
 }
 
