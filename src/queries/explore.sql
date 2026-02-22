@@ -7,7 +7,7 @@ SELECT
 FROM
     bewa_Overview
 WHERE
-    InnerId IS NOT NULL /*AND TripDomain IN (TripDomain) AND ParticipantGroup IN (ParticipantGroup)*/
+    InnerId IS NOT NULL AND TripDomain IN (TripDomain) AND ParticipantGroup IN (ParticipantGroup) AND TripLabels in (TripLabels)
 ORDER BY
     RANDOM()
 LIMIT 3;

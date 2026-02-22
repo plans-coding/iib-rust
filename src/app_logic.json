@@ -1,0 +1,269 @@
+{
+  "common_page_queries": {
+    "common_trip_domains": "QUERY_COMMON_TRIP_DOMAINS",
+    "common_participant_groups": "QUERY_COMMON_PARTICIPANT_GROUPS",
+    "common_trip_labels": "QUERY_COMMON_TRIP_LABELS"
+  },
+  "pages": {
+    "explore": {
+      "title": "${translation.explore.title}",
+      "template": "TEMPLATE_EXPLORE",
+      "queries": [
+        [
+          "explore",
+          "QUERY_EXPLORE",
+          [
+            ["/*", ""],
+            ["*/", ""],
+            ["(ParticipantGroup)", "${participant_group}"],
+            ["(TripDomain)", "${trip_domain}"]
+          ]
+        ]
+      ]
+    },
+    "overview:year": {
+      "title": "${translation.overview.year}",
+      "template": "TEMPLATE_OVERVIEW_YEAR",
+      "queries": [
+        [
+          "overviewYear",
+          "QUERY_OVERVIEW_YEAR",
+          [
+            ["/*", ""],
+            ["*/", ""],
+            ["(ParticipantGroup)", "${participant_group}"],
+            ["(TripDomain)", "${trip_domain}"]
+          ]
+        ]
+      ]
+    },
+    "overview:country": {
+      "title": "${translation.overview.country}",
+      "template": "TEMPLATE_OVERVIEW_COUNTRY",
+      "queries": [
+        [
+          "overviewCountry",
+          "QUERY_OVERVIEW_COUNTRY",
+          [
+            ["/*", ""],
+            ["*/", ""],
+            ["(ParticipantGroup)", "${participant_group}"],
+            ["(TripDomain)", "${trip_domain}"]
+          ]
+        ]
+      ]
+    },
+    "overview:plain": {
+      "title": "${translation.overview.plain}",
+      "template": "TEMPLATE_OVERVIEW_PLAIN",
+      "queries": [
+        [
+          "overviewYear",
+          "QUERY_OVERVIEW_PLAIN",
+          [
+            ["/*", ""],
+            ["*/", ""],
+            ["(ParticipantGroup)", "${participant_group}"],
+            ["(TripDomain)", "${trip_domain}"]
+          ]
+        ],
+        [
+          "overviewCountry",
+          "QUERY_OVERVIEW_COUNTRY",
+          [
+            ["/*", ""],
+            ["*/", ""],
+            ["(ParticipantGroup)", "${participant_group}"],
+            ["(TripDomain)", "${trip_domain}"]
+          ]
+        ]
+      ]
+    },
+    "map": {
+      "title": "${translation.map.title}",
+      "template": "TEMPLATE_MAP",
+      "queries": [
+        [
+          "map_country_list",
+          "QUERY_MAP_COUNTRY_LIST",
+          [
+            ["(ParticipantGroup)", "${participant_group}"],
+            ["(TripDomain)", "${trip_domain}"]
+          ]
+        ],
+        [
+          "map_data",
+          "QUERY_MAP_CONTOUR",
+          [
+            ["/*", ""],
+            ["*/", ""],
+            ["(ParticipantGroup)", "${participant_group}"],
+            ["(TripDomain)", "${trip_domain}"]
+          ]
+        ],
+        ["common_trip_domains", "QUERY_COMMON_TRIP_DOMAINS", []]
+      ]
+    },
+    "statistics:summary": {
+      "title": "${translation.statistics.summary}",
+      "template": "TEMPLATE_STATISTICS_SUMMARY",
+      "queries": [
+        [
+          "statistics_visits",
+          "QUERY_STATISTICS_VISITS",
+          [
+            ["SELECT\n    Country,\n    OL,\n    SS,\n    VSS,\n    PS,\n    OLMQ,\n    SSMQ,\n    VSSMQ,\n    PSMQ\nFROM Aggregated\nORDER BY OL DESC;", "SELECT COUNT(DISTINCT Country) AS TripCount FROM Aggregated;"],
+            ["/*", ""],
+            ["*/", ""],
+            ["(ParticipantGroup)", "${participant_group}"],
+            ["(TripDomain)", "${trip_domain}"]
+          ]
+        ],
+        [
+          "statistics_trip_count",
+          "QUERY_STATISTICS_TRIP_COUNT",
+          [
+            ["/*", ""],
+            ["*/", ""],
+            ["(ParticipantGroup)", "${participant_group}"],
+            ["(TripDomain)", "${trip_domain}"]
+          ]
+        ],
+        [
+          "statistics_per_domain_year",
+          "QUERY_STATISTICS_PER_DOMAIN_YEAR",
+          [
+            ["/*", ""],
+            ["*/", ""],
+            ["(ParticipantGroup)", "${participant_group}"],
+            ["(TripDomain)", "${trip_domain}"]
+          ]
+        ],
+        ["common_trip_domains", "QUERY_COMMON_TRIP_DOMAINS", []]
+      ],
+      "execute_after": ["initializeChart"]
+    },
+    "statistics:visits": {
+      "title": "${translation.statistics.visits}",
+      "template": "TEMPLATE_STATISTICS_VISITS",
+      "queries": [
+        [
+          "statistics_visits",
+          "QUERY_STATISTICS_VISITS",
+          [
+            ["/*", ""],
+            ["*/", ""],
+            ["(ParticipantGroup)", "${participant_group}"],
+            ["(TripDomain)", "${trip_domain}"]
+          ]
+        ]
+      ]
+    },
+    "statistics:overnights": {
+      "title": "${translation.statistics.overnights}",
+      "template": "TEMPLATE_STATISTICS_OVERNIGHTS",
+      "queries": [
+        [
+          "statistics_overnights",
+          "QUERY_STATISTICS_OVERNIGHTS",
+          [
+            ["/*", ""],
+            ["*/", ""],
+            ["(ParticipantGroup)", "${participant_group}"],
+            ["(TripDomain)", "${trip_domain}"]
+          ]
+        ]
+      ],
+      "execute_after": ["initializeChartOvernights"]
+    },
+    "statistics:themes": {
+      "title": "${settings.Plugin.Theme.translation}",
+      "template": "TEMPLATE_STATISTICS_THEMES",
+      "queries": [
+        [
+          "statistics_theme_count",
+          "QUERY_STATISTICS_THEME_COUNT",
+          [
+            ["(ParticipantGroup)", "${participant_group}"],
+            ["(TripDomain)", "${trip_domain}"]
+          ]
+        ]
+      ]
+    },
+    "dataset": {
+      "title": "${translation.dataset.title}",
+      "template": "TEMPLATE_DATASET",
+      "queries": [
+        ["table_list", "SELECT name FROM sqlite_master WHERE type IN ('table', 'view') ORDER BY name;", []],
+        ["stored_custom_queries", "SELECT ROWID, Name FROM com_CodeCollection WHERE Target = 'BewDataset';", []]
+      ],
+      "execute_after": ["load_code_editor", "initiate_spreadsheet"]
+    },
+    "source": {
+      "title": "${translation.source.title}",
+      "template": "TEMPLATE_SOURCE",
+      "queries": [
+        ["cover_photo_original_paths", "SELECT OuterId, CoverPhoto FROM bewa_Overview WHERE CoverPhoto IS NOT NULL;", []]
+      ],
+      "execute_after": ["check_immich_authorization"]
+    },
+    "about": {
+      "title": "${translation.about.title}",
+      "template": "TEMPLATE_ABOUT",
+      "execute_after": ["check_available_update"]
+    },
+    "report": {
+      "title": "${translation.toolbox.report}",
+      "template": "TEMPLATE_TOOLBOX_REPORT"
+    },
+    "input": {
+      "title": "${translation.toolbox.input}",
+      "template": "TEMPLATE_TOOLBOX_INPUT",
+      "execute_after": ["init_create_trip"]
+    },
+    "trip": {
+      "title": "${outer_id}",
+      "template": "TEMPLATE_TRIP",
+      "queries": [
+        ["trip_summary", "QUERY_TRIP_SUMMARY", [["= OuterId", "= '${outer_id}'"]]],
+        ["trip_events", "QUERY_TRIP_EVENTS", [["= o.OuterId", "= '${outer_id}'"]]],
+        ["trip_unique_countries", "QUERY_TRIP_UNIQUE_COUNTRIES", [["= OuterId", "= '${outer_id}'"]]],
+        ["trip_map_pins_overall", "QUERY_TRIP_MAP_PINS_OVERALL", [["= OuterId", "= '${outer_id}'"]]],
+        [
+          "trip_previous",
+          "QUERY_TRIP_PREVIOUS",
+          [
+            ["= OuterId", "= '${outer_id}'"],
+            ["(ParticipantGroup)", "${participant_group}"],
+            ["(TripDomain)", "${trip_domain}"]
+          ]
+        ],
+        ["trip_extension_movie", "QUERY_TRIP_EXTENSION_MOVIE", [["_OUTER_ID_", "${outer_id}健全"]]]
+      ]
+    },
+    "search": {
+      "title": "${search_suffix}",
+      "template": "TEMPLATE_SEARCH",
+      "queries": [
+        [
+          "search_trip",
+          "QUERY_SEARCH_TRIP",
+          [
+            ["/*_STRING_*/", "${search_suffix}"],
+            ["(ParticipantGroup)", "${participant_group}"],
+            ["(TripDomain)", "${trip_domain}"]
+          ]
+        ],
+        [
+          "search_event",
+          "QUERY_SEARCH_EVENT",
+          [
+            ["/*_STRING_*/", "${search_suffix}"],
+            ["(ParticipantGroup)", "${participant_group}"],
+            ["(TripDomain)", "${trip_domain}"]
+          ]
+        ]
+      ]
+    }
+  }
+}

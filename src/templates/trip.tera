@@ -1,4 +1,5 @@
 <style>
+#iib-foot {display:none;}
 /* Background photo from thumbnail */
 {% set cover_photo_id = cover_photos_list | get(key=trip_summary[0].OuterId, default="NO") %}
 
@@ -25,8 +26,6 @@ body {
 {% endfor %}
 
 
-  <!--<div class="prev_next"><a href="?path=trip:{{ trip_previous[0].OuterId }}"><img src="static/images/arrow-left.svg" /></a><a href="?path=trip:{{ trip_next[0].OuterId }}"><img src="static/images/arrow-right.svg" /></a></div>-->
-
   <div class="breadcrumb-trip">
     <a href="?path=trip:{{ trip_previous[0].OuterId }}"><div class="breadcrumb-trip-link active"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-left" viewBox="0 0 16 16">
     <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0"/>
@@ -38,6 +37,17 @@ body {
 </svg>
       <div class="breadcrumb-link active" style="background-color:{{ theme_color }}!important;">{{ trip_summary[0].OuterId }} {{ translation.trip.to | default(value="to") }} {{ trip_summary[0].OverallDestination }}</div>
     </div>
+
+<div style="display:flex; gap:10pt;  justify-content:flex-end;">
+        <div style="cursor:pointer;" onclick="document.getElementById('menu').style.display = (document.getElementById('menu').style.display === 'none' ? 'block' : 'none')"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-menu-down" viewBox="0 0 16 16">
+      <path d="M7.646.146a.5.5 0 0 1 .708 0L10.207 2H14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h3.793zM1 7v3h14V7zm14-1V4a1 1 0 0 0-1-1h-3.793a1 1 0 0 1-.707-.293L8 1.207l-1.5 1.5A1 1 0 0 1 5.793 3H2a1 1 0 0 0-1 1v2zm0 5H1v2a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1zM2 4.5a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 0 1h-8a.5.5 0 0 1-.5-.5m0 4a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5m0 4a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6a.5.5 0 0 1-.5-.5"/>
+    </svg></div>
+        
+        <div style="cursor:pointer;" onclick="document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen()"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-fullscreen" viewBox="0 0 16 16">
+      <path d="M1.5 1a.5.5 0 0 0-.5.5v4a.5.5 0 0 1-1 0v-4A1.5 1.5 0 0 1 1.5 0h4a.5.5 0 0 1 0 1zM10 .5a.5.5 0 0 1 .5-.5h4A1.5 1.5 0 0 1 16 1.5v4a.5.5 0 0 1-1 0v-4a.5.5 0 0 0-.5-.5h-4a.5.5 0 0 1-.5-.5M.5 10a.5.5 0 0 1 .5.5v4a.5.5 0 0 0 .5.5h4a.5.5 0 0 1 0 1h-4A1.5 1.5 0 0 1 0 14.5v-4a.5.5 0 0 1 .5-.5m15 0a.5.5 0 0 1 .5.5v4a1.5 1.5 0 0 1-1.5 1.5h-4a.5.5 0 0 1 0-1h4a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 1 .5-.5"/>
+    </svg></div>
+</div>
+
     <a href="?path=trip:{{ trip_next[0].OuterId }}"><div class="breadcrumb-trip-link active"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
     <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708"/>
 </svg>
@@ -308,3 +318,4 @@ body {
 {% endif %}
 
 </div>
+<br>

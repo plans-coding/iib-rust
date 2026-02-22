@@ -82,10 +82,10 @@
           {% endfor %}
         </select>
 
-        <img src="static/images/persons.svg" />
-        <select id="ParticipantGroup" multiple size="1" onchange="save_filter_OPFS()">
-          {% for participantGroup in common.common_participant_groups %}
-            <option value="{{ participantGroup.ParticipantGroup }}">{{ participantGroup.ParticipantGroup }}</option>
+        <img src="static/images/labels.svg" />
+        <select id="TripLabel" multiple size="1" onchange="save_filter_OPFS()">
+          {% for tripLabels in common.common_trip_labels %}
+            <option value="{{ tripLabels.TripLabel }}">{{ tripLabels.TripLabel }}</option>
           {% endfor %}
         </select>
 

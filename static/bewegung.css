@@ -444,7 +444,7 @@ a.tab-link:not(.active):hover {text-decoration:underline;}
 
 .breadcrumb-link svg {color:var(--color-hover-text);}
 
-.breadcrumb-trip {color:var(--color-text);  display: grid;grid-template-columns: auto auto 1fr;justify-items: end;font-family: 'Cairo', sans-serif;font-weight:bold;font-size:16pt;margin:5pt 0 10pt 0;gap:5pt;}
+.breadcrumb-trip {color:var(--color-text);  display: grid;grid-template-columns: auto auto 1fr auto;justify-items: end;font-family: 'Cairo', sans-serif;font-weight:bold;font-size:16pt;margin:5pt 0 10pt 0;gap:5pt;}
 
 .breadcrumb-trip-link {text-decoration:none;font-weight:bold;background-color:var(--color-hover-background-alpha);color:var(--color-text);padding:0 5pt 0 5pt;border-radius:5pt; }
 .breadcrumb-trip-link:hover {background-color:var(--color-hover-background);color:var(--color-hover-text);}
@@ -504,7 +504,7 @@ button.source-button:hover {background-color:#dc3545cc;}
     padding:10pt;
     margin-top:10pt;
     background-color:var(--color-background);
-
+    border:1pt solid var(--color-hover-background);
 }
 
 .day {display: grid;grid-template-columns: 1fr;padding:10pt;gap:5pt;}
