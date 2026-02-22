@@ -1,0 +1,345 @@
+/* ====================== */
+/* ===== VARIABLES ====== */
+/* ====================== */
+:root {
+  /* Base colors */
+  --color-background: #f8fafd;
+  --color-background-alpha: #f8fafdaa;
+  --color-white: #fff;
+  --color-text: #000;
+
+  --color-hover-background: #6f757e;
+  --color-hover-background-alpha: #6f757e22;
+  --color-hover-text: #fff;
+
+  --color-filter: #ffbf00;
+  --color-filter-alpha: #ffbf00bb;
+  --color-filter-background: #fdf8ee;
+
+  --color-submenu-background: #e2e3e5;
+  --color-chart-text: #000;
+}
+
+/* Dark mode */
+body.dark {
+  --color-background: #022626;
+  --color-background-alpha: #022626aa;
+  --color-white: #022626aa;
+  --color-text: #e0e0e0;
+
+  --color-hover-background: #1d655e;
+  --color-hover-background-alpha: #99999922;
+  --color-hover-text: #fff;
+
+  --color-submenu-background: #1d655e;
+  --color-chart-text: #ffbf00;
+  --color-filter: #ffbf00;
+  --color-filter-alpha: #ffbf00bb;
+  --color-filter-background: #ffbf00;
+  --color-filter-text: #000;
+}
+
+/* ====================== */
+/* ===== BASE ====== */
+/* ====================== */
+html, body {
+  min-height: 100%;
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, "Noto Sans", "Liberation Sans", sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-background);
+  color: var(--color-text);
+}
+
+body.dark #cellViewer {
+  background-color: var(--color-background);
+  color: var(--color-text);
+}
+
+/* ====================== */
+/* ===== FONTS ====== */
+/* ====================== */
+@font-face {
+  font-family: 'Cairo';
+  src: url('../bundle/fonts/Cairo-VariableFont_slnt,wght.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Righteous';
+  src: url('../bundle/fonts/Righteous-Regular.ttf') format('truetype');
+}
+
+.immer-in-font-uc { font-family: 'Cairo', sans-serif; text-transform: uppercase; }
+.bewegung-font-uc { font-family: 'Righteous', sans-serif; text-transform: uppercase; }
+
+/* ====================== */
+/* ===== TABLES ====== */
+/* ====================== */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table td,
+.table-overview-plain td,
+.table-overview-year td,
+.table-overview-country td,
+.table-overview-plain thead th {
+  padding: 8pt;
+  font-weight: normal;
+}
+
+.table-overview-year td:first-child,
+.table-overview-country td:first-child,
+.table-overview-plain thead th {
+  background-color: var(--color-hover-background);
+  color: var(--color-hover-text);
+}
+
+.table tbody tr {
+  border-bottom: 1px solid var(--color-hover-background);
+}
+
+.table tbody tr:hover {
+  background-color: var(--color-hover-background-alpha);
+}
+
+.table-statistics-visits {
+  width: 100%;
+  background-color: var(--color-hover-background);
+  color: var(--color-hover-text);
+  padding: 5pt;
+}
+
+/* ====================== */
+/* ===== BUTTONS ====== */
+/* ====================== */
+button {
+  font-family: Arial, sans-serif;
+  font-size: 12pt;
+  border: 0;
+  border-radius: 5pt;
+  padding: 8pt;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+button.filter-button { background-color: var(--color-filter); color: var(--color-text); }
+button.filter-button:hover { background-color: #FFBF00cc; }
+
+button.black-button { background-color: #000; color: #fff; }
+button.black-button:hover { background-color: #000cc; }
+
+button.source-button {
+  background-color: #dc3545;
+  color: var(--color-hover-text);
+  width: 200pt;
+  margin: auto;
+}
+button.source-button:hover { background-color: #dc3545cc; }
+
+/* ====================== */
+/* ===== MENU ====== */
+/* ====================== */
+.iib-menu {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 1000;
+}
+
+.iib-menu-over {
+  display: flex;
+  flex-direction: row;
+  border-bottom: 1pt solid var(--color-hover-background);
+  box-shadow: 0 3pt 0 rgba(0,0,0,0.15);
+  background-color: var(--color-background);
+}
+
+.iib-menu-over img, .iib-menu-over svg, #more { vertical-align: middle; }
+.iib-menu-over > div, .iib-menu-under > div, .iib-menu-over > a, .iib-menu-under > a { padding: 0.75rem; }
+
+.iib-menu-under {
+  display: none;
+  position: absolute;
+  top: 100%; left: 0; right: 0;
+  gap: 8px;
+  max-width: 100%;
+  overflow-x: auto;
+  background-color: var(--color-submenu-background);
+  border-bottom: 1pt solid var(--color-hover-background);
+  box-shadow: 0 3pt 0 rgba(0,0,0,0.15);
+}
+
+.iib-menu:has(#overview:hover) #submenu-overview,
+.iib-menu:has(#submenu-overview:hover) #submenu-overview,
+.iib-menu:has(#statistics:hover) #submenu-statistics,
+.iib-menu:has(#submenu-statistics:hover) #submenu-statistics,
+.iib-menu:has(#more:hover) #submenu-more,
+.iib-menu:has(#submenu-more:hover) #submenu-more,
+.iib-menu:has(#filter:hover) #submenu-filter,
+.iib-menu:has(#submenu-filter:hover) #submenu-filter,
+.iib-menu:has(select:focus) #submenu-filter,
+.iib-menu:has(select:focus-within) #submenu-filter,
+.iib-menu:has(#search:hover) #submenu-search,
+.iib-menu:has(#submenu-search:hover) #submenu-search,
+.iib-menu:has(#submenu-search:focus) #submenu-search {
+  display: flex;
+}
+
+/* Hover colors */
+.iib-menu a:hover,
+.iib-menu:has(#overview:hover) #overview,
+.iib-menu:has(#submenu-overview:hover) #overview,
+.iib-menu:has(#statistics:hover) #statistics,
+.iib-menu:has(#submenu-statistics:hover) #statistics,
+.iib-menu:has(#more:hover) #more,
+.iib-menu:has(#submenu-more:hover) #more,
+.iib-menu:has(#search:hover) #search,
+.iib-menu:has(#submenu-search:hover) #search {
+  background-color: var(--color-hover-background);
+  color: var(--color-hover-text);
+}
+
+/* ====================== */
+/* ===== GRADIENT BAR ====== */
+.gradient-bar {
+  height: 5pt;
+  width: 100%;
+  background: linear-gradient(90deg, #1d655e, #1d655ecc, #82ec3e, #1d655e);
+  background-size: 500%;
+  animation: moveGradient 7s linear infinite;
+}
+
+@keyframes moveGradient {
+  0% { background-position: 0 0; }
+  100% { background-position: 500% 0; }
+}
+
+/* ====================== */
+/* ===== TRIPS ====== */
+[data-trip-domain] {
+  --domain-alpha: color-mix(in srgb, var(--domain-color) 13%, transparent);
+  --domain-strong: color-mix(in srgb, var(--domain-color) 80%, black);
+}
+
+details.trip,
+.trip-details-field,
+.explore-cover {
+  border-radius: 10pt;
+  padding: 10pt;
+  background-color: var(--domain-alpha);
+  color: var(--color-text);
+}
+
+details.trip summary {
+  background: var(--domain-color);
+  color: #fff;
+  font-weight: bold;
+  padding: 10pt;
+}
+
+/* Cards */
+.card {
+  border-radius: 5pt;
+  border: 1pt solid var(--color-hover-background-alpha);
+  border-left: 5pt solid var(--domain-color);
+  padding: 5pt;
+  color: var(--color-text);
+  text-decoration: none;
+}
+.card:hover {
+  background: var(--domain-alpha);
+  border-color: var(--domain-color);
+}
+
+/* Badges & Labels */
+.iib-plain,
+.iib-decade,
+.btn-filter-domain,
+.card-footer {
+  background: var(--domain-color);
+  color: #fff;
+}
+.iib-decade:hover,
+.btn-filter-domain:active {
+  background: var(--domain-strong);
+}
+
+/* Trip days */
+.days {
+  display: flex;
+  flex-direction: column;
+  border-radius: 10pt;
+  padding: 10pt;
+  margin-top: 10pt;
+  background-color: var(--color-background);
+}
+.day {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 5pt;
+  padding: 10pt;
+}
+.day:hover { background-color: var(--color-hover-background-alpha); }
+.day-foot, .day-foot a { color: var(--domain-color); }
+
+/* ====================== */
+/* ===== MEDIA QUERIES ====== */
+@media (max-width: 800px) {
+  .trip-layout { grid-template-columns: 1fr; grid-template-rows: auto auto; }
+  #map { aspect-ratio: 4/3; width: 100%; height: auto; }
+}
+
+@media (max-width: 600px) {
+  .iib-menu-over span, .widescreen, #iib-foot,
+  #filter-button-overmenu, #non_widescreen { display: none; }
+
+  .card-container,
+  #statistics-summary-flex,
+  #statistics-summary-flex-widget { flex-direction: column !important; }
+}
+
+@media (min-width: 601px) {
+  #overview svg, #map_menu svg, #statistics svg { display: none; }
+  #filter-button-undermenu { display: none; }
+  #non_widescreen { display: block; }
+}
+
+.day-icon {
+    background-color: var(--domain-color);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.3em;
+    height: 1.3em;
+    margin: 0 0.3em;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 0.7em;
+    font-weight: 600;
+    line-height: 1;
+    vertical-align: middle;
+}
+
+.acc-icon {
+    background-color: var(--domain-color);
+
+    /* Mask image */
+    -webkit-mask-image: url('images/house.svg');
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    -webkit-mask-size: contain;
+
+    mask-image: url('images/house.svg');
+    mask-repeat: no-repeat;
+    mask-position: center;
+    mask-size: contain;
+
+    width: 0.9em;
+    height: 0.9em;
+    display: inline-block;
+    transform: translateY(2px);
+}

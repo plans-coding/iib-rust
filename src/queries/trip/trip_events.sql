@@ -45,6 +45,7 @@ CountryMapping AS (
     WHERE line LIKE '%:%:%'
 )
 SELECT
+    ROW_NUMBER() OVER (ORDER BY e.Date ASC) - 1 AS DayNumber,
     o.OuterId,
     e.InnerId,
     o.OverallDestination AS OverallDestination,

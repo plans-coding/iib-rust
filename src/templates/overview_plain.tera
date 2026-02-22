@@ -1,12 +1,3 @@
-<div class="breadcrumb">
-  <img class="widescreen icon-color" src="static/images/frog.svg" />
-  <div class="widescreen">{{ translation.overview.title | default(value="Overview") }}</div>
-  <img class="widescreen" src="static/images/arrow-right.svg" />
-  <a href="?path=overview:year" class="breadcrumb-link {% if query_params.path == 'overview:year' %}active{% endif %}">{{ translation.overview.year | default(value="Year") }}</a>
-  <a href="?path=overview:country" class="breadcrumb-link {% if query_params.path == 'overview:country' %}active{% endif %}">{{ translation.overview.country | default(value="Country") }}</a>
-  <a href="?path=overview:plain" class="breadcrumb-link {% if query_params.path == 'overview:plain' %}active{% endif %}">{{ translation.overview.plain | default(value="Plain") }}</a>
-</div>
-
 <div style="max-width:100%;overflow-x:auto;">
 <table class="table-overview-plain">
   <thead>
@@ -36,13 +27,13 @@
     {% for trip in overviewYear %}
       <tr class="iib-item"
           data-iib-participantGroup="{{ trip.ParticipantGroup }}"
-          data-iib-tripDomain="{{ trip.TripDomain }}">
+          data-trip-domain="{{ trip.TripDomain }}">
 
         <td style="text-align:center;">
           <a href="?path=trip:{{ trip.OuterId }}" style="text-decoration:none;">
-            <div class="text-nowrap iib-decade"
+            <div class="text-nowrap iib-decade overview-item"
                  data-iib-participantGroup="{{ trip.ParticipantGroup }}"
-                 data-iib-tripDomain="{{ trip.TripDomain }}">
+                 data-trip-domain="{{ trip.TripDomain }}">
               {{ trip.OuterId }}
             </div>
           </a>

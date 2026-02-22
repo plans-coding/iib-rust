@@ -12,8 +12,10 @@ mod sqlite_query;
 mod render;
 mod helper;
 
+const CURRENT_VERSION: &str = include_str!("../version");
 
 const TEMPLATE_MENU: &str = include_str!("../src/templates/_menu.tera");
+const TEMPLATE_BREADCRUMBS: &str = include_str!("../src/templates/_breadcrumbs.tera");
 
 const TEMPLATE_EXPLORE: &str = include_str!("../src/templates/explore.tera");
 const TEMPLATE_OVERVIEW_YEAR: &str = include_str!("../src/templates/overview_year.tera");
@@ -127,10 +129,7 @@ extern "C" {
     //fn inject_css(css: &str);
     // Other
     fn initialize_theme_color();
-    /*fn applyTripCoverPhotos(
-        immich_api_url: &str,
-        immich_api_key: &str,
-    );*/
+
     fn check_immich_authorization();
     fn init_create_trip();
 
@@ -138,6 +137,8 @@ extern "C" {
 
     #[wasm_bindgen(catch)]
     async fn get_filter_value_OPFS() -> Result<JsValue, JsValue>;
+    #[wasm_bindgen(catch)]
+    async fn check_available_update() -> Result<JsValue, JsValue>;
 }
 
 // -----------------------------------------------------------------------
@@ -401,7 +402,7 @@ async fn page_load_internal() {
             "overview:year" => {
                 render_structure["page"] = json!({
                     "title": render_structure.pointer("/all/translation/overview/year").and_then(|v| v.as_str()).unwrap_or("Overview: Year"),
-                    "template": TEMPLATE_OVERVIEW_YEAR,
+                    "template": format!("{}{}", TEMPLATE_BREADCRUMBS.replace("_PAGE_", page), TEMPLATE_OVERVIEW_YEAR),
                     "queries": [
                         ["overviewYear", QUERY_OVERVIEW_YEAR.replace("/*","").replace("*/","")
                         .replace("(ParticipantGroup)", &participant_group)
@@ -411,7 +412,7 @@ async fn page_load_internal() {
             "overview:country" => {
                 render_structure["page"] = json!({
                     "title": render_structure.pointer("/all/translation/overview/country").and_then(|v| v.as_str()).unwrap_or("Overview: Country"),
-                    "template": TEMPLATE_OVERVIEW_COUNTRY,
+                    "template": format!("{}{}", TEMPLATE_BREADCRUMBS.replace("_PAGE_", page), TEMPLATE_OVERVIEW_COUNTRY),
                     "queries": [
                          // Replace "c.Continent = 'Europa'" in QUERY_OVERVIEW_COUNTRY with value from settings in future version
                          ["overviewCountry", QUERY_OVERVIEW_COUNTRY.to_string().replace("/*","").replace("*/","")
@@ -422,7 +423,7 @@ async fn page_load_internal() {
             "overview:plain" => {
                 render_structure["page"] = json!({
                     "title": render_structure.pointer("/all/translation/overview/plain").and_then(|v| v.as_str()).unwrap_or("Overview: Plain"),
-                    "template": TEMPLATE_OVERVIEW_PLAIN,
+                    "template": format!("{}{}", TEMPLATE_BREADCRUMBS.replace("_PAGE_", page), TEMPLATE_OVERVIEW_PLAIN),
                     "queries": [
                         ["overviewYear", QUERY_OVERVIEW_PLAIN.to_string().replace("/*","").replace("*/","")
                         .replace("(ParticipantGroup)", &participant_group)
@@ -451,7 +452,7 @@ async fn page_load_internal() {
             "statistics:summary" => {
                 render_structure["page"] = json!({
                     "title": render_structure.pointer("/all/translation/statistics/summary").and_then(|v| v.as_str()).unwrap_or("Statistics: Summary"),
-                    "template": TEMPLATE_STATISTICS_SUMMARY,
+                    "template": format!("{}{}", TEMPLATE_BREADCRUMBS.replace("_PAGE_", page), TEMPLATE_STATISTICS_SUMMARY),
                     "queries": [
                         ["statistics_visits", QUERY_STATISTICS_VISITS.replace("SELECT\n    Country,\n    OL,\n    SS,\n    VSS,\n    PS,\n    OLMQ,\n    SSMQ,\n    VSSMQ,\n    PSMQ\nFROM Aggregated\nORDER BY OL DESC;", "SELECT COUNT(DISTINCT Country) AS TripCount FROM Aggregated;").replace("/*","").replace("*/","")
                         .replace("(ParticipantGroup)", &participant_group)
@@ -468,7 +469,7 @@ async fn page_load_internal() {
             "statistics:visits" => {
                 render_structure["page"] = json!({
                     "title": render_structure.pointer("/all/translation/statistics/visits").and_then(|v| v.as_str()).unwrap_or("Statistics: Visits"),
-                    "template": TEMPLATE_STATISTICS_VISITS,
+                    "template": format!("{}{}", TEMPLATE_BREADCRUMBS.replace("_PAGE_", page), TEMPLATE_STATISTICS_VISITS),
                     "queries": [
                         ["statistics_visits", QUERY_STATISTICS_VISITS.replace("/*","").replace("*/","")
                         .replace("(ParticipantGroup)", &participant_group)
@@ -478,7 +479,7 @@ async fn page_load_internal() {
             "statistics:overnights" => {
                 render_structure["page"] = json!({
                     "title": render_structure.pointer("/all/translation/statistics/overnights").and_then(|v| v.as_str()).unwrap_or("Statistics: Overnights"),
-                    "template": TEMPLATE_STATISTICS_OVERNIGHTS,
+                    "template": format!("{}{}", TEMPLATE_BREADCRUMBS.replace("_PAGE_", page), TEMPLATE_STATISTICS_OVERNIGHTS),
                     "queries": [
                         ["statistics_overnights", QUERY_STATISTICS_OVERNIGHTS.replace("/*","").replace("*/","")
                         .replace("(ParticipantGroup)", &participant_group)
@@ -488,7 +489,7 @@ async fn page_load_internal() {
             "statistics:themes" => {
                 render_structure["page"] = json!({
                     "title": render_structure.pointer("/all/settings/Plugin/Theme/translation").and_then(|v| v.as_str()).unwrap_or("Themes"),
-                    "template": TEMPLATE_STATISTICS_THEMES,
+                    "template": format!("{}{}", TEMPLATE_BREADCRUMBS.replace("_PAGE_", page), TEMPLATE_STATISTICS_THEMES),
                     "queries": [
                         ["statistics_theme_count", QUERY_STATISTICS_THEME_COUNT.replace("(ParticipantGroup)", &participant_group)
                         .replace("(TripDomain)", &trip_domain)]
@@ -505,7 +506,7 @@ async fn page_load_internal() {
                     ]});
                 render_structure["all"]["query_templates"] = json!(ALL_QUERIES.iter().map(|(name, _)| name).collect::<Vec<_>>());
             }
-            "more:source" => {
+            "source" => {
                 render_structure["page"] = json!({
                     "title": render_structure.pointer("/all/translation/source/title").and_then(|v| v.as_str()).unwrap_or("Source"),
                     "template": TEMPLATE_SOURCE,
@@ -514,31 +515,32 @@ async fn page_load_internal() {
                     ]});
                 render_structure["all"]["db_loaded"] = json!(if !&db_bytes.is_empty() { "stored" } else { "missing" });
             }
-            "more:about" => {
-                // Lägg till versionskontroll
+            "about" => {
                 render_structure["page"] = json!({
                     "title": render_structure.pointer("/all/translation/about/title").and_then(|v| v.as_str()).unwrap_or("About"),
                     "template": TEMPLATE_ABOUT,
                     });
-                render_structure["all"]["current_version"] = filecontent::fetch_text("version").await.into();
-                render_structure["all"]["latest_version"] = json!(helper::get_latest_version_number().await);
+                let update_info = check_available_update()
+                    .await
+                    .ok()
+                    .and_then(|v| v.as_string())
+                    .unwrap_or_default();
+                render_structure["all"]["update_info"] = update_info.into();
+                render_structure["all"]["current_version"] = json!(CURRENT_VERSION);
             }
-            "toolbox:report" => {
+            "report" => {
                 render_structure["page"] = json!({
                     "title": render_structure.pointer("/all/translation/toolbox/report").and_then(|v| v.as_str()).unwrap_or("Report"),
                         "settings": render_structure["all"]["settings"],
                         "template": TEMPLATE_TOOLBOX_REPORT,
                         });
             }
-            "toolbox:input" => {
+            "input" => {
                 render_structure["page"] = json!({
                     "title": render_structure.pointer("/all/translation/toolbox/input").and_then(|v| v.as_str()).unwrap_or("Input"),
                         "settings": render_structure["all"]["settings"],
                         "template": TEMPLATE_TOOLBOX_INPUT,
-                        /*"queries": [
-                            ["inner_id_max", "SELECT InnerId FROM bewa_Overview WHERE InnerId LIKE '$_INNER_ID_PREFIX_%' ORDER BY SUBSTR(InnerId, 2) + 0 DESC LIMIT 1;".replace("_INNER_ID_PREFIX_","")],
-                            ["outer_id_max", "SELECT OuterId FROM bewa_Overview WHERE OuterId GLOB '_OUTER_ID_PREFIX_[0-9]*' ORDER BY CAST(substr(OuterId, length('_OUTER_ID_') + 1) AS INTEGER) DESC LIMIT 1;".replace("_OUTER_ID_PREFIX_","")]
-                        ]*/});
+                    });
                 }
             _ => {
                 
@@ -686,7 +688,7 @@ async fn page_load_internal() {
                         ]});
                 }
 
-                if let Some(suffix) = page.strip_prefix("toolbox:report:output:") {
+                if let Some(suffix) = page.strip_prefix("report:output:") {
 
                     let mut parts = suffix.splitn(2, ':');
 
@@ -823,8 +825,9 @@ async fn page_load_internal() {
             "statistics:overnights" => {
                 initializeChartOvernights();
             }
-            "more:source" => check_immich_authorization(),
-            "toolbox:input" => init_create_trip(),
+            "source" => check_immich_authorization(),
+            "input" => init_create_trip(),
+            "about" => {},
             _ => {}
         }
 

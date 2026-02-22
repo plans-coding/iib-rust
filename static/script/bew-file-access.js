@@ -40,7 +40,6 @@ async function idbPut(dbName, storeName, key, value) {
   });
 }
 
-// Compare two ArrayBuffers
 function buffersAreEqual(buf1, buf2) {
   if (!buf1 || !buf2 || buf1.byteLength !== buf2.byteLength) return false;
   const a1 = new Uint8Array(buf1);
@@ -49,20 +48,17 @@ function buffersAreEqual(buf1, buf2) {
   return true;
 }
 
-// Read a FileSystemFileHandle into ArrayBuffer
 async function readHandle(handle) {
   const file = await handle.getFile();
   return await file.arrayBuffer();
 }
 
-// Write ArrayBuffer into FileSystemFileHandle
 async function writeHandle(handle, buffer) {
   const writable = await handle.createWritable();
   await writable.write(buffer);
   await writable.close();
 }
 
-// Read/write OPFS file
 async function readOPFSFile(path) {
   const root = await navigator.storage.getDirectory();
   try {
@@ -84,7 +80,6 @@ async function writeOPFSFile(path, buffer) {
   await writable.close();
 }
 
-// Functions called from Rust via wasm-bindgen extern imports.
 async function read_opfs_file(path) {
   return await readOPFSFile(path);
 }
@@ -153,12 +148,3 @@ async function bindSQLiteFile(opfsPath = "chronik.sqlite") {
 
   return { buffer: userBytes, opfsHandle };
 }
-
-// ---------------------------
-// Example usage
-// ---------------------------
-/*
-(async () => {
-  const { buffer, opfsHandle } = await bindSQLiteFile();
-  console.log("SQLite buffer ready for WASM in-memory load:", buffer.byteLength, "bytes");
-})();*/

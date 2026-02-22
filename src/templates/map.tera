@@ -5,7 +5,7 @@ section {max-width:100%!important;width:100%!important;margin:0!important;}
 #iib-foot{display:none;}
 
 {% for tripDomain in common_trip_domains %}
-.iib-map-ref[data-iib-tripDomain='{{ tripDomain.DomainAbbreviation }}'] {
+.iib-map-ref[data-trip-domain='{{ tripDomain.DomainAbbreviation }}'] {
   background-color: {{ tripDomain.Color }} !important;
   color: #fff;
   padding: 3pt 5pt;

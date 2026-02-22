@@ -589,3 +589,210 @@ dialog{width:100vw;height:100vh;}
 .jspreadsheet thead th:first-child {
     z-index: 3;
 }
+
+.stripes {
+    background-image: repeating-linear-gradient(to right, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.25) 24px, transparent 2px, transparent 10px), radial-gradient(circle at top center, rgba(255, 255, 255, 0.15) 0%, transparent 60%), linear-gradient(to right, gold, green);
+    background-blend-mode: overlay;
+    border-radius: 20pt;
+    padding: 10pt;
+}
+
+.blur {
+    backdrop-filter: blur(8px);
+    border: 1pt solid rgba(255, 255, 255, .2);
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+    --tw-shadow: 0 25px 50px -12px var(--tw-shadow-color, #00000040);
+}
+
+/* ---------------------- */
+/* PER TRIP CSS BELOW */
+/* ---------------------- */
+
+/* shared helpers */
+[data-trip-domain] {
+  --domain-alpha: color-mix(in srgb, var(--domain-color) 13%, transparent);
+  --domain-strong: color-mix(in srgb, var(--domain-color) 80%, black);
+}
+
+/* links */
+.days .theme-link {
+  color: var(--domain-color);
+  background: var(--domain-alpha);
+  text-decoration: underline;
+}
+
+/* cards */
+.card {
+  border-radius: 5pt;
+  border: 1pt solid var(--color-hover-background-alpha);
+  border-left: 5pt solid var(--domain-color);
+  padding: 5pt;
+  color:var(--color-text);
+  text-decoration:none;
+}
+.card:hover {
+  background: var(--domain-alpha);
+  border-color: var(--domain-color);
+}
+
+/* backgrounds */
+details.trip summary { background: var(--domain-color); }
+details.trip,
+.trip-details-field,
+.explore-cover { background: var(--domain-alpha); }
+
+/* separators */
+.day:not(:last-child) {
+  border-bottom: 1pt solid var(--domain-alpha);
+}
+
+/* text */
+.day-foot,
+.day-foot a {
+  color: var(--domain-color);
+}
+
+/* badges */
+.iib-plain,
+.iib-decade,
+.btn-filter-domain,
+.card-footer {
+  background: var(--domain-color);
+  color: #fff;
+}
+
+.iib-decade:hover,
+.btn-filter-domain:active {
+  background: var(--domain-strong);
+}
+
+.overview-item {padding:3pt 5pt 3pt 5pt;text-decoration:none;}
+
+.maplibregl-popup-content a {
+    color: var(--color-text);
+    text-decoration: none;
+}
+
+#path-overview-country {
+
+    /* Continent collapsible section */
+    .continent summary {
+        cursor: pointer;
+        padding:8pt;
+        background-color: var(--color-hover-background);
+        color: var(--color-hover-text);
+        user-select:none;
+    }
+
+    /* Content inside each continent */
+    .continent-content {
+        display: flex;
+        flex-direction: column;
+        gap: 2pt;
+        margin-top:2pt;
+    }
+
+    /* Country row: left country, right trips */
+    .country-row {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        align-items: stretch;
+    }
+
+    /* Country block on the left */
+    .country-block {
+        background-color: var(--color-hover-background);
+        color: var(--color-hover-text);
+        padding:10pt;
+        width: 100pt;
+        flex-shrink: 0;
+    }
+
+    /* Container for trips in that country */
+    .country-trips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        align-items: center;
+    }
+
+}
+
+#path-overview-year {
+    /* Decade collapsible section */
+    .decade summary {
+        cursor: pointer;
+        padding:8pt;
+        background-color: var(--color-hover-background);
+        color: var(--color-hover-text);
+        user-select:none;
+    }
+
+    /* Content inside each decade */
+    .decade-content {
+        display: flex;
+        flex-direction: column;
+        gap: 2pt;
+        margin-top:2pt;
+    }
+
+    /* Year row: left year, right trips */
+    .year-row {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        align-items: stretch;
+    }
+
+    /* Year block on the left */
+    .year-block {
+        background-color: var(--color-hover-background);
+        color: var(--color-hover-text);
+        padding:10pt;
+    }
+
+    /* Container for trips in that year */
+    .trips-block {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        align-items: center;
+    }
+}
+
+.day-icon {
+    background-color: var(--domain-color);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.3em;
+    height: 1.3em;
+    margin: 0 0.3em;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 0.7em;
+    font-weight: 600;
+    line-height: 1;
+    vertical-align: middle;
+}
+
+.acc-icon {
+    background-color: var(--domain-color);
+
+    /* Mask image */
+    -webkit-mask-image: url('images/house.svg');
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    -webkit-mask-size: contain;
+
+    mask-image: url('images/house.svg');
+    mask-repeat: no-repeat;
+    mask-position: center;
+    mask-size: contain;
+
+    width: 0.9em;
+    height: 0.9em;
+    display: inline-block;
+    transform: translateY(2px);
+}

@@ -211,10 +211,34 @@
             });
         }
 
+        async function check_available_update() {
+            const currentUrl = "version";
+            const latestUrl =
+                "https://raw.githubusercontent.com/plans-coding/immer-in-bewegung/refs/heads/main/version";
+
+            try {
+                const [resCurrent, resLatest] = await Promise.all([
+                    fetch(currentUrl, { cache: "no-store" }),
+                    fetch(latestUrl, { cache: "no-store" })
+                ]);
+
+                if (!resCurrent.ok || !resLatest.ok) {
+                    return "";
+                }
+
+                const current = (await resCurrent.text()).trim();
+                const latest = (await resLatest.text()).trim();
+
+                return latest !== current ? latest : "";
+            } catch {
+                return "";
+            }
+        }
+
         // Register Service Worker
         if ('serviceWorker' in navigator) {
             const baseUrl = new URL('./', window.location.href);
-            navigator.serviceWorker.register(new URL('bew-service-worker.js', baseUrl), {
+            navigator.serviceWorker.register(new URL('service-worker.js', baseUrl), {
                 scope: baseUrl.pathname
             })
                 .then(r => console.log('Service Worker registered', r))

@@ -45,8 +45,8 @@ body {
   </div>
 
 
-  <details open class="trip" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
-  <summary data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}" style="border-radius:3pt;user-select:none;">
+  <details open class="trip" data-trip-domain="{{ trip_summary[0].DomainAbbreviation }}">
+  <summary data-trip-domain="{{ trip_summary[0].DomainAbbreviation }}" style="border-radius:3pt;user-select:none;">
     {{ trip_summary[0].TripDescription }}
   </summary>
 
@@ -60,21 +60,21 @@ body {
           <label class="trip-details-label">
             {{ translation.trip.departureDate | default(value="Departure Date") }}
           </label>
-          <div class="trip-details-field" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">{{ trip_summary[0].DepartureDate }}</div>
+          <div class="trip-details-field" data-trip-domain="{{ trip_summary[0].DomainAbbreviation }}">{{ trip_summary[0].DepartureDate }}</div>
         </div>
 
         <div class="trip-details-container">
           <label class="trip-details-label">
             {{ translation.trip.returnDate | default(value="Return Date") }}
           </label>
-          <div class="trip-details-field" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">{{ trip_summary[0].ReturnDate }}</div>
+          <div class="trip-details-field" data-trip-domain="{{ trip_summary[0].DomainAbbreviation }}">{{ trip_summary[0].ReturnDate }}</div>
         </div>
 
         <div class="trip-details-container">
           <label class="trip-details-label">
             {{ translation.trip.numberOfDays | default(value="Days Count") }}
           </label>
-          <div class="trip-details-field" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">{{ trip_summary[0].NumberOfDays }}</div>
+          <div class="trip-details-field" data-trip-domain="{{ trip_summary[0].DomainAbbreviation }}">{{ trip_summary[0].NumberOfDays }}</div>
         </div>
       </div>
 
@@ -83,21 +83,21 @@ body {
           <label class="trip-details-label">
             {{ translation.trip.participantGroup | default(value="Participant Group") }}
           </label>
-          <div class="trip-details-field" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">{{ trip_summary[0].ParticipantGroup }}</div>
+          <div class="trip-details-field" data-trip-domain="{{ trip_summary[0].DomainAbbreviation }}">{{ trip_summary[0].ParticipantGroup }}</div>
         </div>
 
         <div class="trip-details-container">
           <label class="trip-details-label">
             {{ translation.trip.outerId | default(value="ID") }} ({{ trip_summary[0].InnerId }})
           </label>
-          <div class="trip-details-field" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">{{ trip_summary[0].OuterId }} <span style="font-size: 0.7rem;color:var(--color-hover-background);"></span></div>
+          <div class="trip-details-field" data-trip-domain="{{ trip_summary[0].DomainAbbreviation }}">{{ trip_summary[0].OuterId }} <span style="font-size: 0.7rem;color:var(--color-hover-background);"></span></div>
         </div>
 
         <div class="trip-details-container">
           <label class="trip-details-label">
             {{ translation.trip.numberOfCountries | default(value="Countries Count") }}
           </label>
-          <div class="trip-details-field" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
+          <div class="trip-details-field" data-trip-domain="{{ trip_summary[0].DomainAbbreviation }}">
           {# set uniqueCountries = trip_border_crossings[0].UniqueCountries | default(value="-") %}
           {% if uniqueCountries == "-" %}
             -
@@ -114,7 +114,7 @@ body {
           <label class="trip-details-label">
             {{ translation.trip.uniqueCountries | default(value="Unique Countries") }}
           </label>
-          	<div class="trip-details-field" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
+          	<div class="trip-details-field" data-trip-domain="{{ trip_summary[0].DomainAbbreviation }}">
 			{% if trip_unique_countries | length > 0 %}
 				{% for country in trip_unique_countries %}
 					{{ country.Flag }}&nbsp;{{ country.Country }}{% if not loop.last %}, {% endif %}
@@ -127,7 +127,7 @@ body {
           <label class="trip-details-label">
             {{ translation.trip.overallRoute | default(value="Overall Route") }}
           </label>
-          <div class="trip-details-field" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
+          <div class="trip-details-field" data-trip-domain="{{ trip_summary[0].DomainAbbreviation }}">
             {{ trip_border_crossings[0].OverallRoute | default(value="-") }}
           </div>
         </div>
@@ -136,7 +136,7 @@ body {
           <label class="trip-details-label">
             {{ translation.trip.countryTripMovements | default(value="Country Trip Movements") }}
           </label>
-          <div class="trip-details-field" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
+          <div class="trip-details-field" data-trip-domain="{{ trip_summary[0].DomainAbbreviation }}">
           {{ trip_border_crossings[0].AllBorderCrossings | default(value="-") }}</div>
         </div>
 
@@ -147,7 +147,7 @@ body {
             {% if trip_immich_desc_search[0].ImmichDescSearch %}
 
                   <a class="to-image-viewer" href='{{ settings.Photos.ImmichUrl }}search?query=%7B"description"%3A"(IIB-{{ trip_summary[0].OtherId }})"%7D#search-chips' target="_blank">
-                      <button type="button" class="item-viewer-button filter-button" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}" style="width:100%;">
+                      <button type="button" class="item-viewer-button filter-button" data-trip-domain="{{ trip_summary[0].DomainAbbreviation }}" style="width:100%;">
                           <img src="static/images/photos.svg" />
 			{{ trip_immich_desc_search[0].ImmichDescSearch }}
                       </button>
@@ -157,7 +157,7 @@ body {
             {% elif trip_immich_album_name[0].ImmichAlbumName %}
 
                   <a class="to-image-viewer" data-album="{{ trip_immich_album_name[0].ImmichAlbumName }}"   onclick="get_album_id_from_name('{{ settings.Photos.ImmichUrl }}', this.dataset.album).then(function(id){window.open('/albums/'+id)})" target="_blank">
-                      <button type="button" class="item-viewer-button filter-button" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}" style="width:100%;">
+                      <button type="button" class="item-viewer-button filter-button" data-trip-domain="{{ trip_summary[0].DomainAbbreviation }}" style="width:100%;">
                           <img src="static/images/photos.svg" style="vertical-align: middle;" />
 			{{ trip_immich_album_name[0].ImmichAlbumName }}
                       </button>
@@ -207,10 +207,10 @@ body {
 </details>
 
 {% if trip_events %}
-<div class="days" data-iib-tripDomain="{{ trip_summary[0].TripDomain }}">
+<div class="days" data-trip-domain="{{ trip_summary[0].TripDomain }}">
   {% for day in trip_events %}
   
-    <div class="day" data-iib-tripDomain="{{ trip_summary[0].TripDomain }}">
+    <div class="day" data-trip-domain="{{ trip_summary[0].TripDomain }}">
     
       <div class="day-left">
       
@@ -222,7 +222,7 @@ body {
               {% if settings.Photos.Immich == "Enabled" and day.OuterId not in settings.Other.ExcludeDayPhotos %}
 
                   <a class="to-image-viewer" href="?path=images:{{ day.OuterId }}:{{ day.Date }}" target="_blank">
-                      <button type="button" class="item-viewer-button filter-button" data-iib-tripDomain="{{ trip_summary[0].TripDomain }}">
+                      <button type="button" class="item-viewer-button filter-button" data-trip-domain="{{ trip_summary[0].TripDomain }}">
                           <img src="static/images/photos.svg" />
                       </button>
                   </a>
@@ -246,7 +246,7 @@ body {
                 {% for file in diary_filelist %}
                   {% if day_year in file and day_week in file %}
 
-                    <button class="item-viewer-button" onclick="const img = document.getElementById('diary_image_{{ loop.index }}');if (!img.src) img.src = img.dataset.src;document.getElementById('diary_{{ loop.index }}').showModal();" type="button" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
+                    <button class="item-viewer-button" onclick="const img = document.getElementById('diary_image_{{ loop.index }}');if (!img.src) img.src = img.dataset.src;document.getElementById('diary_{{ loop.index }}').showModal();" type="button" data-trip-domain="{{ trip_summary[0].DomainAbbreviation }}">
                         <img src="static/images/diary.svg" />
                     </button>
 
@@ -272,7 +272,7 @@ body {
                 {% for file in passport_filelist %}
                   {% if day_date in file %}
 
-                    <button class="item-viewer-button" onclick="const img = document.getElementById('passport_image_{{ loop.index }}');if (!img.src) img.src = img.dataset.src;document.getElementById('passport_{{ loop.index }}').showModal();" type="button" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
+                    <button class="item-viewer-button" onclick="const img = document.getElementById('passport_image_{{ loop.index }}');if (!img.src) img.src = img.dataset.src;document.getElementById('passport_{{ loop.index }}').showModal();" type="button" data-trip-domain="{{ trip_summary[0].DomainAbbreviation }}">
                         P
                     </button>
 
@@ -291,10 +291,10 @@ body {
 
         </div>
                 
-        <div class="day-foot" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
-          <div class="day-label"><div class="day-icon" data-iib-tripDomain='{{ trip_summary[0].DomainAbbreviation }}'>{{ loop.index - 1 }}</div> {{ day.Weekday | default(value="") }} {{ day.Date }}</div>
-           &nbsp; <a style="text-decoration:none;" target="_blank" href="{{ settings.Other.ExternalMapProvider }}{{ day.AccommodationCoordinates }}" data-iib-tripDomain="{{ trip_summary[0].DomainAbbreviation }}">
-              <div class="acc-icon" data-iib-tripDomain='{{ trip_summary[0].DomainAbbreviation }}'></div>
+        <div class="day-foot" data-trip-domain="{{ trip_summary[0].DomainAbbreviation }}">
+          <div class="day-label"><div class="day-icon" data-trip-domain='{{ trip_summary[0].DomainAbbreviation }}'>{{ day.DayNumber }}</div> {{ day.Weekday | default(value="") }} {{ day.Date }}</div>
+           &nbsp; <a style="text-decoration:none;" target="_blank" href="{{ settings.Other.ExternalMapProvider }}{{ day.AccommodationCoordinates }}" data-trip-domain="{{ trip_summary[0].DomainAbbreviation }}">
+              <div class="acc-icon" data-trip-domain='{{ trip_summary[0].DomainAbbreviation }}'></div>
               <span class="acc-text">{{ day.Accommodation }} – {{ day.AccommodationCountryFlag }} {{ day.AccommodationCountry }} – {{ day.AccommodationCoordinates }} {{ day.AccommodationCoordinateAccuracy | default(value="") }}</span>
           </a>
         </div>

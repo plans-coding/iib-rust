@@ -1,87 +1,11 @@
 <div class="gradient-bar-inactive"></div>
+
 <style>
-details.trip summary[data-trip-domain=''] { background-color: var(--color-hover-background); }
-details.trip[data-trip-domain=''],
-.trip-details-field[data-trip-domain=''] { background-color: var(--color-hover-background-alpha);  }
-details.trip[data-trip-domain=''],
-.trip-details-field[data-trip-domain=''] { background-color: var(--color-hover-background-alpha);  }
-
-
-{% for tripDomain in common.common_trip_domains %}
-
-.days[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}] .theme-link {color:{{ tripDomain.Color }};background-color:{{ tripDomain.Color }}22;text-decoration:underline;}
-
-.card[data-trip-domain={{ tripDomain.DomainAbbreviation }}] {text-decoration:none;color:var(--color-text);border-radius:5pt; border:1pt solid var(--color-hover-background-alpha);border-left:5pt solid {{ tripDomain.Color }};padding:5pt;}
-.card[data-trip-domain={{ tripDomain.DomainAbbreviation }}]:hover {background-color:{{ tripDomain.Color }}22;border-top:1pt solid {{ tripDomain.Color }};border-right:1pt solid {{ tripDomain.Color }};border-bottom:1pt solid {{ tripDomain.Color }};}
-
-.explore-cover[data-trip-domain={{ tripDomain.DomainAbbreviation }}] {background-color:{{ tripDomain.Color }}22;}
-
-details.trip summary[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}] { background-color: {{ tripDomain.Color }}; }
-
-details.trip[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}],
-.trip-details-field[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}] { background-color: {{ tripDomain.Color }}22; }
-
-.day[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}]:not(:last-child) { border-bottom: 1pt solid {{ tripDomain.Color }}22;  }
-
-.day-foot[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}], .day-foot a[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}] { color: {{ tripDomain.Color }}; }
-
-.acc-icon[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}] {
-    background-color:{{ tripDomain.Color }};
-    mask: url(static/images/house.svg) no-repeat center / contain;
-    -webkit-mask: url(static/images/house.svg) no-repeat center / contain;
-    width: 0.9em;
-    height: 0.9em;
-    display: inline-block;
-    transform: translateY(2px);
-}
-
-.day-icon[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}] {
-    background-color:{{ tripDomain.Color }};
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 1.3em;
-    height: 1.3em;
-    margin: 0 0.3em;
-    border-radius: 50%;
-    color: #fff;
-    font-size: 0.7em;
-    font-weight: 600;
-    line-height: 1;
-    vertical-align: middle;
-}
-
-.iib-plain[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}] {
-  background-color: {{ tripDomain.Color }};
-  padding: 3pt 5pt 3pt 5pt;
-  color:#fff;
-}
-.iib-decade[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}] {
-  background-color: {{ tripDomain.Color }};
-  padding: 3pt 5pt 3pt 5pt;
-  margin:2pt 0 2pt 0;
-  color:#fff;
-  text-decoration:none;
-}
-.btn-filter-domain[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}] {
-  background-color: {{ tripDomain.Color }};
-  color:#fff;
-}
-.participantGroup {
-  background-color: #000;
-  padding: 3pt 5pt 3pt 5pt;
-  color:#fff;
-}
-.iib-decade[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}]:hover,
-.btn-filter-domain[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}]:active {
-  background-color: {{ tripDomain.Color }}cc;
-  color:#fff;
-}
-
-.card-footer[data-trip-domain={{ tripDomain.DomainAbbreviation }}] {
-  background-color: {{ tripDomain.Color }};
-}
-{% endfor %}
+  {% for tripDomain in common.common_trip_domains %}
+    [data-trip-domain="{{ tripDomain.DomainAbbreviation }}"] {
+      --domain-color: {{ tripDomain.Color }};
+    }
+  {% endfor %}
 </style>
 
 <div class="iib-menu">
@@ -158,6 +82,13 @@ details.trip[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}],
           {% endfor %}
         </select>
 
+        <img src="static/images/persons.svg" />
+        <select id="ParticipantGroup" multiple size="1" onchange="save_filter_OPFS()">
+          {% for participantGroup in common.common_participant_groups %}
+            <option value="{{ participantGroup.ParticipantGroup }}">{{ participantGroup.ParticipantGroup }}</option>
+          {% endfor %}
+        </select>
+
         <img src="static/images/reload.svg" onclick="page_load();" style="cursor:pointer;">
 
             <button id="filter-button-undermenu" class="remove-filter" onclick="navigator.storage.getDirectory().then(dir => dir.removeEntry('filter.json').catch(()=>{})).then(() => page_load())">
@@ -171,10 +102,10 @@ details.trip[data-iib-tripDomain={{ tripDomain.DomainAbbreviation }}],
         <div class="iib-menu-under" id="submenu-more">
         <div style="flex: 1;"></div>
         <a href="?path=dataset" class="non_widescreen">{{ translation.menu.dataset | default(value="Dataset") }}</a>
-        <a href="?path=toolbox:report" target="_blank">{{ translation.menu.report | default(value="Generate report") }}</a>
-        <a href="?path=toolbox:input" target="_blank">{{ translation.input.title | default(value="Create trip") }}</a>
-        <a href="?path=more:source">{{ translation.source.title | default(value="Source") }}</a>
-        <a href="?path=more:about">{{ translation.about.title | default(value="About") }}</a>
+        <a href="?path=report" target="_blank">{{ translation.menu.report | default(value="Generate report") }}</a>
+        <a href="?path=input" target="_blank">{{ translation.input.title | default(value="Create trip") }}</a>
+        <a href="?path=source">{{ translation.source.title | default(value="Source") }}</a>
+        <a href="?path=about">{{ translation.about.title | default(value="About") }}</a>
     </div>
 
 </div>
