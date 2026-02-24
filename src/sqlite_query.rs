@@ -15,111 +15,115 @@ unsafe impl Send for SqliteDb {}
 
 static SQLITE_DB: OnceCell<Mutex<SqliteDb>> = OnceCell::new();
 
-unsafe fn open_and_deserialize(db_vec: &[u8]) -> *mut ffi::sqlite3 {
-    let mut db: *mut ffi::sqlite3 = ptr::null_mut();
-    let flags = ffi::SQLITE_OPEN_READWRITE | ffi::SQLITE_OPEN_CREATE | ffi::SQLITE_OPEN_MEMORY;
+fn open_and_deserialize(db_vec: &[u8]) -> *mut ffi::sqlite3 {
+    unsafe {
+        let mut db: *mut ffi::sqlite3 = ptr::null_mut();
+        let flags = ffi::SQLITE_OPEN_READWRITE | ffi::SQLITE_OPEN_CREATE | ffi::SQLITE_OPEN_MEMORY;
 
-    let ret = ffi::sqlite3_open_v2(
-        b"memdb\0".as_ptr().cast(),
-        &mut db,
-        flags,
-        ptr::null(),
-    );
-    assert_eq!(ret, ffi::SQLITE_OK, "Failed to open SQLite");
+        let ret = ffi::sqlite3_open_v2(
+            b"memdb\0".as_ptr().cast(),
+            &mut db,
+            flags,
+            ptr::null(),
+        );
+        assert_eq!(ret, ffi::SQLITE_OK, "Failed to open SQLite");
 
-    let ret = ffi::sqlite3_deserialize(
-        db,
-        b"main\0".as_ptr() as *const _,
-        db_vec.as_ptr() as *mut u8,
-        db_vec.len() as i64,
-        db_vec.len() as i64,
-        ffi::SQLITE_DESERIALIZE_READONLY,
-    );
-    assert_eq!(ret, ffi::SQLITE_OK, "Failed to deserialize DB");
+        let ret = ffi::sqlite3_deserialize(
+            db,
+            b"main\0".as_ptr() as *const _,
+            db_vec.as_ptr() as *mut u8,
+            db_vec.len() as i64,
+            db_vec.len() as i64,
+            ffi::SQLITE_DESERIALIZE_READONLY,
+        );
+        assert_eq!(ret, ffi::SQLITE_OK, "Failed to deserialize DB");
 
-    db
+        db
+    }
 }
 
 pub fn init_db(db_vec: &[u8]) {
     SQLITE_DB.get_or_init(|| {
-        let db = unsafe { open_and_deserialize(db_vec) };
+        let db = open_and_deserialize(db_vec);
         Mutex::new(SqliteDb { db })
     });
 }
 
 fn get_db(db_vec: &[u8]) -> &'static Mutex<SqliteDb> {
     SQLITE_DB.get_or_init(|| {
-        let db = unsafe { open_and_deserialize(db_vec) };
+        let db = open_and_deserialize(db_vec);
         Mutex::new(SqliteDb { db })
     })
 }
 
-unsafe fn run_query(db: *mut ffi::sqlite3, sql: &str) -> Vec<Value> {
-    let mut stmt: *mut ffi::sqlite3_stmt = ptr::null_mut();
-    let csql = CString::new(sql).expect("ERROR");
-    ffi::sqlite3_prepare_v2(db, csql.as_ptr(), -1, &mut stmt, ptr::null_mut());
+fn run_query(db: *mut ffi::sqlite3, sql: &str) -> Vec<Value> {
+    unsafe {
+        let mut stmt: *mut ffi::sqlite3_stmt = ptr::null_mut();
+        let csql = CString::new(sql).expect("ERROR");
+        ffi::sqlite3_prepare_v2(db, csql.as_ptr(), -1, &mut stmt, ptr::null_mut());
 
-    let mut rows = Vec::new();
+        let mut rows = Vec::new();
 
-    loop {
-        let rc = ffi::sqlite3_step(stmt);
-        if rc == ffi::SQLITE_ROW {
-            let mut row = Map::new();
-            let col_count = ffi::sqlite3_column_count(stmt);
+        loop {
+            let rc = ffi::sqlite3_step(stmt);
+            if rc == ffi::SQLITE_ROW {
+                let mut row = Map::new();
+                let col_count = ffi::sqlite3_column_count(stmt);
 
-            for i in 0..col_count {
-                let name_ptr = ffi::sqlite3_column_name(stmt, i);
-                let name = std::ffi::CStr::from_ptr(name_ptr)
-                .to_string_lossy()
-                .to_string();
+                for i in 0..col_count {
+                    let name_ptr = ffi::sqlite3_column_name(stmt, i);
+                    let name = std::ffi::CStr::from_ptr(name_ptr)
+                    .to_string_lossy()
+                    .to_string();
 
-                let col_type = ffi::sqlite3_column_type(stmt, i);
+                    let col_type = ffi::sqlite3_column_type(stmt, i);
 
-                let value = match col_type {
-                    ffi::SQLITE_INTEGER => Value::from(ffi::sqlite3_column_int64(stmt, i)),
-                    ffi::SQLITE_FLOAT => Value::from(ffi::sqlite3_column_double(stmt, i)),
-                    ffi::SQLITE_TEXT => {
-                        let text_ptr = ffi::sqlite3_column_text(stmt, i);
-                        let text = std::ffi::CStr::from_ptr(text_ptr as *const i8)
-                        .to_string_lossy()
-                        .to_string();
-                        Value::from(text)
-                    }
-                    ffi::SQLITE_NULL => Value::Null,
-                    _ => Value::Null,
-                };
+                    let value = match col_type {
+                        ffi::SQLITE_INTEGER => Value::from(ffi::sqlite3_column_int64(stmt, i)),
+                        ffi::SQLITE_FLOAT => Value::from(ffi::sqlite3_column_double(stmt, i)),
+                        ffi::SQLITE_TEXT => {
+                            let text_ptr = ffi::sqlite3_column_text(stmt, i);
+                            let text = std::ffi::CStr::from_ptr(text_ptr as *const i8)
+                            .to_string_lossy()
+                            .to_string();
+                            Value::from(text)
+                        }
+                        ffi::SQLITE_NULL => Value::Null,
+                        _ => Value::Null,
+                    };
 
-                row.insert(name, value);
+                    row.insert(name, value);
+                }
+
+                rows.push(Value::Object(row));
+            } else {
+                break;
             }
-
-            rows.push(Value::Object(row));
-        } else {
-            break;
         }
-    }
 
-    ffi::sqlite3_finalize(stmt);
-    rows
+        ffi::sqlite3_finalize(stmt);
+        rows
+    }
 }
 
 pub async fn get_query_data(
     db_vec: &[u8],
     queries: Vec<(String, String)>,
 ) -> Value {
-    unsafe {
-        let db_lock = get_db(db_vec);
-        let db_guard = db_lock.lock().expect("Failed to lock SQLite DB");
-        let db = db_guard.db;
 
-        // Run each query and insert results into a JSON object
-        let mut out = Map::new();
-        for (name, sql) in queries {
-            let rows = run_query(db, &sql);
-            out.insert(name, Value::Array(rows));
-        }
+    let db_lock = get_db(db_vec);
+    let db_guard = db_lock.lock().expect("Failed to lock SQLite DB");
+    let db = db_guard.db;
 
-        Value::Object(out)
+    // Run each query and insert results into a JSON object
+    let mut out = Map::new();
+    for (name, sql) in queries {
+        let rows = run_query(db, &sql);
+        out.insert(name, Value::Array(rows));
     }
+
+    Value::Object(out)
+
 }
 
 

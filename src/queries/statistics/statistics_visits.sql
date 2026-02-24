@@ -27,7 +27,7 @@ BorderCrossings AS (
     FROM ConsecutiveRemoval AS a
     LEFT JOIN bewa_Overview AS b ON a.InnerId = b.InnerId
     WHERE a.cleaned_country IS NOT NULL
-    /*AND TripDomain IN (TripDomain) AND ParticipantGroup IN (ParticipantGroup)*/
+    /*AND TripDomain IN (TripDomain) AND ParticipantGroup IN (ParticipantGroup) AND 1=1*/
     GROUP BY a.InnerId
 ),
 SplitCountries AS (

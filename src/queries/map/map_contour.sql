@@ -5,6 +5,6 @@ FROM
     bewb_Events e
 JOIN bewa_Overview o ON e.InnerId = o.InnerId
 WHERE
-    e.AccommodationCoordinates IS NOT NULL AND TripDomain IN (TripDomain) AND ParticipantGroup IN (ParticipantGroup)
+    e.AccommodationCoordinates IS NOT NULL AND TripDomain IN (TripDomain) AND ParticipantGroup IN (ParticipantGroup) AND 1=1
 GROUP BY
     e.InnerId;

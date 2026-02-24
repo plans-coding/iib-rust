@@ -92,14 +92,16 @@ async function remove_filter() {
 }
 
 function updateFilterButtonVisibility() {
+
     const tripDomainSelect = document.getElementById("TripDomain");
     const participantGroupSelect = document.getElementById("ParticipantGroup");
     const tripLabelSelect = document.getElementById("TripLabel");
+
     const btn = document.getElementById("filter-button-overmenu");
 
     const hasTrip = tripDomainSelect.selectedOptions.length > 0;
     const hasGroup = participantGroupSelect.selectedOptions.length > 0;
     const hasLabel = tripLabelSelect.selectedOptions.length > 0;
 
-    btn.style.display = (hasTrip || hasGroup) ? "inline" : "none";
+    btn.style.display = (hasTrip || hasGroup || hasLabel) ? "inline" : "none";
 }

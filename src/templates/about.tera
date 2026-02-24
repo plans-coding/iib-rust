@@ -1,9 +1,4 @@
 <div class="path-about">
-    <div class="breadcrumb widescreen">
-    <img class="icon-color" src="static/images/frog.svg" />
-    <div class="">{{ translation.about.title | default(value='About') }}</div>
-    <!--<img src="static/images/arrow-right.svg" />-->
-    </div>
 
     <div style="text-align:center;">
 

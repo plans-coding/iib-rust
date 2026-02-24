@@ -796,3 +796,35 @@ details.trip,
     display: inline-block;
     transform: translateY(2px);
 }
+
+  #path-explore {
+    .breadcrumb {
+      justify-content: center;
+    }
+
+    .genre-icon-overlay {
+      position: absolute;
+      margin: 5pt 0 0 5pt;
+      color: #82ec3e;
+      z-index: 1000;
+    }
+
+    .card-spacer {
+      flex: 1;
+    }
+
+    .cover {
+      height: 120pt;
+      background-size: contain;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-image: url('images/travel.svg');
+      background-color: color-mix(in srgb, var(--domain-color), transparent 80%);
+    }
+
+    .has-cover {
+      background-size: cover, contain;
+      background-position: center, center;
+      background-repeat: no-repeat, no-repeat;
+    }
+  }

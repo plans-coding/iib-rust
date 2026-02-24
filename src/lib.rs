@@ -14,23 +14,10 @@ mod helper;
 
 macro_rules! define_resources {
     ($($name:ident => $path:expr),+ $(,)?) => {
-
-        $(
-            pub const $name: &str = include_str!($path);
-        )+
-
-        pub const ALL_QUERIES: &[(&str, &str)] = &[
-            $(
-                define_resources!(@is_query $name)
-            ),+
-        ];
+        $( pub const $name: &str = include_str!($path); )+
+        pub const ALL_QUERIES: &[(&str, &str)] = &[ $( define_resources!(@is_query $name) ),+ ];
     };
-
-    (@is_query $name:ident) => {
-        {
-            (stringify!($name), $name)
-        }
-    };
+    (@is_query $name:ident) => { { (stringify!($name), $name) } };
 }
 
 define_resources! {
@@ -59,7 +46,7 @@ define_resources! {
     TEMPLATE_TOOLBOX_REPORT_OUTPUT => "../src/templates/toolbox/toolbox_report_output.tera",
     TEMPLATE_TOOLBOX_INPUT => "../src/templates/toolbox/toolbox_input.tera",
 
-    QUERY_EXPLORE => "../src/queries/explore.sql",
+    QUERY_EXPLORE => "../src/queries/explore/explore.sql",
     QUERY_OVERVIEW_YEAR => "../src/queries/overview/overview_year.sql",
     QUERY_OVERVIEW_COUNTRY => "../src/queries/overview/overview_country.sql",
     QUERY_OVERVIEW_PLAIN => "../src/queries/overview/overview_plain.sql",
@@ -73,23 +60,23 @@ define_resources! {
     QUERY_TRIP_MAP_PINS_OVERALL => "../src/queries/trip/trip_map_pins_overall.sql",
     QUERY_TRIP_IMMICH_DESC_SEARCH => "../src/queries/trip/trip_immich_desc_search.sql",
     QUERY_TRIP_IMMICH_ALBUM_NAME => "../src/queries/trip/trip_immich_album_name.sql",
-    QUERY_TRIP_EXTENSION_MOVIE => "../src/queries/extensions/trip_movie.sql",
+    QUERY_TRIP_EXTENSION_MOVIE => "../src/queries/_extensions/trip_movie.sql",
     QUERY_STATISTICS_VISITS => "../src/queries/statistics/statistics_visits.sql",
     QUERY_STATISTICS_OVERNIGHTS => "../src/queries/statistics/statistics_overnights.sql",
     QUERY_STATISTICS_PER_DOMAIN_YEAR => "../src/queries/statistics/statistics_per_domain_year.sql",
     QUERY_STATISTICS_THEME_COUNT => "../src/queries/statistics/statistics_theme_count.sql",
     QUERY_STATISTICS_TRIP_COUNT => "../src/queries/statistics/statistics_trip_count.sql",
-    QUERY_COMMON_PARTICIPANT_GROUPS => "../src/queries/common_participant_groups.sql",
-    QUERY_COMMON_TRIP_DOMAINS => "../src/queries/common_trip_domains.sql",
-    QUERY_COMMON_TRIP_LABELS => "../src/queries/common_trip_labels.sql",
-    QUERY_IMAGES_DATE_LIST => "../src/queries/images_date_list.sql",
-    QUERY_IMAGES_PHOTO_TIME => "../src/queries/images_photo_time.sql",
+    QUERY_COMMON_PARTICIPANT_GROUPS => "../src/queries/_common/common_participant_groups.sql",
+    QUERY_COMMON_TRIP_DOMAINS => "../src/queries/_common/common_trip_domains.sql",
+    QUERY_COMMON_TRIP_LABELS => "../src/queries/_common/common_trip_labels.sql",
+    QUERY_IMAGES_DATE_LIST => "../src/queries/images/images_date_list.sql",
+    QUERY_IMAGES_PHOTO_TIME => "../src/queries/images/images_photo_time.sql",
     QUERY_MAP_CONTOUR => "../src/queries/map/map_contour.sql",
     QUERY_MAP_COUNTRY => "../src/queries/map/map_country.sql",
     QUERY_MAP_COUNTRY_LIST => "../src/queries/map/map_country_list.sql",
     QUERY_MAP_THEME => "../src/queries/map/map_theme.sql",
-    QUERY_SEARCH_EVENT => "../src/queries/search_event.sql",
-    QUERY_SEARCH_TRIP => "../src/queries/search_trip.sql",
+    QUERY_SEARCH_EVENT => "../src/queries/search/search_event.sql",
+    QUERY_SEARCH_TRIP => "../src/queries/search/search_trip.sql",
     QUERY_REPORT_ALL_OVERVIEW => "../src/queries/report/report_all_overview.sql",
     QUERY_REPORT_ALL_EVENTS => "../src/queries/report/report_all_events.sql",
 
@@ -231,14 +218,12 @@ async fn session_load() -> (Vec<u8>, serde_json::Value) {
     
         let mut render_structure = json!({});
         render_structure["all"]["query_params"]["path"] = path.into();
-        render_structure["all"]["time"] = helper::build_time_json();
     
         // Get translation
         let translation_query = vec![(
             "translation_filename".to_string(),
-                                      "SELECT Value FROM bewx_Settings
-                                      WHERE AttributeGroup = 'Base'
-        AND Attribute = 'LanguageFile';".to_string(),
+            "SELECT Value FROM bewx_Settings WHERE AttributeGroup = 'Base'
+            AND Attribute = 'LanguageFile';".to_string(),
         )];
 
         let translation_filename =
@@ -291,7 +276,7 @@ async fn session_load() -> (Vec<u8>, serde_json::Value) {
         ];
         render_structure["all"]["common"] = sqlite_query::get_query_data(&db_bytes, common_data).await;
 
-//let _ = render::render2dom(TEMPLATE_MENU, &render_structure["all"], "menu", false);
+	//let _ = render::render2dom(TEMPLATE_MENU, &render_structure["all"], "menu", false);
 
         let rendered_menu = render::render2dom(TEMPLATE_MENU, &render_structure["all"], "menu", false);
 
@@ -353,8 +338,8 @@ async fn page_load_internal() {
    
     render_structure["all"]["query_params"]["path"] = path.clone().into();
 
-    render_structure["all"]["time"] = helper::build_time_json();
-    //web_sys::console::log_1(&serde_json::to_string(&render_structure["all"]).expect("ERROR").into());
+    //render_structure["all"]["time"] = helper::build_time_json();
+    //web_sys::console::log_1(&serde_json::to_string(&render_structure["all"]["filters"]).expect("ERROR").into());
 
     // READ APPLIED FILTERS  -----------------------------------------------------------------------
 
@@ -362,7 +347,7 @@ async fn page_load_internal() {
     render_structure["all"]["filters"] = serde_wasm_bindgen::from_value(filter_values).unwrap();
 
     // Prepare filters
-    /*
+    
     let participant_group = if render_structure["all"]["filters"]["participantGroup"].as_array().map_or(true, |a| a.is_empty()) {
         "(ParticipantGroup)".to_string()
     } else {
@@ -373,12 +358,27 @@ async fn page_load_internal() {
     } else {
         format!("({})", render_structure["all"]["filters"]["tripDomain"].as_array().expect("ERROR").iter().filter_map(|v| v.as_str()).map(|s| format!("'{}'", s)).collect::<Vec<_>>().join(","))
     };
-    let trip_label = if render_structure["all"]["filters"]["tripLabel"].as_array().map_or(true, |a| a.is_empty()) {
-        "(TripLabel)".to_string()
+    let trip_label = if render_structure["all"]["filters"]["tripLabel"]
+        .as_array()
+        .map_or(true, |a| a.is_empty())
+    {
+        // no filter → tautology
+        "1=1".to_string()
     } else {
-        format!("({})", render_structure["all"]["filters"]["tripLabel"].as_array().expect("ERROR").iter().filter_map(|v| v.as_str()).map(|s| format!("'{}'", s)).collect::<Vec<_>>().join(","))
-    };*/
+        // build AND chain of LIKEs for all labels
+        let conds = render_structure["all"]["filters"]["tripLabel"]
+            .as_array()
+            .expect("ERROR")
+            .iter()
+            .filter_map(|v| v.as_str())
+            .map(|s| format!("(',' || REPLACE(TripLabels,' ','') || ',') LIKE '%,{},%'", s.replace('\'', "''")))
+            .collect::<Vec<_>>()
+            .join(" AND "); // use "AND" if you want ALL labels present; "OR" if any label suffices
 
+        format!("({})", conds)
+    };
+    web_sys::console::log_1(&serde_json::to_string(&render_structure["all"]["filters"]).expect("ERROR").into());
+/*
     let filters = &render_structure["all"]["filters"];
 
     let format_filter = |key: &str, default: &str| {
@@ -394,7 +394,7 @@ async fn page_load_internal() {
     let participant_group = format_filter("participantGroup", "ParticipantGroup");
     let trip_domain = format_filter("tripDomain", "TripDomain");
     let trip_label = format_filter("tripLabel", "TripLabel");
-
+*/
     use std::collections::HashMap;
     let cover_photos_list_opt = filecontent::cover_photos_list_from_opfs().await;
     let cover_photos_map: HashMap<String, String> = match cover_photos_list_opt {
@@ -410,12 +410,12 @@ async fn page_load_internal() {
             "explore" => {
                 render_structure["page"] = json!({
                     "title": render_structure.pointer("/all/translation/explore/title").and_then(|v| v.as_str()).unwrap_or("Explore"),
-                    "template": TEMPLATE_EXPLORE,
+                    "template": format!("{}{}", TEMPLATE_BREADCRUMBS.replace("_PAGE_", page), TEMPLATE_EXPLORE),
                     "queries": [
                         ["explore", QUERY_EXPLORE
                         .replace("(ParticipantGroup)", &participant_group)
                         .replace("(TripDomain)", &trip_domain)
-                        .replace("(TripLabels)", &trip_label)], /* Should be s after label here */
+                        .replace("1=1", &trip_label)],
                     ]});
                 render_structure["all"]["cover_photos_list"] = serde_json::to_value(&cover_photos_map).expect("Failed to convert map to Value");
             }
@@ -426,7 +426,8 @@ async fn page_load_internal() {
                     "queries": [
                         ["overviewYear", QUERY_OVERVIEW_YEAR.replace("/*","").replace("*/","")
                         .replace("(ParticipantGroup)", &participant_group)
-                        .replace("(TripDomain)", &trip_domain)]
+                        .replace("(TripDomain)", &trip_domain)
+                        .replace("1=1", &trip_label)]
                     ]});
             }
             "overview:country" => {
@@ -437,7 +438,8 @@ async fn page_load_internal() {
                          // Replace "c.Continent = 'Europa'" in QUERY_OVERVIEW_COUNTRY with value from settings in future version
                          ["overviewCountry", QUERY_OVERVIEW_COUNTRY.to_string().replace("/*","").replace("*/","")
                         .replace("(ParticipantGroup)", &participant_group)
-                        .replace("(TripDomain)", &trip_domain)]
+                        .replace("(TripDomain)", &trip_domain)
+                        .replace("1=1", &trip_label)]
                      ]});
             }
             "overview:plain" => {
@@ -445,13 +447,15 @@ async fn page_load_internal() {
                     "title": render_structure.pointer("/all/translation/overview/plain").and_then(|v| v.as_str()).unwrap_or("Overview: Plain"),
                     "template": format!("{}{}", TEMPLATE_BREADCRUMBS.replace("_PAGE_", page), TEMPLATE_OVERVIEW_PLAIN),
                     "queries": [
-                        ["overviewYear", QUERY_OVERVIEW_PLAIN.to_string().replace("/*","").replace("*/","")
+                        ["overviewPlain", QUERY_OVERVIEW_PLAIN.to_string().replace("/*","").replace("*/","")
                         .replace("(ParticipantGroup)", &participant_group)
-                        .replace("(TripDomain)", &trip_domain)],
+                        .replace("(TripDomain)", &trip_domain)
+                        .replace("1=1", &trip_label)],
                          // Replace "c.Continent = 'Europa'" in QUERY_OVERVIEW_COUNTRY with value from settings in future version
-                        ["overviewCountry", QUERY_OVERVIEW_COUNTRY.to_string().replace("/*","").replace("*/","")
+                        /*["overviewCountry", QUERY_OVERVIEW_COUNTRY.to_string().replace("/*","").replace("*/","")
                         .replace("(ParticipantGroup)", &participant_group)
-                        .replace("(TripDomain)", &trip_domain)]
+                        .replace("(TripDomain)", &trip_domain)
+                        .replace("1=1", &trip_label)]*/
                     ]});
             }
             "map" => {
@@ -463,7 +467,8 @@ async fn page_load_internal() {
                         .replace("(TripDomain)", &trip_domain)],
                         ["map_data", QUERY_MAP_CONTOUR.replace("/*","").replace("*/","")
                         .replace("(ParticipantGroup)", &participant_group)
-                        .replace("(TripDomain)", &trip_domain)], //contour
+                        .replace("(TripDomain)", &trip_domain)
+                        .replace("1=1", &trip_label)], //contour
                         ["common_trip_domains", QUERY_COMMON_TRIP_DOMAINS.to_string()],
                     ]});
                 map_request = "contour";
@@ -476,13 +481,16 @@ async fn page_load_internal() {
                     "queries": [
                         ["statistics_visits", QUERY_STATISTICS_VISITS.replace("SELECT\n    Country,\n    OL,\n    SS,\n    VSS,\n    PS,\n    OLMQ,\n    SSMQ,\n    VSSMQ,\n    PSMQ\nFROM Aggregated\nORDER BY OL DESC;", "SELECT COUNT(DISTINCT Country) AS TripCount FROM Aggregated;").replace("/*","").replace("*/","")
                         .replace("(ParticipantGroup)", &participant_group)
-                        .replace("(TripDomain)", &trip_domain)],
+                        .replace("(TripDomain)", &trip_domain)
+                        .replace("1=1", &trip_label)],
                         ["statistics_trip_count", QUERY_STATISTICS_TRIP_COUNT.replace("/*","").replace("*/","")
                         .replace("(ParticipantGroup)", &participant_group)
-                        .replace("(TripDomain)", &trip_domain)],
+                        .replace("(TripDomain)", &trip_domain)
+                        .replace("1=1", &trip_label)],
                         ["statistics_per_domain_year", QUERY_STATISTICS_PER_DOMAIN_YEAR.replace("/*","").replace("*/","")
                         .replace("(ParticipantGroup)", &participant_group)
-                        .replace("(TripDomain)", &trip_domain)],
+                        .replace("(TripDomain)", &trip_domain)
+                        .replace("1=1", &trip_label)],
                         ["common_trip_domains", QUERY_COMMON_TRIP_DOMAINS.to_string()],
                     ]});
             }
@@ -493,7 +501,8 @@ async fn page_load_internal() {
                     "queries": [
                         ["statistics_visits", QUERY_STATISTICS_VISITS.replace("/*","").replace("*/","")
                         .replace("(ParticipantGroup)", &participant_group)
-                        .replace("(TripDomain)", &trip_domain)]
+                        .replace("(TripDomain)", &trip_domain)
+                        .replace("1=1", &trip_label)]
                     ]});
             }
             "statistics:overnights" => {
@@ -503,7 +512,8 @@ async fn page_load_internal() {
                     "queries": [
                         ["statistics_overnights", QUERY_STATISTICS_OVERNIGHTS.replace("/*","").replace("*/","")
                         .replace("(ParticipantGroup)", &participant_group)
-                        .replace("(TripDomain)", &trip_domain)],
+                        .replace("(TripDomain)", &trip_domain)
+                        .replace("1=1", &trip_label)],
                     ]});
             }
             "statistics:themes" => {
@@ -512,7 +522,8 @@ async fn page_load_internal() {
                     "template": format!("{}{}", TEMPLATE_BREADCRUMBS.replace("_PAGE_", page), TEMPLATE_STATISTICS_THEMES),
                     "queries": [
                         ["statistics_theme_count", QUERY_STATISTICS_THEME_COUNT.replace("(ParticipantGroup)", &participant_group)
-                        .replace("(TripDomain)", &trip_domain)]
+                        .replace("(TripDomain)", &trip_domain)
+                        .replace("1=1", &trip_label)]
                     ]});
             }
             "dataset" => {
@@ -529,7 +540,7 @@ async fn page_load_internal() {
             "source" => {
                 render_structure["page"] = json!({
                     "title": render_structure.pointer("/all/translation/source/title").and_then(|v| v.as_str()).unwrap_or("Source"),
-                    "template": TEMPLATE_SOURCE,
+                    "template": format!("{}{}", TEMPLATE_BREADCRUMBS.replace("_PAGE_", page), TEMPLATE_SOURCE),
                     "queries": [
                         ["cover_photo_original_paths", "SELECT OuterId, CoverPhoto FROM bewa_Overview WHERE CoverPhoto IS NOT NULL;"],
                     ]});
@@ -538,7 +549,7 @@ async fn page_load_internal() {
             "about" => {
                 render_structure["page"] = json!({
                     "title": render_structure.pointer("/all/translation/about/title").and_then(|v| v.as_str()).unwrap_or("About"),
-                    "template": TEMPLATE_ABOUT,
+                    "template": format!("{}{}", TEMPLATE_BREADCRUMBS.replace("_PAGE_", page), TEMPLATE_ABOUT),
                     });
                 let update_info = check_available_update()
                     .await
@@ -591,10 +602,12 @@ async fn page_load_internal() {
                                     ["trip_map_pins_accommodation", QUERY_TRIP_MAP_PINS_ACCOMMODATION.replace("= o.InnerId", &format!("= '{}'", inner_id))],
                                     ["trip_previous", QUERY_TRIP_PREVIOUS.replace("= InnerId", &format!("= '{}'", inner_id))
                                     .replace("(ParticipantGroup)", &participant_group)
-                                    .replace("(TripDomain)", &trip_domain)],
+                                    .replace("(TripDomain)", &trip_domain)
+                                    .replace("1=1", &trip_label)],
                                     ["trip_next", QUERY_TRIP_NEXT.replace("= InnerId", &format!("= '{}'", inner_id))
                                     .replace("(ParticipantGroup)", &participant_group)
-                                    .replace("(TripDomain)", &trip_domain)],
+                                    .replace("(TripDomain)", &trip_domain)
+                                    .replace("1=1", &trip_label)],
                                     ["trip_immich_desc_search", QUERY_TRIP_IMMICH_DESC_SEARCH.replace("= InnerId", &format!("= '{}'", inner_id))],
                                     ["trip_immich_album_name", QUERY_TRIP_IMMICH_ALBUM_NAME.replace("= InnerId", &format!("= '{}'", inner_id))],
                                 ]});
@@ -621,10 +634,12 @@ async fn page_load_internal() {
                                 ["trip_map_pins_accommodation", QUERY_TRIP_MAP_PINS_ACCOMMODATION.replace("= o.OuterId", &format!("= '{}'", outer_id))],
                                 ["trip_previous", QUERY_TRIP_PREVIOUS.replace("= OuterId", &format!("= '{}'", outer_id))
                                     .replace("(ParticipantGroup)", &participant_group)
-                                    .replace("(TripDomain)", &trip_domain)],
+                                    .replace("(TripDomain)", &trip_domain)
+                                    .replace("1=1", &trip_label)],
                                 ["trip_next", QUERY_TRIP_NEXT.replace("= OuterId", &format!("= '{}'", outer_id))
                                     .replace("(ParticipantGroup)", &participant_group)
-                                    .replace("(TripDomain)", &trip_domain)],
+                                    .replace("(TripDomain)", &trip_domain)
+                                    .replace("1=1", &trip_label)],
                                 ["trip_immich_desc_search", QUERY_TRIP_IMMICH_DESC_SEARCH.replace("= OuterId", &format!("= '{}'", outer_id))],
                                 ["trip_immich_album_name", QUERY_TRIP_IMMICH_ALBUM_NAME.replace("= OuterId", &format!("= '{}'", outer_id))],
                                 ["trip_extension_movie", QUERY_TRIP_EXTENSION_MOVIE.replace("_OUTER_ID_", &outer_id)],
@@ -668,9 +683,11 @@ async fn page_load_internal() {
                             "template": TEMPLATE_MAP,
                             "queries": [
                                 ["map_country_list", QUERY_MAP_COUNTRY_LIST.replace("(ParticipantGroup)", &participant_group)
-                                .replace("(TripDomain)", &trip_domain)],
+                                .replace("(TripDomain)", &trip_domain)
+                                .replace("1=1", &trip_label)],
                                 ["map_data", QUERY_MAP_COUNTRY.replace("_COUNTRY_",country).replace("(ParticipantGroup)", &participant_group)
-                                .replace("(TripDomain)", &trip_domain)], //country
+                                .replace("(TripDomain)", &trip_domain)
+                                .replace("1=1", &trip_label)], //country
                                 ["common_trip_domains", QUERY_COMMON_TRIP_DOMAINS.to_string()],
                             ]});
                         map_request = "country";
@@ -683,9 +700,11 @@ async fn page_load_internal() {
                             "template": TEMPLATE_MAP,
                             "queries": [
                                 ["map_country_list", QUERY_MAP_COUNTRY_LIST.replace("(ParticipantGroup)", &participant_group)
-                                .replace("(TripDomain)", &trip_domain)],
+                                .replace("(TripDomain)", &trip_domain)
+                                .replace("1=1", &trip_label)],
                                 ["map_data", QUERY_MAP_THEME.replace("_THEME_",theme).replace("(ParticipantGroup)", &participant_group)
-                                .replace("(TripDomain)", &trip_domain)], //theme
+                                .replace("(TripDomain)", &trip_domain)
+                                .replace("1=1", &trip_label)], //theme
                                 ["common_trip_domains", QUERY_COMMON_TRIP_DOMAINS.to_string()],
                             ]});
                         map_request = "theme";
@@ -702,9 +721,11 @@ async fn page_load_internal() {
                         "settings": serde_json::to_value(&render_structure["all"]["settings"]).expect("ERROR"),
                         "queries": [
                             ["search_trip", QUERY_SEARCH_TRIP.to_string().replace("/*_STRING_*/", suffix).replace("(ParticipantGroup)", &participant_group)
-                            .replace("(TripDomain)", &trip_domain)],
+                            .replace("(TripDomain)", &trip_domain)
+                            .replace("1=1", &trip_label)],
                             ["search_event", QUERY_SEARCH_EVENT.to_string().replace("/*_STRING_*/", suffix).replace("(ParticipantGroup)", &participant_group)
-                            .replace("(TripDomain)", &trip_domain)],
+                            .replace("(TripDomain)", &trip_domain)
+                            .replace("1=1", &trip_label)],
                         ]});
                 }
 
@@ -721,9 +742,11 @@ async fn page_load_internal() {
                             "template": TEMPLATE_TOOLBOX_REPORT_OUTPUT,
                             "queries": [
                                 ["all_overview", QUERY_REPORT_ALL_OVERVIEW.replace("(ParticipantGroup)", &participant_group)
-                                .replace("(TripDomain)", &trip_domain)],
+                                .replace("(TripDomain)", &trip_domain)
+                                .replace("1=1", &trip_label)],
                                 ["all_events", QUERY_REPORT_ALL_EVENTS.replace("(ParticipantGroup)", &participant_group)
-                                .replace("(TripDomain)", &trip_domain)],
+                                .replace("(TripDomain)", &trip_domain)
+                                .replace("1=1", &trip_label)],
                             ]});
                         render_structure["all"]["title_string"] = json!(title_string);
                         render_structure["all"]["backside_string"] = json!(backside_string);
@@ -761,13 +784,13 @@ async fn page_load_internal() {
         .collect();
 
         let query_response: serde_json::Value = sqlite_query::get_query_data(&db_bytes, combined_query).await;
-        //web_sys::console::log_1(&serde_json::to_string(&query_response).expect("ERROR").into());
+        web_sys::console::log_1(&serde_json::to_string(&query_response).expect("ERROR").into());
     
         let mut merged_structure = render_structure["all"].clone();
 
         // Merge if both are objects
         match (&mut merged_structure, query_response) {
-            (serde_json::Value::Object(ref mut target), serde_json::Value::Object(source)) => {
+            (serde_json::Value::Object(target), serde_json::Value::Object(source)) => {
                 for (k, v) in source {
                     target.insert(k, v);
                 }
@@ -831,10 +854,7 @@ async fn page_load_internal() {
         }
 
         match page {
-            "trip" => {
-                //applyTripCoverPhotos(&render_structure["all"]["settings"]["Feature"]["ImmichApiUrl"].to_string(),&render_structure["all"]["settings"]["Feature"]["ImmichApiKey"].to_string());
-            }
-            "dataset" => {
+           "dataset" => {
                 load_code_editor();
                 initiate_spreadsheet();
                 //custom_queries(); // Need input value (e.g. get code editor content)

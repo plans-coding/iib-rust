@@ -1,6 +1,56 @@
 {% set page = "_PAGE_" %}
 
-{% if page == "overview:year" %}
+{% set theme_config = [] %}
+{% if settings.Extension.Theme is defined %}
+    {% set theme_config = settings.Extension.Theme | split(pat="\n") | first | split(pat=",") %}
+{% endif %}
+
+<div class="breadcrumb {% if page != 'explore' and page != 'source' %}widescreen{% endif %}">
+
+    <img class="icon-color {% if page is starting_with('overview') %}widescreen{% endif %}" src="static/images/frog.svg" />
+
+    {% if page == "explore" %}
+        <div>{{ translation.explore.title | default(value="Explore") }}</div>
+
+    {% elif page is starting_with("overview:") %}
+        <div class="widescreen">{{ translation.overview.title | default(value="Overview") }}</div>
+        <img class="widescreen" src="static/images/arrow-right.svg" />
+        <a href="?path=overview:year" class="breadcrumb-link {% if query_params.path == 'overview:year' %}active{% endif %}">{{ translation.overview.year | default(value="Year") }}</a>
+        <a href="?path=overview:country" class="breadcrumb-link {% if query_params.path == 'overview:country' %}active{% endif %}">{{ translation.overview.country | default(value="Country") }}</a>
+        <a href="?path=overview:plain" class="breadcrumb-link {% if query_params.path == 'overview:plain' %}active{% endif %}">{{ translation.overview.plain | default(value="Plain") }}</a>
+
+    {% elif page is starting_with("statistics:") %}
+        <div>{{ translation.statistics.title | default(value="Summary") }}</div>
+        <img src="static/images/arrow-right.svg" />
+        <a href="?path=statistics:summary" class="breadcrumb-link {% if query_params.path == 'statistics:summary' %}active{% endif %}">{{ translation.statistics.summary | default(value="Summary") }}</a>
+        <a href="?path=statistics:visits" class="breadcrumb-link {% if query_params.path == 'statistics:visits' %}active{% endif %}">{{ translation.statistics.visits | default(value="Visits") }}</a>
+        <a href="?path=statistics:overnights" class="breadcrumb-link {% if query_params.path == 'statistics:overnights' %}active{% endif %}">{{ translation.statistics.overnights | default(value="Overnights") }}</a>
+        
+        {% if theme_config | length >= 2 and theme_config[0] == "Enabled" %}
+            <a href="?path=statistics:themes" class="breadcrumb-link {% if query_params.path == 'statistics:themes' %}active{% endif %}">{{ theme_config[1] | default(value="Themes") }}</a>
+        {% endif %}
+
+    {% elif page == "source" %}
+        <div>{{ translation.source.title | default(value='Configure your data source') }}</div>
+
+    {% elif page == "about" %}
+        <div>{{ translation.about.title | default(value='About') }}</div>
+
+    {% endif %}
+    
+</div>
+
+{#{% set page = "_PAGE_" %}
+
+{% if page == "explore" %}
+  <div class="breadcrumb">
+    <img class="icon-color" src="static/images/frog.svg" />
+    <div>{{ translation.explore.title | default(value="Explore") }}</div>
+    <!--<img src="static/images/arrow-right.svg" />
+    <div class="breadcrumb-link active warning"><span class="immer-in-font-uc" style="font-weight:normal;">Immer in</span>&nbsp;<span class="bewegung-font-uc">Bewegung</span></div>
+    -->
+  </div>
+{% elif page == "overview:year" %}
     <div class="breadcrumb">
     <img class="widescreen icon-color" src="static/images/frog.svg" />
     <div class="widescreen">{{ translation.overview.title | default(value="Overview") }}</div>
@@ -92,6 +142,16 @@
     <a href="?path=statistics:themes" class="breadcrumb-link {% if query_params.path == 'statistics:themes' %}active{% endif %}">{{ theme_config[1] | default(value="Themes") }}</a>
   {% endif %}
 </div>
+{% elif page == "source" %}
+    <div class="breadcrumb">
+    <img class="icon-color" src="static/images/frog.svg" />
+    <div class="">{{ translation.source.title | default(value='Configure your data source') }}</div>
+  </div>
+{% elif page == "about" %}
+    <div class="breadcrumb widescreen">
+    <img class="icon-color" src="static/images/frog.svg" />
+    <div class="">{{ translation.about.title | default(value='About') }}</div>
+    </div>
 {% else %}
-    {# no output #}
-{% endif %}
+
+{% endif %}#}

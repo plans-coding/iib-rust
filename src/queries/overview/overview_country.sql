@@ -75,7 +75,7 @@ normalized AS (
         json_each('["' || REPLACE(AllBorderCrossings, ', ', '", "') || '"]')
     LEFT JOIN  bewa_Overview AS b
     ON b.InnerId = a.InnerId
-    /*WHERE TripDomain IN (TripDomain) AND ParticipantGroup IN (ParticipantGroup)*/
+    /*WHERE TripDomain IN (TripDomain) AND ParticipantGroup IN (ParticipantGroup) AND 1=1*/
     ORDER BY
         b.DepartureDate ASC
 )

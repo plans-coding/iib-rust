@@ -9,7 +9,7 @@ LEFT JOIN
 	bewa_Overview
 USING
 	(InnerId)
-/*WHERE TripDomain IN (TripDomain) AND ParticipantGroup IN (ParticipantGroup)*/
+/*WHERE TripDomain IN (TripDomain) AND ParticipantGroup IN (ParticipantGroup) AND 1=1*/
 GROUP BY
     AccommodationCountry
 ORDER BY

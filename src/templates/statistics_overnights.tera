@@ -1,12 +1,8 @@
 <div style="text-align:center;">
-    <table class="table-statistics-visits">
-        <tr>
-            <td class="iib-silver-grey">
-                {{ translation.statistics.overnightStaysCountry
-                   | default(value="Number of overnight stays per country") }}
-            </td>
-        </tr>
-    </table>
+
+    <div class="table-statistics-visits">
+        {{ translation.statistics.overnightStaysCountry | default(value="Number of overnight stays per country") }}
+    </div>
     
     <b>
         {{ translation.statistics.topTenCountries

@@ -1,18 +1,8 @@
 use crate::sqlite_query;
 use crate::DB_BYTES;
-//use crate::filecontent;
 
-use chrono::Local;
-use serde_json::{json, Value, Map};
+use serde_json::{Value, Map};
 use wasm_bindgen::JsCast;
-
-pub fn build_time_json() -> Value {
-    let now = Local::now();
-    json!({
-          "now_year": now.format("%Y").to_string(),
-          "now_date": now.format("%Y-%m-%d").to_string(),
-    })
-}
 
 pub fn transform_settings(settings_array: &[Value]) -> Value {
     let mut result = Map::new();

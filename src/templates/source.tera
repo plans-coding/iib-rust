@@ -1,8 +1,4 @@
 <div id="path-source">
-  <div class="breadcrumb">
-    <img class="icon-color" src="static/images/frog.svg" />
-    <div class="">{{ translation.source.title | default(value='Configure your data source') }}</div>
-  </div>
 
   <div style="display:flex;flex-direction:column;gap:5pt;">
 

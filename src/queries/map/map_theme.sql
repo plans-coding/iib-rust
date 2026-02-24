@@ -14,4 +14,4 @@ SELECT
 	   e.CountriesDuringDay AS CountriesDuringDay
 FROM bewb_Events e
 JOIN bewa_Overview o ON e.InnerId = o.InnerId
-WHERE AdditionalNotes LIKE '%| _THEME_ }%' AND TripDomain IN (TripDomain) AND ParticipantGroup IN (ParticipantGroup);
+WHERE AdditionalNotes LIKE '%| _THEME_ }%' AND TripDomain IN (TripDomain) AND ParticipantGroup IN (ParticipantGroup) AND 1=1;

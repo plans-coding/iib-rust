@@ -135,6 +135,7 @@ async function sync_album_covers(immichUrl, immichCoverAlbumId) {
 }
 
 // RUN THIS TO SAVE IMMICH ALBUM TO OPFS
+
 async function save_album_covers_ids2OPFS(immichUrl, immichCoverAlbumId) {
 
     const cover_albums_db_text =
@@ -147,13 +148,31 @@ async function save_album_covers_ids2OPFS(immichUrl, immichCoverAlbumId) {
         immichCoverAlbumId
     );
 
-    const outerIdToAssetId = Object.fromEntries(
+    /*const outerIdToAssetId = Object.fromEntries(
         cover_albums_db
         .map(dbItem => {
             const asset = cover_albums_response.assets.find(
                 a => a.originalPath === dbItem.CoverPhoto
             );
             return asset ? [dbItem.OuterId, asset.id] : null;
+        })
+        .filter(Boolean)
+    );*/
+
+    const outerIdToAssetId = Object.fromEntries(
+    cover_albums_db
+        .map(dbItem => {
+            const coverPhoto = dbItem.CoverPhoto;
+
+            if (coverPhoto.startsWith('!genre[') && coverPhoto.endsWith(']')) {
+                const genreValue = coverPhoto.slice(7, -1);
+                return [dbItem.OuterId, genreValue];
+            }
+
+            const asset = cover_albums_response.assets.find(
+                a => a.originalPath === coverPhoto
+            );
+            return asset ? [dbItem.OuterId, immichUrl + "api/assets/" + asset.id + "/thumbnail"] : null;
         })
         .filter(Boolean)
     );
@@ -164,7 +183,6 @@ async function save_album_covers_ids2OPFS(immichUrl, immichCoverAlbumId) {
     .then(w => (w.write(JSON.stringify(outerIdToAssetId, null, 2)), w.close())).then(() => {
         document.getElementById("cover2opfs").textContent = "OK";
     }).then(()=>{location.reload()});
-
 
 }
 

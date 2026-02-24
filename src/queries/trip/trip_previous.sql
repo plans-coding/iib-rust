@@ -5,6 +5,7 @@ FROM bewa_Overview
 WHERE OuterId IS NOT NULL
   AND TripDomain IN (TripDomain)
   AND ParticipantGroup IN (ParticipantGroup)
+  AND 1=1
 ORDER BY
     DepartureDate >= (
         SELECT DepartureDate

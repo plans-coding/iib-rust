@@ -24,7 +24,7 @@
   </thead>
 
   <tbody>
-    {% for trip in overviewYear %}
+    {% for trip in overviewPlain %}
       <tr class="iib-item"
           data-iib-participantGroup="{{ trip.ParticipantGroup }}"
           data-trip-domain="{{ trip.TripDomain }}">

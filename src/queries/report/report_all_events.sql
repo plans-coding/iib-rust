@@ -54,4 +54,4 @@ LEFT JOIN CountryMapping cm
 WHERE
     e.InnerId IS NOT NULL
     AND o.TripDomain IN (TripDomain)
-    AND o.ParticipantGroup IN (ParticipantGroup);
+    AND o.ParticipantGroup IN (ParticipantGroup) AND 1=1;

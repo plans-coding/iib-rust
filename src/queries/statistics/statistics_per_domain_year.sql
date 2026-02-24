@@ -10,7 +10,7 @@ FROM
 WHERE
     InnerId IS NOT NULL
     AND DepartureDate IS NOT NULL
-	/*AND TripDomain IN (TripDomain) AND ParticipantGroup IN (ParticipantGroup)*/
+	/*AND TripDomain IN (TripDomain) AND ParticipantGroup IN (ParticipantGroup) AND 1=1*/
 GROUP BY
     DomainAbbreviation, Year
 ORDER BY
