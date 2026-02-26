@@ -103,7 +103,7 @@ WHERE m.type='table' ORDER BY table_name;"
     <details>
       <summary style="cursor:pointer;">{{ translation.dataset.predefinedQueries | default(value="Pre-defined queries") }}</summary>
       <div style="background-color:var(--color-background);padding:2pt;border-radius:5pt;">
-      {% for item in query_templates %}
+      {% for item in all.query_templates %}
         <div style="cursor:pointer;" onclick="load_code_editor(get_predefined_query('{{ item }}'));">{{ item }}</div>
       {% endfor %}
     </details>

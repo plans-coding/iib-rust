@@ -20,7 +20,7 @@
 
         <div style="max-width:500pt;margin:auto;">
         
-            <div style="font-size:1.5em;border-radius: 30pt;margin:auto;font-weight:bold;">{{ current_version }}</div>
+            <div style="font-size:1.5em;border-radius: 30pt;margin:auto;font-weight:bold;">{{ all.current_version }}</div>
 
         </div>
 

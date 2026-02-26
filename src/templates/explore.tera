@@ -6,7 +6,7 @@
   <div class="card-container">
 
     {% for row in explore %}
-      {% set cover_photo_id = cover_photos_list | get(key=row.OuterId, default="NO") %}
+      {% set cover_photo_id = all.cover_photos_list | get(key=row.OuterId, default="NO") %}
 
       <a href="?path=trip:{{ row.OuterId }}" class="card" data-trip-domain="{{ row.TripDomain }}">
         

@@ -43,7 +43,7 @@
   <img class="widescreen icon-color" src="static/images/frog.svg" />
   <div class="widescreen">{{ translation.menu.search | default(value="Search") }}</div>
   <img class="widescreen" src="static/images/arrow-right.svg" />
-  <div class="breadcrumb-link active">{{ query_params.path | split(pat=":") | last }}</div>
+  <div class="breadcrumb-link active">{{ all.query_params.path | split(pat=":") | last }}</div>
 </div>
 
 <details open class="search">

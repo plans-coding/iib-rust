@@ -1,7 +1,7 @@
 <style>
 #iib-foot {display:none;}
 /* Background photo from thumbnail */
-{% set cover_photo_id = cover_photos_list | get(key=trip_summary[0].OuterId, default="NO") %}
+{% set cover_photo_id = all.cover_photos_list | get(key=trip_summary[0].OuterId, default="NO") %}
 
 {% if trip_summary[0].CoverPhoto %}
     {% if trip_summary[0].CoverPhoto is containing("!genre") %}
@@ -19,7 +19,7 @@ body {
 <div id="path-trip">
 
 {% set_global theme_color = "" %}
-{% for item in common.common_trip_domains %}
+{% for item in common_trip_domains %}
     {% if item.DomainAbbreviation == trip_summary[0].DomainAbbreviation %}
         {% set_global theme_color = item.Color %}
     {% endif %}
