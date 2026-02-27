@@ -64,4 +64,4 @@ section {max-width:100%!important;width:100%!important;margin:0!important;}
 
 <div id="map" style="height:100%; width:100%;"></div>
 
-<div id="map-pin-data" data-map='{{ map_data | json_encode }}' data-settings-assets='{% if theme_config | length >= 2 and theme_config[0] == "Enabled" %}{{ settings.Extension.Theme }}{% endif %}'></div>
+<div id="map-pin-data" data-map='{{ map_data | json_encode | escape }}' data-settings-assets='{% if theme_config | length >= 2 and theme_config[0] == "Enabled" %}{{ settings.Extension.Theme }}{% endif %}'></div>

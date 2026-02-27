@@ -1,3 +1,5 @@
+// SQLITE -----------------------------
+
 async function idbGet(dbName, storeName, key) {
   return new Promise((resolve, reject) => {
     const req = indexedDB.open(dbName);
@@ -99,11 +101,17 @@ async function bindSQLiteFile(opfsPath = "chronik.sqlite") {
   const STORE_KEY = "sqlite-db";
 
   let handle = await idbGet(DB_NAME, STORE_NAME, STORE_KEY);
+  const hasUserGesture = !!(navigator.userActivation && navigator.userActivation.isActive);
 
   // If no handle persisted, prompt user
   if (!handle) {
     if (!window.showOpenFilePicker) {
       console.log("File System Access API not supported. Using OPFS only.");
+      const opfsBuffer = await readOPFSFile(opfsPath);
+      return { buffer: opfsBuffer, opfsHandle: null };
+    }
+    if (!hasUserGesture) {
+      console.log("No persisted file handle and no user gesture. Using OPFS only.");
       const opfsBuffer = await readOPFSFile(opfsPath);
       return { buffer: opfsBuffer, opfsHandle: null };
     }
@@ -119,7 +127,7 @@ async function bindSQLiteFile(opfsPath = "chronik.sqlite") {
 
   // Check permission
   let perm = await handle.queryPermission({ mode: "read" });
-  if (perm !== "granted") {
+  if (perm !== "granted" && hasUserGesture) {
     perm = await handle.requestPermission({ mode: "read" });
   }
   if (perm !== "granted") {

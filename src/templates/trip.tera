@@ -210,7 +210,7 @@ body {
     </div>
 
     <div><div id="map" style="width:100%;height:100%;border-radius:3pt;"></div></div>
-    <div id="map-pin-data" data-trip-map-overall='{{ trip_map_pins_overall | json_encode }}' data-trip-map-accommodation='{{ trip_map_pins_accommodation | json_encode }}' data-theme-color="{{ theme_color }}"></div>
+    <div id="map-pin-data" data-trip-map-overall='{{ trip_map_pins_overall | json_encode }}' data-trip-map-accommodation='{{ trip_map_pins_accommodation | json_encode | escape }}' data-theme-color="{{ theme_color }}"></div>
 
 
   </div>
