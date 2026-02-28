@@ -1,59 +1,28 @@
-<div style="max-width:100%;overflow-x:auto;">
-<table class="table-overview-plain">
-  <thead>
-    <tr>
-      <th style="white-space: nowrap;">
-        {{ translation.trip.id | default(value="ID") }}
-      </th>
-      <th>
-        {{ translation.trip.overallDestination | default(value="Overall Destination") }}
-      </th>
-      <th>
-        {{ translation.trip.departureDate | default(value="Departure") }}
-      </th>
-      <th>
-        {{ translation.trip.returnDate | default(value="Return") }}
-      </th>
-      <th>
-        {{ translation.trip.numberOfDays | default(value="NoD") }}
-      </th>
-      <th>
-        {{ translation.trip.participantGroup | default(value="Group") }}
-      </th>
-    </tr>
-  </thead>
-
-  <tbody>
-    {% for trip in overviewPlain %}
-      <tr class="iib-item"
-          data-iib-participantGroup="{{ trip.ParticipantGroup }}"
-          data-trip-domain="{{ trip.TripDomain }}">
-
-        <td style="text-align:center;">
-          <a href="?path=trip:{{ trip.OuterId }}" style="text-decoration:none;">
-            <div class="text-nowrap iib-decade overview-item"
-                 data-iib-participantGroup="{{ trip.ParticipantGroup }}"
-                 data-trip-domain="{{ trip.TripDomain }}">
-              {{ trip.OuterId }}
-            </div>
-          </a>
-        </td>
-
-        <td style="text-align:center;">{{ trip.OverallDestination }}</td>
-
-        <td style="text-align:center;"><div class="text-nowrap">{{ trip.DepartureDate }}</div></td>
-
-        <td style="text-align:center;"><div class="text-nowrap">{{ trip.ReturnDate }}</div></td>
-
-        <td style="text-align:center;">
-          {{ trip.NumberOfDays | default(value="") }}
-        </td>
-
-        <td>
-          <div class="participantGroup" style="text-align:center;">{{ trip.ParticipantGroup }}</div>
-        </td>
+<div id="path-overview-plain">
+  <table>
+    <thead>
+      <tr>
+        <th>{{ translation.trip.id | default(value="ID") }}</th>
+        <th>{{ translation.trip.overallDestination | default(value="Overall Destination") }}</th>
+        <th>{{ translation.trip.departureDate | default(value="Departure") }}</th>
+        <th>{{ translation.trip.returnDate | default(value="Return") }}</th>
+        <th>{{ translation.trip.numberOfDays | default(value="NoD") }}</th>
+        <th>{{ translation.trip.participantGroup | default(value="Group") }}</th>
       </tr>
-    {% endfor %}
-  </tbody>
-</table>
+    </thead>
+    <tbody>
+      {% for trip in overview_plain %}
+      <tr>
+        <td><a href="?path=trip:{{ trip.OuterId }}" class="trip-button" data-trip-domain="{{ trip.TripDomain }}">
+          {{ trip.OuterId }}
+        </a></td>
+        <td>{{ trip.OverallDestination }}</td>
+        <td>{{ trip.DepartureDate }}</div></td>
+        <td>{{ trip.ReturnDate }}</div></td>
+        <td>{{ trip.NumberOfDays | default(value="") }}</td>
+        <td data-participant-group="participant-group">{{ trip.ParticipantGroup }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>

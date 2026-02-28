@@ -1,55 +1,55 @@
 <div id="path-overview-country">
+  {% set_global last_continent = "" %}
+  {% set_global last_country = "" %}
 
-  <div style="display:flex;margin:2pt;flex-direction:column;gap:2pt;">
+  {% for row in overview_country %}
 
-    {% set_global last_continent = "" %}
-
-    {% for row in overviewCountry %}
-
-        {# --- Start a new continent if it changes --- #}
-        {% if row.Continent != last_continent %}
-            {% if last_continent != "" %}
-                </div> {# close previous continent-content #}
-            </details>
-            {% endif %}
-
-            <details open class="continent">
-                <summary>{{ row.Continent }}</summary>
-                <div class="continent-content">
-            {% set_global last_continent = row.Continent %}
-        {% endif %}
-
-        {# --- Country block --- #}
-        <div class="country-row">
-            <div class="country-block">
-                {{ row.Country }}
-            </div>
-            <div class="country-trips">
-
-                {% set countryOuterId = row.OuterIDs | split(pat=", ") %}
-                {% set countryInnerId = row.TripDomains | split(pat=", ") %}
-                {% set countryOverallDestination = row.OverallDestination | split(pat=" | ") %}
-                {% set countryParticipantGroup = row.ParticipantGroup | split(pat=" | ") %}
-
-                {% for trip in countryOuterId %}
-                    {% set i = loop.index0 %}
-                    <a href="?path=trip:{{ countryOuterId[i] }}" class="iib-decade iib-item overview-item"
-                        data-iib-participantGroup="{{ countryParticipantGroup[i] }}"
-                        data-trip-domain="{{ countryInnerId[i] }}">
-                        {{ countryOuterId[i] }} {{ countryOverallDestination[i] }}
-                    </a>
-                {% endfor %}
-
-            </div>
+    {# --- 1. Handle Continent Transitions --- #}
+    {% if row.Continent != last_continent %}
+      {% if last_continent != "" %}
+          </div>
         </div>
+        </div>
+      </details>
+      {% endif %}
 
-    {% endfor %}
-
-    {# --- Close the last continent --- #}
-    {% if last_continent != "" %}
-            </div> {# close last continent-content #}
-    </details>
+      <details open>
+        <summary>{{ row.Continent }}</summary>
+        <div class="details-content">
+      {% set_global last_continent = row.Continent %}
+      {% set_global last_country = "" %}
     {% endif %}
-  </div>
 
+
+    {# --- 2. Handle Country Transitions --- #}
+    {% if row.Country != last_country %}
+      {% if last_country != "" %}
+          </div>
+        </div>
+      {% endif %}
+
+      <div class="row">
+        <div class="row-left">{{ row.Country }}</div>
+        <div class="row-right">
+      {% set_global last_country = row.Country %}
+    {% endif %}
+
+
+    {# --- 3. Render Individual Trip Button --- #}
+    <a href="?path=trip:{{ row.OuterID }}" 
+       class="trip-button" 
+       data-trip-domain="{{ row.TripDomain }}">
+      {{ row.OuterID }} {{ row.OverallDestination }}
+    </a>
+
+  {% endfor %}
+
+
+  {# --- 4. Final Cleanup (Close all open tags) --- #}
+  {% if last_continent != "" %}
+        </div>
+      </div>
+      </div>
+    </details>
+  {% endif %}
 </div>

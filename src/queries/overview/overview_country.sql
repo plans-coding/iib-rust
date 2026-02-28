@@ -5,9 +5,7 @@ WITH ContinentCountriesParsed AS (
       substr(Value || char(10), instr(Value || char(10), char(10)) + 1)
     FROM bewx_Settings
     WHERE Attribute = 'ContinentCountries'
-
     UNION ALL
-
     SELECT
       substr(rest, 1, instr(rest, char(10)) - 1),
       substr(rest, instr(rest, char(10)) + 1)
@@ -26,14 +24,12 @@ WITH ContinentCountriesParsed AS (
     )
 ),
 OrderedEvents AS (
-    -- Orders events by date to process country sequences correctly
     SELECT InnerId, countriesduringday, Date
     FROM bewb_Events
     WHERE countriesduringday GLOB '[+*a-zA-ZÅÄÖåäö.-]*'
     ORDER BY Date ASC
 ),
 SplittedCountries AS (
-    -- Splits the comma-separated country strings into individual rows
     SELECT InnerId,
            TRIM(value) AS country,
            Date,
@@ -42,7 +38,6 @@ SplittedCountries AS (
          json_each('["' || REPLACE(countriesduringday, ',', '","') || '"]')
 ),
 ConsecutiveRemoval AS (
-    -- Removes consecutive duplicate countries to identify unique border crossings
     SELECT InnerId, country, Date, row_num,
            CASE
                WHEN row_num = 1 THEN country
@@ -52,7 +47,6 @@ ConsecutiveRemoval AS (
     FROM SplittedCountries
 ),
 BorderCrossings AS (
-    -- This is the substituted subquery, generating the list of border crossings
     SELECT b.OuterId, a.InnerId,
            GROUP_CONCAT(a.cleaned_country, ', ') AS AllBorderCrossings
     FROM ConsecutiveRemoval AS a
@@ -61,7 +55,6 @@ BorderCrossings AS (
     GROUP BY a.InnerId
 ),
 normalized AS (
-    -- Normalizes the data by cleaning country names and joining with overview details
     SELECT
         a.OuterID,
         a.InnerId,
@@ -70,25 +63,21 @@ normalized AS (
         b.OverallDestination,
         b.ParticipantGroup,
         b.DepartureDate,
-		b.TripDomain
+        b.TripDomain
     FROM BorderCrossings AS a,
         json_each('["' || REPLACE(AllBorderCrossings, ', ', '", "') || '"]')
     LEFT JOIN  bewa_Overview AS b
     ON b.InnerId = a.InnerId
-    /*WHERE TripDomain IN (TripDomain) AND ParticipantGroup IN (ParticipantGroup) AND 1=1*/
-    ORDER BY
-        b.DepartureDate ASC
 )
--- Final selection and aggregation
+-- Final selection: Removed GROUP_CONCAT and GROUP BY
 SELECT
     c.Continent,
     n.Country,
-    GROUP_CONCAT(n.OuterID, ', ') AS OuterIDs,
-	GROUP_CONCAT(n.TripDomain, ', ') AS TripDomains,
-    GROUP_CONCAT(n.OverallDestination, ' | ') AS OverallDestination,
-    GROUP_CONCAT(n.ParticipantGroup, ' | ') AS ParticipantGroup
+    n.OuterID,
+    n.TripDomain,
+    n.OverallDestination,
+    n.ParticipantGroup
 FROM (
-    -- Filters out special country markers before final grouping
     SELECT DISTINCT Country, OuterID, InnerId, TripDomain, OverallDestination, ParticipantGroup
     FROM normalized
     WHERE OriginalCountry NOT LIKE '+%'
@@ -96,9 +85,8 @@ FROM (
 ) AS n
 LEFT JOIN ContinentCountriesParsed AS c
 ON c.Country = n.Country
-GROUP BY c.Continent, n.Country
 ORDER BY
-    -- Ensures 'Europa' is always the first continent listed
     CASE WHEN c.Continent = 'Europa' THEN 0 ELSE 1 END,
     c.Continent ASC,
-    n.Country ASC;
+    n.Country ASC,
+    n.OuterID ASC; -- Added OuterID to ordering for cleaner results

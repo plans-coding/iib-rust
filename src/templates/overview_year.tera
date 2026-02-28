@@ -1,66 +1,54 @@
 <div id="path-overview-year">
+    {% set last_decade = 0 %}
+    {% set last_year = 0 %}
+    {% set year_open = false %}
 
-    <div style="display:flex;margin:2pt;flex-direction:column;gap:2pt;">
-        {% set last_decade = 0 %}
-        {% set last_year = 0 %}
-        {% set year_open = false %}
-
-        {% for trip in overviewYear %}
-
-            {# Start a new decade if it changes #}
-            {% if trip.TripDecade != last_decade %}
-                {% if last_decade != 0 %}
-                    {% if year_open %}
-                        </div> {# close trips-block #}
-                    </div> {# close year-row #}
-                        {% set_global year_open = false %}
-                    {% endif %}
-                </div> {# close previous decade-content #}
-                </details>
-                {% endif %}
-
-                <details open class="decade">
-                    <summary>{{ trip.TripDecade }}{{ translation.overview.century | default(value="'s") }}</summary>
-                    <div class="decade-content">
-                {% set_global last_decade = trip.TripDecade %}
-                {% set_global last_year = 0 %}
-            {% endif %}
-
-            {# If year changes, close previous year-row and start a new one #}
-            {% if trip.TripYear != last_year %}
+    {% for trip in overview_year %}
+        {# --- HANDLE DECADE TRANSITION --- #}
+        {% if trip.TripDecade != last_decade %}
+            {% if last_decade != 0 %}
                 {% if year_open %}
-                    </div> {# close trips-block #}
-                </div> {# close previous year-row #}
+                    </div></div>
+                    {% set_global year_open = false %}
                 {% endif %}
-
-                <div class="year-row">
-                    <div class="year-block">{{ trip.TripYear }}</div>
-                    <div class="trips-block">
-                {% set_global last_year = trip.TripYear %}
-                {% set_global year_open = true %}
+                </div></details> {# close decade details-content and details #}
             {% endif %}
 
-            {# Add trip entry #}
-            <a href="?path=trip:{{ trip.OuterId }}" style="text-decoration:none;">
-                <div class="iib-decade iib-item overview-item"
-                    data-participant-group="{{ trip.ParticipantGroup }}"
-                    data-trip-domain="{{ trip.TripDomain }}">
-                    {{ trip.OuterId }} {{ trip.OverallDestination }}
-                </div>
-            </a>
-
-        {% endfor %}
-
-        {# Close any remaining open divs #}
-        {% if year_open %}
-                </div> {# close trips-block #}
-            </div> {# close last year-row #}
+            <details open>
+                <summary>{{ trip.TripDecade }}{{ translation.overview.century | default(value="'s") }}</summary>
+                <div class="details-content">
+            
+            {% set_global last_decade = trip.TripDecade %}
+            {% set_global last_year = 0 %}
         {% endif %}
-        {% if last_decade != 0 %}
-                </div> {# close last decade-content #}
-        </details>
-        {% endif %}
-    </div>
 
+        {# --- HANDLE YEAR TRANSITION --- #}
+        {% if trip.TripYear != last_year %}
+            {% if year_open %}
+                </div></div> {# close previous row-right and row #}
+            {% endif %}
+
+            <div class="row">
+                <div class="row-left">{{ trip.TripYear }}</div>
+                <div class="row-right">
+            
+            {% set_global last_year = trip.TripYear %}
+            {% set_global year_open = true %}
+        {% endif %}
+
+        {# --- TRIP ENTRY --- #}
+        <a href="?path=trip:{{ trip.OuterId }}" 
+           class="trip-button" 
+           data-trip-domain="{{ trip.TripDomain }}">
+            {{ trip.OuterId }} {{ trip.OverallDestination }}
+        </a>
+    {% endfor %}
+
+    {# --- FINAL CLEANUP --- #}
+    {% if year_open %}
+        </div></div>
+    {% endif %}
+    {% if last_decade != 0 %}
+        </div></details>
+    {% endif %}
 </div>
-

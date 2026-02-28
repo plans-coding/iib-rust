@@ -470,7 +470,7 @@ async fn page_load_internal() {
                 title: tr("/overview/year", "Overview: Year"),
                 template: "overview_year".into(),
                 queries: vec![(
-                    "overviewYear".into(),
+                    "overview_year".into(),
                     QUERY_OVERVIEW_YEAR.apply_filters(
                         &participant_group,
                         &trip_domain,
@@ -484,7 +484,7 @@ async fn page_load_internal() {
                 title: tr("/overview/country", "Overview: Country"),
                 template: "overview_country".into(),
                 queries: vec![(
-                    "overviewCountry".into(),
+                    "overview_country".into(),
                     QUERY_OVERVIEW_COUNTRY.apply_filters(
                         &participant_group,
                         &trip_domain,
@@ -499,7 +499,7 @@ async fn page_load_internal() {
                 title: tr("/overview/plain", "Overview: Plain"),
                 template: "overview_plain".into(),
                 queries: vec![(
-                    "overviewPlain".into(),
+                    "overview_plain".into(),
                     QUERY_OVERVIEW_PLAIN.apply_filters(
                         &participant_group,
                         &trip_domain,
@@ -974,7 +974,7 @@ async fn page_load_internal() {
     let mut context = render_structure.clone();
     context.insert("all", &all_state);
     context.insert("query_params", &all_state["query_params"]);
-    context.insert("title", &page_data.title);
+    //context.insert("title", &page_data.title);
 
     if let Some(obj) = query_response.as_object() {
         for (key, value) in obj {
@@ -1033,9 +1033,11 @@ async fn page_load_internal() {
         web_sys::console::log_1(&e.into());
     }
 
-    load_filter_OPFS();
 
-    // POST CODE  -----------------------------------------------------------------------
+
+    // RUN FUNCTIONS AFTER PAGE LOAD  ------------------------------------
+
+    load_filter_OPFS();
 
     for action in execute_after {
         match action.as_str() {
@@ -1053,6 +1055,7 @@ async fn page_load_internal() {
             _ => {}
         }
     }
+
 }
 
 pub async fn get_sqlite_binary() -> Vec<u8> {
