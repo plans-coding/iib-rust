@@ -168,10 +168,18 @@
 
         <script>
 
-        (async () => {
-            const { buffer, opfsHandle } = await bindSQLiteFile();
-            console.log("SQLite buffer ready for WASM in-memory load:", buffer.byteLength, "bytes");
-        })();
+        /*(async () => {
+            try {
+                const { buffer } = await bindSQLiteFile();
+                if (buffer) {
+                    console.log("SQLite buffer ready for WASM in-memory load:", buffer.byteLength, "bytes");
+                } else {
+                    console.log("No SQLite buffer available yet.");
+                }
+            } catch (err) {
+                console.warn("SQLite file binding skipped:", err);
+            }
+        })();*/
 
         // CUSTOM QUERIES  -----------------------------------------------------------------------
 

@@ -1,38 +1,27 @@
+<div id="path-statistics-summary">
 
+  <template id="stat-trip-overview-chart-data"
+      data-json='{{ statistics_per_domain_year | json_encode }}'
+      data-json-color='{{ common_trip_domains | json_encode }}'>
+  </template>
 
-<template id="stat-trip-overview-chart-data"
-     data-json='{{ statistics_per_domain_year | json_encode }}'
-     data-json-color='{{ common_trip_domains | json_encode }}'>
-</template>
-
-<div style="display:flex;flex-direction:row;gap:5pt;flex-wrap:wrap;" id="statistics-summary-flex">
-
-  <div style="display:flex;flex-direction:column;justify-content:top;gap:3pt;align-items:stretch;" id="statistics-summary-flex-widget">
-    
-    <div style="background-color:var(--color-hover-background-alpha);border-radius:10pt;padding:10pt;">
-      <h2 style="text-align:center;">{{ statistics_visits[0].TripCount }}</h2>
-      <p style="text-align:center;">
-        {{ translation.statistics.uniqueCountries
-           | default(value="Count of unique countries") }}
-      </p>
+  <div id="statistics-summary-flex">
+    <div id="statistics-summary-flex-widget">
+      <div class="widget-class">
+        <h2>{{ statistics_visits[0].TripCount }}</h2>
+        <p>{{ translation.statistics.uniqueCountries
+            | default(value="Count of unique countries") }}</p>
+      </div>
+      <div class="widget-class">
+        <h2>{{ statistics_trip_count[0].Count }}</h2>
+        <p>{{ translation.statistics.totalTrips
+            | default(value="Number of trips in total") }}</p>
+      </div>
     </div>
-  
-    <div style="background-color:var(--color-hover-background-alpha);border-radius:10pt;padding:10pt;">
-      <h2 style="text-align:center;">{{ statistics_trip_count[0].Count }}</h2>
-      <p style="text-align:center;">
-        {{ translation.statistics.totalTrips
-           | default(value="Number of trips in total") }}
-      </p>
+    <div class="stat-overv">
+      <canvas id="stat-trip-overview"></canvas><br />
+      <div>{{ translation.statistics.tripDomainYear | default(value="Trips per domain and year") }}</div>
     </div>
+  </div>
   
-  </div>
-
-  <div style="flex:1;text-align:center;">
-    
-    <canvas id="stat-trip-overview" style="max-width:100%;width:100%;"></canvas><br />
-    <div>{{ translation.statistics.tripDomainYear | default(value="Trips per domain and year") }}</div>
-    
-  </div>
-
 </div>
-

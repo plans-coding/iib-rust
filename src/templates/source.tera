@@ -1,6 +1,13 @@
+<style>
+body {
+    background: repeating-linear-gradient(to right, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.25) 24px, transparent 2px, transparent 10px), radial-gradient(circle at top center, rgba(255, 255, 255, 0.15) 0%, transparent 60%), linear-gradient(to right, gold, green);
+    background-blend-mode: overlay;
+}
+#iib-foot{display:none;}
+</style>
 <div id="path-source">
 
-  <div style="display:flex;flex-direction:column;gap:5pt;">
+  {#<div style="display:flex;flex-direction:column;gap:5pt;">
 
     <div class="{% if all.db_loaded == "stored" %}green-text{% else %}red-text{% endif %}" id="opfsStatus" style="display:inline-block;">
     {% if all.db_loaded == "stored" %}
@@ -86,7 +93,116 @@
       </div>
 
 {% endif %}
-  </div>
+  </div>#}
+
+    <!-- Status Bar -->
+    <div class="status-bar blur">
+      <div class="status-item">
+        <div class="status-dot" id="dotOpfs"></div>
+        <span class="status-label">OPFS:</span>
+        <span class="status-value" id="valOpfs">Checking…</span>
+      </div>
+      <div class="status-item">
+        <div class="status-dot" id="dotDb"></div>
+        <span class="status-label">DB in OPFS:</span>
+        <span class="status-value" id="valDb">—</span>
+      </div>
+      <div class="status-item">
+        <div class="status-dot" id="dotSize"></div>
+        <span class="status-label">Size:</span>
+        <span class="status-value" id="valSize">—</span>
+      </div>
+      <div class="status-item">
+        <div class="status-dot" id="dotBound"></div>
+        <span class="status-label">Bound file:</span>
+        <span class="status-value" id="valBound">—</span>
+      </div>
+      <div class="status-item">
+        <div class="status-dot" id="dotImmich"></div>
+        <span class="status-label">Immich status:</span>
+        <span class="status-value" id="valImmich">—</span>
+      </div>
+      <div class="status-item">
+        <div class="status-dot" id="dotImmichSync"></div>
+        <span class="status-label">Bound file:</span>
+        <span class="status-value" id="valImmichSync">—</span>
+      </div>
+    </div>
+
+    <!-- Radio Options -->
+    <div class="options">
+      <label class="option-card" data-mode="fetch">
+        <input type="radio" name="mode" value="fetch" />
+        <h3>① Fetch from Server</h3>
+        <p>Read the DB path from <code>server_db_path.txt</code>, fetch the <code>.sqlite</code> file, and persist it into OPFS.</p>
+      </label>
+
+      <label class="option-card" data-mode="folder">
+        <input type="radio" name="mode" value="folder" />
+        <h3>② Bind Local File <span class="badge readonly">Read-only</span> <span class="badge sync">Auto-sync</span></h3>
+        <p>Pick a local <code>.sqlite</code> file. A copy is saved to OPFS. The file handle is <strong>persisted across reloads</strong> via IndexedDB. On reload, the file is compared by hash and re-synced if changed.</p>
+      </label>
+
+      <label class="option-card" data-mode="upload">
+        <input type="radio" name="mode" value="upload" />
+        <h3>③ Upload Directly</h3>
+        <p>Drag-and-drop or browse to upload a <code>.sqlite</code> file straight into OPFS.</p>
+      </label>
+    </div>
+
+    <!-- Action Panels -->
+    <div class="action-area">
+      <!-- FETCH panel -->
+      <div id="panel-fetch" class="hidden">
+        <h4>Fetch from Server</h4>
+        <div class="input-row">
+          <input type="text" id="fetchPathOverride" placeholder="Or paste a direct URL to .sqlite (optional)" />
+          <button class="btn" id="btnFetch">⬇ Fetch</button>
+        </div>
+        <div class="progress-wrap hidden" id="fetchProgress">
+          <div class="progress-bar" id="fetchBar"></div>
+        </div>
+      </div>
+
+      <!-- FOLDER panel -->
+      <div id="panel-folder" class="hidden">
+        <h4>Bind Local File</h4>
+        <div class="btn-row">
+          <button class="btn" id="btnPickFile">📂 Pick .sqlite File</button>
+          <button class="btn btn-outline hidden" id="btnResync">🔄 Re-check &amp; Sync</button>
+          <button class="btn btn-danger hidden" id="btnUnbind">✕ Unbind</button>
+        </div>
+        <div class="folder-info hidden" id="folderInfo">
+          <div class="filename" id="folderFilename"></div>
+          <div class="meta" id="folderMeta"></div>
+        </div>
+        <div class="progress-wrap hidden" id="folderProgress">
+          <div class="progress-bar" id="folderBar"></div>
+        </div>
+      </div>
+
+      <!-- UPLOAD panel -->
+      <div id="panel-upload" class="hidden">
+        <h4>Upload SQLite File</h4>
+        <div class="file-drop" id="dropZone">
+          <input type="file" id="fileInput" accept=".sqlite,.db,.sqlite3" />
+          <span class="icon">📄</span>
+          Drop your <strong>.sqlite</strong> file here or <strong>click to browse</strong>
+        </div>
+        <div class="progress-wrap hidden" id="uploadProgress">
+          <div class="progress-bar" id="uploadBar"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Log -->
+    <div class="log-panel">
+      <div class="log-header">
+        <h4>Activity Log</h4>
+        <button id="btnClearLog">Clear</button>
+      </div>
+      <div id="log"></div>
+    </div>
 
 
 </div>

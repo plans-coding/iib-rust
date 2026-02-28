@@ -5,6 +5,8 @@ use serde_json::json;
 use tera::Tera;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::{future_to_promise, JsFuture};
+use serde::Serialize;
+use std::collections::HashMap;
 use opfs::{
     persistent::app_specific_dir,
     CreateWritableOptions, GetFileHandleOptions,
@@ -127,6 +129,45 @@ fn get_tera() -> &'static Tera {
     })
 }
 
+fn tokenize_path(path: &str) -> (&str, &str, &str) {
+    if let Some(s) = path.strip_prefix("trip:") {
+        let parts: Vec<&str> = s.splitn(2, ':').collect();
+        return match parts.as_slice() {
+            ["", inner] => ("trip", "", inner),
+            [outer, _]  => ("trip", outer, ""), 
+            [outer]     => ("trip", outer, ""),
+            _           => ("trip", "", ""),
+        };
+    }
+    if let Some(s) = path.strip_prefix("map:") {
+        let parts: Vec<&str> = s.splitn(2, ':').collect();
+        return match parts.as_slice() {
+            [kind, val] => ("map", kind, val),
+            _           => ("map", "", ""),
+        };
+    }
+    if let Some(s) = path.strip_prefix("images:") {
+        let parts: Vec<&str> = s.splitn(2, ':').collect();
+        return match parts.as_slice() {
+            [id, date] => ("images", id, date),
+            _          => ("images", "", ""),
+        };
+    }
+    if let Some(s) = path.strip_prefix("report:output:") {
+        let parts: Vec<&str> = s.splitn(2, ':').collect();
+        return match parts.as_slice() {
+            [title, back] => ("report:output", title, back),
+            _             => ("report:output", "", ""),
+        };
+    }
+    if let Some(s) = path.strip_prefix("search:") {
+        return ("search", s, "");
+    }
+
+    // Default for exact matches like "explore", "overview:year", etc.
+    (path, "", "")
+}
+
 static DB_BYTES: OnceCell<Vec<u8>> = OnceCell::new();
 static RENDER_STRUCTURE: OnceCell<Mutex<tera::Context>> = OnceCell::new();
 
@@ -153,12 +194,14 @@ extern "C" {
     fn init_create_trip();
     fn load_filter_OPFS();
 
+    fn sync_db_init();
+
     #[wasm_bindgen(catch)]
     async fn get_filter_value_OPFS() -> Result<JsValue, JsValue>;
     #[wasm_bindgen(catch)]
     async fn check_available_update() -> Result<JsValue, JsValue>;
     #[wasm_bindgen(catch)]
-    async fn read_opfs_file(path: &str) -> Result<JsValue, JsValue>;
+    async fn readOPFSFile(path: &str) -> Result<JsValue, JsValue>;
     #[wasm_bindgen(catch)]
     async fn read_opfs_text(path: &str) -> Result<JsValue, JsValue>;
 }
@@ -214,26 +257,51 @@ pub fn user_run_sql(sql: String) -> js_sys::Promise {
 // -----------------------------------------------------------------------
 
 async fn session_load() -> (Vec<u8>, tera::Context) {
-    let db_bytes = get_sqlite_binary().await;
-    if !db_bytes.is_empty() { 
-        sqlite_query::get_or_init_db(&db_bytes); 
+    use wasm_bindgen::JsCast;
+    use js_sys::Uint8Array;
+
+    let db_result = readOPFSFile("app.sqlite").await;
+
+    let db_bytes: Vec<u8> = db_result
+        .ok()
+        .map(|val| {
+            Uint8Array::new(&val).to_vec()
+        })
+        .unwrap_or_default();
+
+    let db_loaded = !db_bytes.is_empty();
+
+    if db_loaded {
+        sqlite_query::get_or_init_db(&db_bytes);
     }
 
     // 1. Get current path from URL
-    let path = web_sys::window()
-        .and_then(|w| w.location().search().ok())
-        .and_then(|s| web_sys::UrlSearchParams::new_with_str(&s).ok())
-        .and_then(|p| p.get("path"))
-        .unwrap_or_else(|| "explore".to_string());
+    let path = if db_loaded {
+        web_sys::window()
+            .and_then(|w| w.location().search().ok())
+            .and_then(|s| web_sys::UrlSearchParams::new_with_str(&s).ok())
+            .and_then(|p| p.get("path"))
+            .unwrap_or_else(|| "explore".to_string())
+    } else {
+        "source".to_string()
+    };
 
     // 2. Query Database
-    let mut results = sqlite_query::get_query_data_universal(&db_bytes, vec![
-        ("file".into(), "SELECT Value FROM bewx_Settings WHERE Attribute = 'LanguageFile' LIMIT 1;".into()),
-        ("settings".into(), "SELECT * FROM bewx_Settings;".into()),
-        ("common_trip_domains".into(), QUERY_COMMON_TRIP_DOMAINS.into()),
-        ("common_participant_groups".into(), QUERY_COMMON_PARTICIPANT_GROUPS.into()),
-        ("common_trip_labels".into(), QUERY_COMMON_TRIP_LABELS.into()),
-    ], false).await;
+    let mut results = if db_loaded {
+        sqlite_query::get_query_data_universal(&db_bytes, vec![
+            ("file".into(), "SELECT Value FROM bewx_Settings WHERE Attribute = 'LanguageFile' LIMIT 1;".into()),
+            ("settings".into(), "SELECT * FROM bewx_Settings;".into()),
+            ("common_trip_domains".into(), QUERY_COMMON_TRIP_DOMAINS.into()),
+            ("common_participant_groups".into(), QUERY_COMMON_PARTICIPANT_GROUPS.into()),
+            ("common_trip_labels".into(), QUERY_COMMON_TRIP_LABELS.into()),
+        ], false).await
+    } else {
+        serde_json::json!({
+            "common_trip_domains": [],
+            "common_participant_groups": [],
+            "common_trip_labels": []
+        })
+    };
 
     // 3. Fetch Translation File
     let translation = match results.pointer("/file/0/Value").and_then(|v| v.as_str()) {
@@ -332,20 +400,20 @@ async fn page_load_internal() {
         all_state = json!({});
     }
 
-    let path = web_sys::window()
-        .expect("No window available")
-        .location()
-        .search()
-        .ok()
-        .as_deref()
-        .and_then(|s| web_sys::UrlSearchParams::new_with_str(s).ok())
-        .and_then(|params| params.get("path"));
+    let db_loaded = !db_bytes.is_empty();
+    let mut page = web_sys::window()
+        .and_then(|w| w.location().search().ok())
+        .and_then(|s| web_sys::UrlSearchParams::new_with_str(&s).ok())
+        .and_then(|p| p.get("path"))
+        .unwrap_or_else(|| "explore".to_string());
 
-    let page = path.as_deref().unwrap_or("explore");
+    if !db_loaded {
+        page = "source".to_string();
+    }
 
     //web_sys::console::log_1(&format!("Loading page: {}",page).into());
 
-    all_state["query_params"] = json!({ "path": path.clone() });
+    all_state["query_params"] = json!({ "path": page.clone() });
 
     // READ APPLIED FILTERS  -----------------------------------------------------------------------
 
@@ -400,9 +468,6 @@ async fn page_load_internal() {
             .unwrap_or(fallback)
             .to_string()
     };
-
-    use serde_json;
-    use std::collections::HashMap;
     
     let cover_photos_json = read_opfs_text("cover_photos.json").await.ok();
 
@@ -438,8 +503,6 @@ async fn page_load_internal() {
         }
     }
 
-    use serde::Serialize;
-
     #[derive(Serialize, Debug, Clone)]
     pub struct PageData {
         pub title: String,
@@ -450,501 +513,264 @@ async fn page_load_internal() {
     // -----------------------------------------------------------------------
     // Fourth: Page specific data
     // -----------------------------------------------------------------------
+    
     let mut page_data: Option<PageData> = None;
     let mut execute_after: Vec<String> = Vec::new();
-    match page {
-        "explore" => {
+    let (route, a1, a2) = tokenize_path(&page);
+
+    let get_trip_queries =
+        |id_field: &str,
+         id_value: &str,
+         participant_group: &str,
+         trip_domain: &str,
+         trip_label: &str|
+         -> Vec<(String, String)> {
+            match id_field {
+                "InnerId" => vec![
+                    ("trip_summary".into(), QUERY_TRIP_SUMMARY.replace("= InnerId", &format!("= '{}'", id_value))),
+                    ("trip_events".into(), QUERY_TRIP_EVENTS.replace("= e.InnerId", &format!("= '{}'", id_value))),
+                    ("common_trip_domains".into(), QUERY_COMMON_TRIP_DOMAINS.to_string()),
+                    ("trip_unique_countries".into(), QUERY_TRIP_UNIQUE_COUNTRIES.replace("= InnerId", &format!("= '{}'", id_value))),
+                    ("trip_border_crossings".into(), QUERY_TRIP_BORDER_CROSSINGS.replace("= a.InnerId", &format!("= '{}'", id_value))),
+                    ("trip_map_pins_overall".into(), QUERY_TRIP_MAP_PINS_OVERALL.replace("= InnerId", &format!("= '{}'", id_value))),
+                    ("trip_map_pins_accommodation".into(), QUERY_TRIP_MAP_PINS_ACCOMMODATION.replace("= o.InnerId", &format!("= '{}'", id_value))),
+                    ("trip_previous".into(), QUERY_TRIP_PREVIOUS.replace("= InnerId", &format!("= '{}'", id_value)).apply_filters(participant_group, trip_domain, trip_label)),
+                    ("trip_next".into(), QUERY_TRIP_NEXT.replace("= InnerId", &format!("= '{}'", id_value)).apply_filters(participant_group, trip_domain, trip_label)),
+                    ("trip_immich_desc_search".into(), QUERY_TRIP_IMMICH_DESC_SEARCH.replace("= InnerId", &format!("= '{}'", id_value))),
+                    ("trip_immich_album_name".into(), QUERY_TRIP_IMMICH_ALBUM_NAME.replace("= InnerId", &format!("= '{}'", id_value))),
+                ],
+                _ => vec![
+                    ("trip_summary".into(), QUERY_TRIP_SUMMARY.replace("= OuterId", &format!("= '{}'", id_value))),
+                    ("trip_events".into(), QUERY_TRIP_EVENTS.replace("= o.OuterId", &format!("= '{}'", id_value))),
+                    ("common_trip_domains".into(), QUERY_COMMON_TRIP_DOMAINS.to_string()),
+                    ("trip_unique_countries".into(), QUERY_TRIP_UNIQUE_COUNTRIES.replace("= OuterId", &format!("= '{}'", id_value))),
+                    ("trip_border_crossings".into(), QUERY_TRIP_BORDER_CROSSINGS.replace("= b.OuterId", &format!("= '{}'", id_value))),
+                    ("trip_map_pins_overall".into(), QUERY_TRIP_MAP_PINS_OVERALL.replace("= OuterId", &format!("= '{}'", id_value))),
+                    ("trip_map_pins_accommodation".into(), QUERY_TRIP_MAP_PINS_ACCOMMODATION.replace("= o.OuterId", &format!("= '{}'", id_value))),
+                    ("trip_previous".into(), QUERY_TRIP_PREVIOUS.replace("= OuterId", &format!("= '{}'", id_value)).apply_filters(participant_group, trip_domain, trip_label)),
+                    ("trip_next".into(), QUERY_TRIP_NEXT.replace("= OuterId", &format!("= '{}'", id_value)).apply_filters(participant_group, trip_domain, trip_label)),
+                    ("trip_immich_desc_search".into(), QUERY_TRIP_IMMICH_DESC_SEARCH.replace("= OuterId", &format!("= '{}'", id_value))),
+                    ("trip_immich_album_name".into(), QUERY_TRIP_IMMICH_ALBUM_NAME.replace("= OuterId", &format!("= '{}'", id_value))),
+                ],
+            }
+        };
+
+    match (route, a1, a2) {
+
+        ("explore", _, _) => {
             page_data = Some(PageData {
                 title: tr("/explore/title", "Explore"),
                 template: "explore".into(),
-                queries: vec![(
-                    "explore".into(),
-                    QUERY_EXPLORE.apply_filters(&participant_group, &trip_domain, &trip_label),
-                )],
+                queries: vec![("explore".into(), QUERY_EXPLORE.apply_filters(&participant_group, &trip_domain, &trip_label))],
             });
-            all_state["cover_photos_list"] =
-                serde_json::to_value(&cover_photos_map).expect("Failed to convert map to Value");
+            all_state["cover_photos_list"] = serde_json::to_value(&cover_photos_map).unwrap();
         }
-        "overview:year" => {
+
+        ("overview:year", _, _) => {
             page_data = Some(PageData {
                 title: tr("/overview/year", "Overview: Year"),
                 template: "overview_year".into(),
-                queries: vec![(
-                    "overview_year".into(),
-                    QUERY_OVERVIEW_YEAR.apply_filters(
-                        &participant_group,
-                        &trip_domain,
-                        &trip_label,
-                    ),
-                )],
-            });
-        }
-        "overview:country" => {
-            page_data = Some(PageData {
-                title: tr("/overview/country", "Overview: Country"),
-                template: "overview_country".into(),
-                queries: vec![(
-                    "overview_country".into(),
-                    QUERY_OVERVIEW_COUNTRY.apply_filters(
-                        &participant_group,
-                        &trip_domain,
-                        &trip_label,
-                    ),
-                )],
+                queries: vec![("overview_year".into(), QUERY_OVERVIEW_YEAR.apply_filters(&participant_group, &trip_domain, &trip_label))],
             });
         }
 
-        "overview:plain" => {
+        ("overview:country", _, _) => {
+            page_data = Some(PageData {
+                title: tr("/overview/country", "Overview: Country"),
+                template: "overview_country".into(),
+                queries: vec![("overview_country".into(), QUERY_OVERVIEW_COUNTRY.apply_filters(&participant_group, &trip_domain, &trip_label))],
+            });
+        }
+
+        ("overview:plain", _, _) => {
             page_data = Some(PageData {
                 title: tr("/overview/plain", "Overview: Plain"),
                 template: "overview_plain".into(),
-                queries: vec![(
-                    "overview_plain".into(),
-                    QUERY_OVERVIEW_PLAIN.apply_filters(
-                        &participant_group,
-                        &trip_domain,
-                        &trip_label,
-                    ),
-                )],
+                queries: vec![("overview_plain".into(), QUERY_OVERVIEW_PLAIN.apply_filters(&participant_group, &trip_domain, &trip_label))],
             });
         }
-        "map" => {
+
+        ("map", "", "") => {
             page_data = Some(PageData {
                 title: tr("/map/title", "Map"),
                 template: "map".into(),
                 queries: vec![
-                    (
-                        "map_country_list".into(),
-                        QUERY_MAP_COUNTRY_LIST.apply_filters(
-                            &participant_group,
-                            &trip_domain,
-                            &trip_label,
-                        ),
-                    ),
-                    (
-                        "map_data".into(),
-                        QUERY_MAP_CONTOUR.apply_filters(
-                            &participant_group,
-                            &trip_domain,
-                            &trip_label,
-                        ),
-                    ),
-                    (
-                        "common_trip_domains".into(),
-                        QUERY_COMMON_TRIP_DOMAINS.to_string(),
-                    ),
+                    ("map_country_list".into(), QUERY_MAP_COUNTRY_LIST.apply_filters(&participant_group, &trip_domain, &trip_label)),
+                    ("map_data".into(), QUERY_MAP_CONTOUR.apply_filters(&participant_group, &trip_domain, &trip_label)),
+                    ("common_trip_domains".into(), QUERY_COMMON_TRIP_DOMAINS.to_string()),
                 ],
             });
             execute_after = vec!["load_contour_map".to_string()];
         }
-        "statistics:summary" => {
+
+        ("map", "country", country) => {
             page_data = Some(PageData {
-                    title: tr("/statistics/summary", "Statistics: Summary"),
-                    template: "statistics_summary".into(),
-                    queries: vec![
-                        ("statistics_visits".into(), QUERY_STATISTICS_VISITS.replace("SELECT\n    Country,\n    OL,\n    SS,\n    VSS,\n    PS,\n    OLMQ,\n    SSMQ,\n    VSSMQ,\n    PSMQ\nFROM Aggregated\nORDER BY OL DESC;", "SELECT COUNT(DISTINCT Country) AS TripCount FROM Aggregated;").replace("/*", "").replace("*/", "").apply_filters(&participant_group, &trip_domain, &trip_label)),
-                        ("statistics_trip_count".into(), QUERY_STATISTICS_TRIP_COUNT.apply_filters(&participant_group, &trip_domain, &trip_label)),
-                        ("statistics_per_domain_year".into(), QUERY_STATISTICS_PER_DOMAIN_YEAR.apply_filters(&participant_group, &trip_domain, &trip_label)),
-                        ("common_trip_domains".into(), QUERY_COMMON_TRIP_DOMAINS.to_string()),
-                    ],
-                });
+                title: tr("/map/title", "Map"),
+                template: "map".into(),
+                queries: vec![
+                    ("map_country_list".into(), QUERY_MAP_COUNTRY_LIST.apply_filters(&participant_group, &trip_domain, &trip_label)),
+                    ("common_trip_domains".into(), QUERY_COMMON_TRIP_DOMAINS.to_string()),
+                    ("map_data".into(), QUERY_MAP_COUNTRY.replace("_COUNTRY_", country).apply_filters(&participant_group, &trip_domain, &trip_label)),
+                ],
+            });
+            execute_after = vec!["load_country_map".into()];
+        }
+
+        ("map", "theme", theme) => {
+            page_data = Some(PageData {
+                title: tr("/map/title", "Map"),
+                template: "map".into(),
+                queries: vec![
+                    ("map_country_list".into(), QUERY_MAP_COUNTRY_LIST.apply_filters(&participant_group, &trip_domain, &trip_label)),
+                    ("common_trip_domains".into(), QUERY_COMMON_TRIP_DOMAINS.to_string()),
+                    ("map_data".into(), QUERY_MAP_THEME.replace("_THEME_", theme).apply_filters(&participant_group, &trip_domain, &trip_label)),
+                ],
+            });
+            execute_after = vec!["load_theme_map".into()];
+        }
+
+        ("statistics:summary", _, _) => {
+            page_data = Some(PageData {
+                title: tr("/statistics/summary", "Statistics: Summary"),
+                template: "statistics_summary".into(),
+                queries: vec![
+                    ("statistics_visits".into(), QUERY_STATISTICS_VISITS.replace("SELECT\n    Country,\n    OL,\n    SS,\n    VSS,\n    PS,\n    OLMQ,\n    SSMQ,\n    VSSMQ,\n    PSMQ\nFROM Aggregated\nORDER BY OL DESC;", "SELECT COUNT(DISTINCT Country) AS TripCount FROM Aggregated;").replace("/*", "").replace("*/", "").apply_filters(&participant_group, &trip_domain, &trip_label)),
+                    ("statistics_trip_count".into(), QUERY_STATISTICS_TRIP_COUNT.apply_filters(&participant_group, &trip_domain, &trip_label)),
+                    ("statistics_per_domain_year".into(), QUERY_STATISTICS_PER_DOMAIN_YEAR.apply_filters(&participant_group, &trip_domain, &trip_label)),
+                    ("common_trip_domains".into(), QUERY_COMMON_TRIP_DOMAINS.to_string()),
+                ],
+            });
             execute_after = vec!["initializeChart".to_string()];
         }
-        "statistics:visits" => {
+
+        ("statistics:visits", _, _) => {
             page_data = Some(PageData {
                 title: tr("/statistics/visits", "Statistics: Visits"),
                 template: "statistics_visits".into(),
-                queries: vec![(
-                    "statistics_visits".into(),
-                    QUERY_STATISTICS_VISITS
-                        .replace("/*", "")
-                        .replace("*/", "")
-                        .apply_filters(&participant_group, &trip_domain, &trip_label),
-                )],
+                queries: vec![("statistics_visits".into(), QUERY_STATISTICS_VISITS.replace("/*", "").replace("*/", "").apply_filters(&participant_group, &trip_domain, &trip_label))],
             });
         }
-        "statistics:overnights" => {
+
+        ("statistics:overnights", _, _) => {
             page_data = Some(PageData {
                 title: tr("/statistics/overnights", "Statistics: Overnights"),
                 template: "statistics_overnights".into(),
-                queries: vec![(
-                    "statistics_overnights".into(),
-                    QUERY_STATISTICS_OVERNIGHTS
-                        .replace("/*", "")
-                        .replace("*/", "")
-                        .apply_filters(&participant_group, &trip_domain, &trip_label),
-                )],
+                queries: vec![("statistics_overnights".into(), QUERY_STATISTICS_OVERNIGHTS.replace("/*", "").replace("*/", "").apply_filters(&participant_group, &trip_domain, &trip_label))],
             });
             execute_after = vec!["initializeChartOvernights".to_string()];
         }
-        "statistics:themes" => {
+
+        ("statistics:themes", _, _) => {
             page_data = Some(PageData {
                 title: settings_text("/Plugin/Theme/translation", "Themes"),
                 template: "statistics_themes".into(),
-                queries: vec![(
-                    "statistics_theme_count".into(),
-                    QUERY_STATISTICS_THEME_COUNT.apply_filters(
-                        &participant_group,
-                        &trip_domain,
-                        &trip_label,
-                    ),
-                )],
+                queries: vec![("statistics_theme_count".into(), QUERY_STATISTICS_THEME_COUNT.apply_filters(&participant_group, &trip_domain, &trip_label))],
             });
         }
-        "dataset" => {
+
+        ("dataset", _, _) => {
             page_data = Some(PageData {
-                    title: tr("/dataset/title", "Dataset"),
-                    template: "dataset".into(),
-                    queries: vec![
-                        ("table_list".into(), "SELECT name FROM sqlite_master WHERE type IN ('table', 'view') ORDER BY name;".to_string()),
-                        ("stored_custom_queries".into(), "SELECT ROWID, Name FROM com_CodeCollection WHERE Target = 'BewDataset';".to_string()),
-                    ],
-                });
-            all_state["query_templates"] =
-                serde_json::json!(ALL_QUERIES.iter().map(|(name, _)| name).collect::<Vec<_>>());
-            execute_after = vec![
-                "load_code_editor".to_string(),
-                "initiate_spreadsheet".to_string(),
-            ];
+                title: tr("/dataset/title", "Dataset"),
+                template: "dataset".into(),
+                queries: vec![
+                    ("table_list".into(), "SELECT name FROM sqlite_master WHERE type IN ('table', 'view') ORDER BY name;".into()),
+                    ("stored_custom_queries".into(), "SELECT ROWID, Name FROM com_CodeCollection WHERE Target = 'BewDataset';".into()),
+                ],
+            });
+            all_state["query_templates"] = serde_json::json!(ALL_QUERIES.iter().map(|(name, _)| name).collect::<Vec<_>>());
+            execute_after = vec!["load_code_editor".into(), "initiate_spreadsheet".into()];
         }
-        "source" => {
+
+        ("source", _, _) => {
             page_data = Some(PageData {
                 title: tr("/source/title", "Source"),
                 template: "source".into(),
-                queries: vec![(
-                    "cover_photo_original_paths".into(),
-                    "SELECT OuterId, CoverPhoto FROM bewa_Overview WHERE CoverPhoto IS NOT NULL;"
-                        .to_string(),
-                )],
+                queries: if db_loaded {
+                    vec![("cover_photo_original_paths".into(), "SELECT OuterId, CoverPhoto FROM bewa_Overview WHERE CoverPhoto IS NOT NULL;".into())]
+                } else {
+                    vec![]
+                },
             });
-            all_state["db_loaded"] = serde_json::json!(if !db_bytes.is_empty() {
-                "stored"
-            } else {
-                "missing"
-            });
-            execute_after = vec!["check_immich_authorization".to_string()];
+            all_state["db_loaded"] = serde_json::json!(if !db_bytes.is_empty() { "stored" } else { "missing" });
+            execute_after = vec!["check_immich_authorization".into(),"sync_db_init".into()];
         }
-        "about" => {
-            page_data = Some(PageData {
-                title: tr("/about/title", "About"),
-                template: "about".into(),
-                queries: vec![],
-            });
-            let update_info = check_available_update()
-                .await
-                .ok()
-                .and_then(|v| v.as_string())
-                .unwrap_or_default();
-            all_state["update_info"] = serde_json::json!(update_info);
+
+        ("about", _, _) => {
+            page_data = Some(PageData { title: tr("/about/title", "About"), template: "about".into(), queries: vec![] });
             all_state["current_version"] = serde_json::json!(CURRENT_VERSION);
         }
-        "report" => {
-            page_data = Some(PageData {
-                title: tr("/toolbox/report", "Report"),
-                template: "report".into(),
-                queries: vec![],
-            });
+
+        ("report", _, _) => {
+            page_data = Some(PageData { title: tr("/toolbox/report", "Report"), template: "report".into(), queries: vec![] });
             all_state["date_now"] = serde_json::json!(Local::now().format("%Y-%m-%d").to_string());
-            all_state["year_now"] = serde_json::json!(Local::now().format("%Y").to_string());
         }
-        "input" => {
+
+        ("report:output", title, backside) => {
             page_data = Some(PageData {
-                title: tr("/toolbox/input", "Input"),
-                template: "toolbox".into(),
-                queries: vec![],
+                title: format!("{}:{}", title, backside),
+                template: "report_output".into(),
+                queries: vec![
+                    ("all_overview".into(), QUERY_REPORT_ALL_OVERVIEW.apply_filters(&participant_group, &trip_domain, &trip_label)),
+                    ("all_events".into(), QUERY_REPORT_ALL_EVENTS.apply_filters(&participant_group, &trip_domain, &trip_label)),
+                ],
             });
-            execute_after = vec!["init_create_trip".to_string()];
+            all_state["title_string"] = serde_json::json!(title);
+            all_state["backside_string"] = serde_json::json!(backside);
         }
-        _ => {
-            if let Some(rest) = page.strip_prefix("trip:") {
-                let mut parts = rest.splitn(2, ':');
-                let outer_id = parts.next().filter(|s| !s.is_empty());
-                let inner_id = parts.next().filter(|s| !s.is_empty());
 
-                match (outer_id, inner_id) {
-                    (None, Some(inner_id)) => {
-                        // TODO: REMOVE AND REDIRECT
-                        page_data = Some(PageData {
-                            title: inner_id.to_string(),
-                            template: "trip".into(),
-                            queries: vec![
-                                (
-                                    "trip_summary".into(),
-                                    QUERY_TRIP_SUMMARY
-                                        .replace("= InnerId", &format!("= '{}'", inner_id)),
-                                ),
-                                (
-                                    "trip_events".into(),
-                                    QUERY_TRIP_EVENTS
-                                        .replace("= e.InnerId", &format!("= '{}'", inner_id)),
-                                ),
-                                (
-                                    "common_trip_domains".into(),
-                                    QUERY_COMMON_TRIP_DOMAINS.to_string(),
-                                ),
-                                (
-                                    "trip_unique_countries".into(),
-                                    QUERY_TRIP_UNIQUE_COUNTRIES
-                                        .replace("= InnerId", &format!("= '{}'", inner_id)),
-                                ),
-                                (
-                                    "trip_border_crossings".into(),
-                                    QUERY_TRIP_BORDER_CROSSINGS
-                                        .replace("= a.InnerId", &format!("= '{}'", inner_id)),
-                                ),
-                                (
-                                    "trip_map_pins_overall".into(),
-                                    QUERY_TRIP_MAP_PINS_OVERALL
-                                        .replace("= InnerId", &format!("= '{}'", inner_id)),
-                                ),
-                                (
-                                    "trip_map_pins_accommodation".into(),
-                                    QUERY_TRIP_MAP_PINS_ACCOMMODATION
-                                        .replace("= o.InnerId", &format!("= '{}'", inner_id)),
-                                ),
-                                (
-                                    "trip_previous".into(),
-                                    QUERY_TRIP_PREVIOUS
-                                        .replace("= InnerId", &format!("= '{}'", inner_id))
-                                        .apply_filters(
-                                            &participant_group,
-                                            &trip_domain,
-                                            &trip_label,
-                                        ),
-                                ),
-                                (
-                                    "trip_next".into(),
-                                    QUERY_TRIP_NEXT
-                                        .replace("= InnerId", &format!("= '{}'", inner_id))
-                                        .apply_filters(
-                                            &participant_group,
-                                            &trip_domain,
-                                            &trip_label,
-                                        ),
-                                ),
-                                (
-                                    "trip_immich_desc_search".into(),
-                                    QUERY_TRIP_IMMICH_DESC_SEARCH
-                                        .replace("= InnerId", &format!("= '{}'", inner_id)),
-                                ),
-                                (
-                                    "trip_immich_album_name".into(),
-                                    QUERY_TRIP_IMMICH_ALBUM_NAME
-                                        .replace("= InnerId", &format!("= '{}'", inner_id)),
-                                ),
-                            ],
-                        });
-                        all_state["cover_photos_list"] = serde_json::to_value(&cover_photos_map)
-                            .expect("Failed to convert map to Value");
-                        execute_after = vec!["load_trip_map".to_string()];
-                    }
-                    (Some(outer_id), _) => {
-                        page_data = Some(PageData {
-                            title: outer_id.to_string(),
-                            template: "trip".into(),
-                            queries: vec![
-                                (
-                                    "trip_summary".into(),
-                                    QUERY_TRIP_SUMMARY
-                                        .replace("= OuterId", &format!("= '{}'", outer_id)),
-                                ),
-                                (
-                                    "trip_events".into(),
-                                    QUERY_TRIP_EVENTS
-                                        .replace("= o.OuterId", &format!("= '{}'", outer_id)),
-                                ),
-                                (
-                                    "common_trip_domains".into(),
-                                    QUERY_COMMON_TRIP_DOMAINS.to_string(),
-                                ),
-                                (
-                                    "trip_unique_countries".into(),
-                                    QUERY_TRIP_UNIQUE_COUNTRIES
-                                        .replace("= OuterId", &format!("= '{}'", outer_id)),
-                                ),
-                                (
-                                    "trip_border_crossings".into(),
-                                    QUERY_TRIP_BORDER_CROSSINGS
-                                        .replace("= b.OuterId", &format!("= '{}'", outer_id)),
-                                ),
-                                (
-                                    "trip_map_pins_overall".into(),
-                                    QUERY_TRIP_MAP_PINS_OVERALL
-                                        .replace("= OuterId", &format!("= '{}'", outer_id)),
-                                ),
-                                (
-                                    "trip_map_pins_accommodation".into(),
-                                    QUERY_TRIP_MAP_PINS_ACCOMMODATION
-                                        .replace("= o.OuterId", &format!("= '{}'", outer_id)),
-                                ),
-                                (
-                                    "trip_previous".into(),
-                                    QUERY_TRIP_PREVIOUS
-                                        .replace("= OuterId", &format!("= '{}'", outer_id))
-                                        .apply_filters(
-                                            &participant_group,
-                                            &trip_domain,
-                                            &trip_label,
-                                        ),
-                                ),
-                                (
-                                    "trip_next".into(),
-                                    QUERY_TRIP_NEXT
-                                        .replace("= OuterId", &format!("= '{}'", outer_id))
-                                        .apply_filters(
-                                            &participant_group,
-                                            &trip_domain,
-                                            &trip_label,
-                                        ),
-                                ),
-                                (
-                                    "trip_immich_desc_search".into(),
-                                    QUERY_TRIP_IMMICH_DESC_SEARCH
-                                        .replace("= OuterId", &format!("= '{}'", outer_id)),
-                                ),
-                                (
-                                    "trip_immich_album_name".into(),
-                                    QUERY_TRIP_IMMICH_ALBUM_NAME
-                                        .replace("= OuterId", &format!("= '{}'", outer_id)),
-                                ),
-                                (
-                                    "trip_extension_movie".into(),
-                                    QUERY_TRIP_EXTENSION_MOVIE.replace("_OUTER_ID_", outer_id),
-                                ),
-                            ],
-                        });
-                        all_state["cover_photos_list"] = serde_json::to_value(&cover_photos_map)
-                            .expect("Failed to convert map to Value");
-                        execute_after = vec!["load_trip_map".to_string()];
-                    }
-                    _ => {}
-                }
-            }
-
-            if let Some(suffix) = page.strip_prefix("images:") {
-                let mut parts = suffix.splitn(2, ':');
-                if let (Some(trip_id), Some(trip_date)) = (parts.next(), parts.next()) {
-                    page_data = Some(PageData {
-                        title: suffix.to_string(),
-                        template: "images".into(),
-                        queries: vec![
-                            (
-                                "images_date_list".into(),
-                                QUERY_IMAGES_DATE_LIST.replace("/*_OUTER_ID_*/", trip_id),
-                            ),
-                            (
-                                "common_trip_domains".into(),
-                                QUERY_COMMON_TRIP_DOMAINS.to_string(),
-                            ),
-                            (
-                                "images_photo_time".into(),
-                                QUERY_IMAGES_PHOTO_TIME.replace("/*_OUTER_ID_*/", trip_id),
-                            ),
-                        ],
-                    });
-                    all_state["trip_date"] = serde_json::json!(trip_date);
-                    all_state["trip_id"] = serde_json::json!(trip_id);
-                }
-            }
-
-            if let Some(suffix) = page.strip_prefix("map:") {
-                let mut queries = vec![
-                    (
-                        "map_country_list".into(),
-                        QUERY_MAP_COUNTRY_LIST.apply_filters(
-                            &participant_group,
-                            &trip_domain,
-                            &trip_label,
-                        ),
-                    ),
-                    (
-                        "common_trip_domains".into(),
-                        QUERY_COMMON_TRIP_DOMAINS.to_string(),
-                    ),
-                ];
-
-                if let Some(country) = suffix.strip_prefix("country:") {
-                    queries.push((
-                        "map_data".into(),
-                        QUERY_MAP_COUNTRY
-                            .replace("_COUNTRY_", country)
-                            .apply_filters(&participant_group, &trip_domain, &trip_label),
-                    ));
-                    page_data = Some(PageData {
-                        title: tr("/map/title", "Map"),
-                        template: "map".into(),
-                        queries,
-                    });
-                    execute_after = vec!["load_country_map".to_string()];
-                } else if let Some(theme) = suffix.strip_prefix("theme:") {
-                    queries.push((
-                        "map_data".into(),
-                        QUERY_MAP_THEME.replace("_THEME_", theme).apply_filters(
-                            &participant_group,
-                            &trip_domain,
-                            &trip_label,
-                        ),
-                    ));
-                    page_data = Some(PageData {
-                        title: tr("/map/title", "Map"),
-                        template: "map".into(),
-                        queries,
-                    });
-                    execute_after = vec!["load_theme_map".to_string()];
-                }
-            }
-
-            if let Some(suffix) = page.strip_prefix("search:") {
-                page_data = Some(PageData {
-                    title: suffix.to_string(),
-                    template: "search".into(),
-                    queries: vec![
-                        (
-                            "search_trip".into(),
-                            QUERY_SEARCH_TRIP
-                                .replace("/*_STRING_*/", suffix)
-                                .apply_filters(&participant_group, &trip_domain, &trip_label),
-                        ),
-                        (
-                            "search_event".into(),
-                            QUERY_SEARCH_EVENT
-                                .replace("/*_STRING_*/", suffix)
-                                .apply_filters(&participant_group, &trip_domain, &trip_label),
-                        ),
-                    ],
-                });
-            }
-
-            if let Some(suffix) = page.strip_prefix("report:output:") {
-                let mut parts = suffix.splitn(2, ':');
-                if let (Some(title_str), Some(backside_str)) = (parts.next(), parts.next()) {
-                    page_data = Some(PageData {
-                        title: suffix.to_string(),
-                        template: "report_output".into(),
-                        queries: vec![
-                            (
-                                "all_overview".into(),
-                                QUERY_REPORT_ALL_OVERVIEW.apply_filters(
-                                    &participant_group,
-                                    &trip_domain,
-                                    &trip_label,
-                                ),
-                            ),
-                            (
-                                "all_events".into(),
-                                QUERY_REPORT_ALL_EVENTS.apply_filters(
-                                    &participant_group,
-                                    &trip_domain,
-                                    &trip_label,
-                                ),
-                            ),
-                        ],
-                    });
-                    all_state["title_string"] = serde_json::json!(title_str);
-                    all_state["backside_string"] = serde_json::json!(backside_str);
-                }
-            }
+        ("input", _, _) => {
+            page_data = Some(PageData { title: tr("/toolbox/input", "Input"), template: "toolbox".into(), queries: vec![] });
+            execute_after = vec!["init_create_trip".into()];
         }
+
+        ("trip", "", inner_id) if !inner_id.is_empty() => {
+            page_data = Some(PageData {
+                title: inner_id.to_string(),
+                template: "trip".into(),
+                queries: get_trip_queries("InnerId", inner_id, &participant_group, &trip_domain, &trip_label),
+            });
+            all_state["cover_photos_list"] = serde_json::to_value(&cover_photos_map).unwrap();
+            execute_after = vec!["load_trip_map".into()];
+        }
+
+        ("trip", outer_id, _) if !outer_id.is_empty() => {
+            let mut queries = get_trip_queries("OuterId", outer_id, &participant_group, &trip_domain, &trip_label);
+            queries.push(("trip_extension_movie".into(), QUERY_TRIP_EXTENSION_MOVIE.replace("_OUTER_ID_", outer_id)));
+            page_data = Some(PageData {
+                title: outer_id.to_string(),
+                template: "trip".into(),
+                queries,
+            });
+            all_state["cover_photos_list"] = serde_json::to_value(&cover_photos_map).unwrap();
+            execute_after = vec!["load_trip_map".into()];
+        }
+
+        ("images", trip_id, trip_date) => {
+            page_data = Some(PageData {
+                title: format!("{}:{}", trip_id, trip_date),
+                template: "images".into(),
+                queries: vec![
+                    ("images_date_list".into(), QUERY_IMAGES_DATE_LIST.replace("/*_OUTER_ID_*/", trip_id)),
+                    ("common_trip_domains".into(), QUERY_COMMON_TRIP_DOMAINS.to_string()),
+                    ("images_photo_time".into(), QUERY_IMAGES_PHOTO_TIME.replace("/*_OUTER_ID_*/", trip_id)),
+                ],
+            });
+            all_state["trip_date"] = serde_json::json!(trip_date);
+            all_state["trip_id"] = serde_json::json!(trip_id);
+        }
+
+        ("search", query, _) => {
+            page_data = Some(PageData {
+                title: query.to_string(),
+                template: "search".into(),
+                queries: vec![
+                    ("search_trip".into(), QUERY_SEARCH_TRIP.replace("/*_STRING_*/", query).apply_filters(&participant_group, &trip_domain, &trip_label)),
+                    ("search_event".into(), QUERY_SEARCH_EVENT.replace("/*_STRING_*/", query).apply_filters(&participant_group, &trip_domain, &trip_label)),
+                ],
+            });
+        }
+
+        _ => { /* Default Fallback Logic */ }
     }
 
     // -----------------------------------------------------------------------
@@ -964,8 +790,11 @@ async fn page_load_internal() {
 
     // RUN SQLITE QUERIES  -----------------------------------------------------------------------
 
-    let query_response: serde_json::Value =
-        sqlite_query::get_query_data_universal(&db_bytes, page_data.queries.clone(), false).await;
+    let query_response: serde_json::Value = if db_loaded && !page_data.queries.is_empty() {
+        sqlite_query::get_query_data_universal(&db_bytes, page_data.queries.clone(), false).await
+    } else {
+        serde_json::json!({})
+    };
 
     // RENDER TO 'APP'  -----------------------------------------------------------------------
 
@@ -1034,7 +863,6 @@ async fn page_load_internal() {
     }
 
 
-
     // RUN FUNCTIONS AFTER PAGE LOAD  ------------------------------------
 
     load_filter_OPFS();
@@ -1049,6 +877,7 @@ async fn page_load_internal() {
             "initiate_spreadsheet" => initiate_spreadsheet(),
             "initializeChart" => initializeChart(),
             "initializeChartOvernights" => initializeChartOvernights(),
+            "sync_db_init" => sync_db_init(),
             "check_immich_authorization" => check_immich_authorization(),
             "init_create_trip" => init_create_trip(),
             "about" => {}
@@ -1056,105 +885,4 @@ async fn page_load_internal() {
         }
     }
 
-}
-
-pub async fn get_sqlite_binary() -> Vec<u8> {
-    // 1) Check if file exists in OPFS
-    if let Ok(value) = read_opfs_file("chronik.sqlite").await {
-        if !value.is_null() && !value.is_undefined() {
-            web_sys::console::log_1(&"Found chronik.sqlite in OPFS".into());
-            return js_sys::Uint8Array::new(&value).to_vec();
-        }
-    }
-
-    web_sys::console::log_1(&"No chronik.sqlite → checking server fallback...".into());
-
-    // 2) Load server_db_path.txt
-    let server_path = {
-        let window = web_sys::window().expect("no global `window` exists");
-        let fetch_task = async {
-            let response_value = JsFuture::from(window.fetch_with_str("server_db_path.txt")).await.ok()?;
-            let response: web_sys::Response = response_value.dyn_into().ok()?;
-            let text = JsFuture::from(response.text().ok()?).await.ok()?;
-            text.as_string()
-        };
-
-        match fetch_task.await {
-            Some(path) if !path.trim().is_empty() => path.trim().to_string(),
-            _ => {
-                web_sys::console::log_1(&"server_db_path.txt missing, empty, or fetch failed".into());
-                return Vec::new(); // Or handle error appropriately
-            }
-        }
-    };
-
-    web_sys::console::log_1(&format!("Server path: {}", server_path).into());
-
-    // Download actual DB file
-    let db_bytes = match {
-        let url = &server_path;
-        async {
-            let window = web_sys::window()?;
-            let resp_value = wasm_bindgen_futures::JsFuture::from(window.fetch_with_str(url)).await.ok()?;
-            let response: web_sys::Response = resp_value.dyn_into().ok()?;
-            
-            if !response.ok() {
-                return None;
-            }
-
-            let array_buffer = wasm_bindgen_futures::JsFuture::from(response.array_buffer().ok()?).await.ok()?;
-            let u8_array = js_sys::Uint8Array::new(&array_buffer);
-            let bytes = u8_array.to_vec();
-
-            if bytes.is_empty() {
-                return None;
-            }
-            Some(bytes)
-        }
-    }.await {
-        Some(bytes) => bytes,
-        None => {
-            web_sys::console::log_1(&"Failed to fetch DB bytes".into());
-            return Vec::new();
-        }
-    };
-
-    // Save to OPFS
-    let dir = match app_specific_dir().await {
-        Ok(d) => d,
-        Err(e) => {
-            web_sys::console::log_1(&format!("Failed to access OPFS dir: {:?}", e).into());
-            return Vec::new();
-        }
-    };
-
-    match dir
-        .get_file_handle_with_options("chronik.sqlite", &GetFileHandleOptions { create: true })
-        .await
-    {
-        Ok(mut file) => {
-            let write_options = CreateWritableOptions {
-                keep_existing_data: false,
-            };
-            match file.create_writable_with_options(&write_options).await {
-                Ok(mut writer) => {
-                    if writer.write_at_cursor_pos(db_bytes.clone()).await.is_ok() {
-                        let _ = writer.close().await;
-                        web_sys::console::log_1(&"Saved DB to OPFS".into());
-                        return db_bytes;
-                    }
-                }
-                Err(e) => {
-                    web_sys::console::log_1(
-                        &format!("Failed to create writable stream: {:?}", e).into(),
-                    );
-                }
-            }
-        }
-        Err(e) => {
-            web_sys::console::log_1(&format!("Failed to get file handle: {:?}", e).into());
-        }
-    }
-
-    Vec::new()
 }

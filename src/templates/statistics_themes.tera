@@ -1,26 +1,24 @@
-{% if theme_config[0] == "Enabled" %}
-  <table class="table table-hover" style="width:100%;">
-      <thead style="position:sticky;top:0;background-color:;">
-          <tr>
-              <td>
-                  <b>{{ theme_config[1] | default(value="Theme") }}</b>
-              </td>
-              <td style="text-align:center;">
-                  <b>{{ theme_config[2] | default(value="Count") }}</b>
-              </td>
-          </tr>
-      </thead>
-  
-      {% for theme_row in statistics_theme_count %}
-              <tr>
-                  <td>{{ theme_row.ThemeDescription }}</td>
-                  <td style="text-align:center;">{{ theme_row.ThemeCount }}</td>
-              </tr>
-      {% endfor %}
-  </table>
+<div id="path-statistics-themes">
+    {% if theme_config[0] == "Enabled" %}
+    <table>
+        <thead>
+            <tr>
+                <td><b>{{ theme_config[1] | default(value="Theme") }}</b></td>
+                <td><b>{{ theme_config[2] | default(value="Count") }}</b></td>
+            </tr>
+        </thead>
 
-{% else %}
+        {% for theme_row in statistics_theme_count %}
+                <tr>
+                    <td>{{ theme_row.ThemeDescription }}</td>
+                    <td>{{ theme_row.ThemeCount }}</td>
+                </tr>
+        {% endfor %}
+    </table>
 
-  Themes not activated.
-  
-{% endif %}
+    {% else %}
+
+    Themes not activated.
+    
+    {% endif %}
+</div>
