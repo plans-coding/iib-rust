@@ -4,14 +4,9 @@ use once_cell::sync::OnceCell;
 use serde_json::json;
 use tera::Tera;
 use wasm_bindgen::prelude::*;
-use wasm_bindgen_futures::{future_to_promise, JsFuture};
+use wasm_bindgen_futures::{future_to_promise};
 use serde::Serialize;
 use std::collections::HashMap;
-use opfs::{
-    persistent::app_specific_dir,
-    CreateWritableOptions, GetFileHandleOptions,
-    DirectoryHandle, FileHandle, WritableFileStream,
-};
 
 mod sqlite_query;
 
@@ -824,14 +819,12 @@ async fn page_load_internal() {
             context.insert(key, value);
         }
     }
-// 1. Convert context to a JSON Value (which implements Serialize)
-let context_json = context.clone().into_json();
 
-// 2. Now serde-wasm-bindgen will be happy
-let js_value = serde_wasm_bindgen::to_value(&context_json)
+    /*let context_json = context.clone().into_json();
+    let js_value = serde_wasm_bindgen::to_value(&context_json)
     .unwrap_or(wasm_bindgen::JsValue::NULL);
-
-web_sys::console::log_1(&js_value);
+    web_sys::console::log_1(&js_value);*/
+    
     let render_result = (|| -> Result<(), String> {
         let rendered = get_tera()
             .render(&page_data.template, &context)

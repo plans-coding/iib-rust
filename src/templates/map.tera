@@ -1,25 +1,8 @@
 <style>
-html, body {height:100%;}
-section {max-width:100%!important;width:100%!important;margin:0!important;}
-#app{flex:1;}
-#iib-foot{display:none;}
-
-{% for tripDomain in common_trip_domains %}
-.iib-map-ref[data-trip-domain='{{ tripDomain.DomainAbbreviation }}'] {
-  background-color: {{ tripDomain.Color }} !important;
-  color: #fff;
-  padding: 3pt 5pt;
-  text-decoration:none;
-}
-{% endfor %}
-
-:root[data-bs-theme="light"] .accommodationColor,
-:root[data-bs-theme="light"] .overviewColor { fill: #1d655e; }
-:root[data-bs-theme="light"] .polylineMap { stroke: #1d655e; }
-
-:root[data-bs-theme="dark"] .accommodationColor,
-:root[data-bs-theme="dark"] .overviewColor { fill: gold; }
-:root[data-bs-theme="dark"] .polylineMap { stroke: gold; }
+    html, body {height:100%;}
+    section {max-width:100%!important;width:100%!important;margin:0!important;}
+    #app{flex:1;}
+    #iib-foot{display:none;}
 </style>
 
 <div style="margin-top:10pt;z-index:900; position:absolute; width:100%; text-align:center;">

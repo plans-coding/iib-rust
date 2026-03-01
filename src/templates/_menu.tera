@@ -1,11 +1,12 @@
 <div id="component-menu">
-  <div class="gradient-bar-inactive"></div>
+  <!--<div class="gradient-bar-inactive"></div>-->
   <style>
     {% for tripDomain in common.common_trip_domains %}
       [data-trip-domain="{{ tripDomain.DomainAbbreviation }}"] {
         --domain-color: {{ tripDomain.Color }};
       }
     {% endfor %}
+
   </style>
 
   <div class="iib-menu">

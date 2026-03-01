@@ -4,7 +4,7 @@
 {% if settings.Extension.Theme is defined %}
     {% set theme_config = settings.Extension.Theme | split(pat="\n") | first | split(pat=",") %}
 {% endif %}
-<div id="component-breadcrumb">
+<div class="component-breadcrumb">
     <div class=" breadcrumb {% if page != 'explore' and page != 'source' %}widescreen{% endif %}">
 
         <img class="icon-color {% if page is starting_with('overview') %}widescreen{% endif %}" src="static/images/frog.svg" />

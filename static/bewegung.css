@@ -79,7 +79,10 @@ body {
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+
 section {max-width:800pt;margin:10pt auto auto;width:100%; }
+
+#app {}
 
 .immer-in-font-uc {font-family: 'Cairo', sans-serif;text-transform: uppercase;}
 .bewegung-font-uc {font-family: 'Righteous', sans-serif;text-transform: uppercase;}
@@ -245,6 +248,15 @@ dialog{width:100vw;height:100vh;}
     #non_widescreen {display:block;}
 }
 
+@media (max-width: 600px) {
+    .iib-menu-over span {display:none;}
+    .widescreen {display:none;}
+    #iib-foot {display:none;}
+    .card-container, #statistics-summary-flex, #statistics-summary-flex-widget { flex-direction: column!important; }
+    #filter-button-overmenu{display:none;}
+    #non_widescreen {display:none;}
+}
+
 .stripes {
     background-image: repeating-linear-gradient(to right, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.25) 24px, transparent 2px, transparent 10px), radial-gradient(circle at top center, rgba(255, 255, 255, 0.15) 0%, transparent 60%), linear-gradient(to right, gold, green);
     background-blend-mode: overlay;
@@ -312,7 +324,8 @@ dialog{width:100vw;height:100vh;}
         flex-direction: row;
         border-bottom: 1px solid var(--color-hover-background);
         box-shadow: 0 4px 0 rgba(0, 0, 0, 0.15);
-        background-color: var(--color-background);
+        background-image: repeating-linear-gradient(to right, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.25) 24px, transparent 2px, transparent 10px), radial-gradient(circle at top center, rgba(255, 255, 255, 0.15) 0%, transparent 60%), linear-gradient(to right, gold, green);
+        background-blend-mode: overlay;
 
         & img, & svg, #more {
             vertical-align: middle;
@@ -372,21 +385,12 @@ dialog{width:100vw;height:100vh;}
 
     #themeToggle {color:var(--color-text);cursor:pointer;}
 
-    @media (max-width: 600px) {
-        .iib-menu-over span {display:none;}
-        .widescreen {display:none;}
-        #iib-foot {display:none;}
-        .card-container, #statistics-summary-flex, #statistics-summary-flex-widget { flex-direction: column!important; }
-        #filter-button-overmenu{display:none;}
-        #non_widescreen {display:none;}
-    }
-
     .submenu{display:flex;}
     .submenu div {font-family: 'Cairo', sans-serif;font-size:32pt;font-weight:bold;color:var(--color-hover-background); }
 
 }
 
-#component-breadcrumb {
+.component-breadcrumb {
     .breadcrumb { 
         color: var(--color-text);
         display: flex;
@@ -445,11 +449,13 @@ dialog{width:100vw;height:100vh;}
 
     .cover {
         height: 160px;
+        overflow: hidden;
         background-size: contain;
         background-position: center;
         background-repeat: no-repeat;
         background-image: url('images/travel.svg');
         background-color: color-mix(in srgb, var(--domain-color), transparent 80%);
+        transition: background-size 0.5s ease;
     }
 
     .has-cover {
@@ -460,7 +466,6 @@ dialog{width:100vw;height:100vh;}
 
     .explore-cover {
         border-radius: 2px;
-        transition: transform 200ms ease, filter 200ms ease;
         will-change: transform;
     }
 
@@ -486,12 +491,13 @@ dialog{width:100vw;height:100vh;}
         padding: 5px;
         color: var(--color-text);
         text-decoration: none;
-        transition: background 0.2s ease, border-color 0.2s ease;
 
         &:hover {
             color: var(--color-text);
             background: var(--domain-alpha);
             border-color: var(--domain-color);
+
+            .cover {transform: scale(1.1);}
 
             .explore-cover {
                 transform: scale(1.08);
@@ -514,7 +520,11 @@ dialog{width:100vw;height:100vh;}
     .card-footer {
         background-color:var(--domain-color);
         color:#fff;
+        padding:3pt 5pt 3pt 5pt;
+        border-radius: 5px;
     }
+    h2 {text-align:center;}
+    .component-breadcrumb { justify-items:center; }
 }
 
 #path-overview-year, #path-overview-country {
@@ -935,6 +945,70 @@ dialog{width:100vw;height:100vh;}
 #path-report {}
 
 #path-trip {
+
+    padding-bottom:3pt;
+
+    /* Layout and Containers */
+  .trip-grid-row {
+    display: grid;
+    grid-template-columns: auto auto auto auto;
+    align-items: center;
+  }
+  .utility-controls {
+    display: flex;
+    gap: 10pt;
+    justify-content: flex-end;
+  }
+  .clickable-icon {
+    cursor: pointer;
+  }
+  .trip-summary-header {
+    border-radius: 3pt;
+    user-select: none;
+  }
+  .column-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 2pt;
+  }
+  .row-flex {
+    display: flex;
+    gap: 2pt;
+    flex-direction: row;
+  }
+  
+  /* Buttons and Text */
+  .full-width-button {
+    width: 100%;
+  }
+  .small-muted-text {
+    font-size: 0.7rem;
+    color: var(--color-hover-background);
+  }
+  .vertical-align-middle {
+    vertical-align: middle;
+  }
+  .day-event-media {
+    float: right;
+    display: flex;
+    flex-direction: column;
+    gap: 2pt;
+    margin: 0 0 5pt 5pt;
+  }
+
+  /* Map and Viewer */
+  .map-frame {
+    width: 100%;
+    height: 100%;
+    border-radius: 3pt;
+  }
+  .item-viewer-filename {
+    position: absolute;
+  }
+  .acc-link {
+    text-decoration: none;
+  }
+
     .trip-details-container {
         position: relative;
         flex: 1;
@@ -1140,8 +1214,9 @@ dialog{width:100vw;height:100vh;}
     .breadcrumb-trip-info {
         color: #fff;
         background-color: var(--domain-color);
-        padding: 0 10px;
+        padding: 5px 10px 5px 10px;
         border-radius:10px;
+        line-height:1.2;
     }
 
     .breadcrumb-trip-link {
@@ -1152,6 +1227,7 @@ dialog{width:100vw;height:100vh;}
         
         border-radius: 5px;
         transition: all 0.2s ease;
+        padding:5pt;
 
         &:hover {
             background-color: var(--color-hover-background);
@@ -1164,10 +1240,152 @@ dialog{width:100vw;height:100vh;}
         margin: 0.5rem 0;
     }
 }
+body:has(#path-trip) {
+    background: linear-gradient(var(--color-background-alpha)), var(--cover-photo-url);
+    background-repeat: no-repeat;
+    background-size: 100% auto;
+}
 
 #path-images {}
-#path-map {}
+
+#path-map {
+    :root[data-bs-theme="light"] .accommodationColor,
+    :root[data-bs-theme="light"] .overviewColor { fill: #1d655e; }
+    :root[data-bs-theme="light"] .polylineMap { stroke: #1d655e; }
+
+    :root[data-bs-theme="dark"] .accommodationColor,
+    :root[data-bs-theme="dark"] .overviewColor { fill: gold; }
+    :root[data-bs-theme="dark"] .polylineMap { stroke: gold; }
+    
+    .iib-map-ref {
+        background-color: var(--domain-color);
+        color: #fff;
+        padding: 3pt 5pt;
+        text-decoration: none;
+    }
+}
+
 #path-dataset {
+
+        display: flex;
+        flex-direction: row;
+        height: 100%;
+
+         /* Summary and details */
+    details summary {
+        cursor: pointer;
+    }
+
+    .details-content {
+        background-color: var(--color-background);
+        padding: 2pt;
+        border-radius: 5pt;
+    }
+
+    .clickable {
+        cursor: pointer;
+    }
+
+    /* Top controls */
+    .top-controls {
+        display: flex;
+        padding: 10pt 5pt 5pt 5pt;
+        gap: 5pt;
+    }
+
+    #loading-overlay {
+        display: none;
+    }
+
+    #loading-overlay img {
+        width: 40px;
+        height: 40px;
+    }
+
+    /* Editor container */
+    #editor-container {
+        margin: 0 5pt 5pt 5pt;
+        background-color: var(--color-background);
+        border: 3pt solid var(--color-filter);
+        border-radius: 3pt;
+        max-height: 20%;
+        overflow: auto;
+    }
+
+    /* Rotate animation */
+    .rotate-animation {
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        100% { transform: rotate(360deg); }
+    }
+
+    /* Buttons */
+    .black-button {
+        /* add your styles */
+    }
+
+    .filter-button {
+        flex: 1;
+        /* add your styles */
+    }
+
+    #left-column {
+        display: flex;
+        flex-direction: column;
+        min-width: 150px;
+        border-right: 1px solid var(--color-hover-background);
+        padding:5pt;
+        gap:2pt;
+        overflow-y: auto;
+        overflow-x: hidden;
+        background-color:var(--color-hover-background);
+    }
+    #right-column {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        overflow: hidden;
+        background-color:var(--color-submenu-background);
+    }
+
+    #sql-output {
+        flex: 1;
+        overflow: hidden;
+        padding-top:5pt;
+    }
+
+    #cellViewer { padding:3pt 5pt 3pt 5pt;margin:5pt;border-radius:3pt;font-size:0.8em;max-height:20%;overflow:auto; }
+
+    .tabulator {
+        margin:0 5pt 5pt 5pt;
+    }
+
+    #sql-output-data .tabulator .tabulator-table .tabulator-cell.frozen {
+        background-color: #e0e0e0;  /* same as header background */
+        color: #000;                /* same as header text color */
+        font-weight: bold;           /* optional for emphasis */
+        border-right: 1px solid #ccc; /* match header border */
+    }
+
+    .hidden {display:none!important;}
+
+    summary {background-color:var(--color-hover-background);color:var(--color-hover-text);padding:2pt;}
+    details div {font-size:0.9em;padding:3pt;color:var(--color-text);}
+    details div:hover {background-color:var(--color-filter);border-radius:3pt;color:var(--color-filter-text);}
+
+    .rotate-animation {
+        transform-origin: center;
+        animation: spin 2s linear infinite; /* continuous clockwise rotation */
+    }
+
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to   { transform: rotate(360deg); }
+    }
+
+    .inactivated-button {background-color:var(--color-hover-background) !important;color:var(--color-hover-text) !important;}
 
     .jspreadsheet thead th,
     .jspreadsheet tbody th {
@@ -1216,6 +1434,13 @@ dialog{width:100vw;height:100vh;}
         color: var(--cv-text);
     }
 
+}
+html:has(#path-dataset), body:has(#path-dataset) {
+    height: 100%;
+    margin:0;
+    section {max-width:100%!important;width:100%!important;margin:0!important;}
+    #iib-foot{display:none;}
+    #app {height: 100%;overflow: auto;}
 }
 
 #path-search {

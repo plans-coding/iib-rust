@@ -253,6 +253,14 @@
                 .catch(e => console.error('SW registration failed:', e));
         }
 
+        function reloadCss() {
+            document.querySelectorAll('link[rel="stylesheet"]').forEach(l => {
+            const h = l.href;
+            l.href = '';
+            l.href = h;
+            });
+        }
+
         </script>
 
 
