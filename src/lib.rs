@@ -63,6 +63,7 @@ define_resources! {
     QUERY_TRIP_IMMICH_DESC_SEARCH => "../src/queries/trip/trip_immich_desc_search.sql",
     QUERY_TRIP_IMMICH_ALBUM_NAME => "../src/queries/trip/trip_immich_album_name.sql",
     QUERY_TRIP_EXTENSION_MOVIE => "../src/queries/_extensions/trip_movie.sql",
+    QUERY_TRIP_EXTENSION_REFERENCE_ITEMS => "../src/queries/_extensions/trip_reference_items.sql",
     QUERY_STATISTICS_VISITS => "../src/queries/statistics/statistics_visits.sql",
     QUERY_STATISTICS_OVERNIGHTS => "../src/queries/statistics/statistics_overnights.sql",
     QUERY_STATISTICS_PER_DOMAIN_YEAR => "../src/queries/statistics/statistics_per_domain_year.sql",
@@ -736,6 +737,7 @@ async fn page_load_internal() {
         ("trip", outer_id, _) if !outer_id.is_empty() => {
             let mut queries = get_trip_queries("OuterId", outer_id, &participant_group, &trip_domain, &trip_label);
             queries.push(("trip_extension_movie".into(), QUERY_TRIP_EXTENSION_MOVIE.replace("_OUTER_ID_", outer_id)));
+            queries.push(("trip_extension_reference_items".into(), QUERY_TRIP_EXTENSION_REFERENCE_ITEMS.replace("_OUTER_ID_", outer_id)));
             page_data = Some(PageData {
                 title: outer_id.to_string(),
                 template: "trip".into(),
@@ -822,7 +824,14 @@ async fn page_load_internal() {
             context.insert(key, value);
         }
     }
+// 1. Convert context to a JSON Value (which implements Serialize)
+let context_json = context.clone().into_json();
 
+// 2. Now serde-wasm-bindgen will be happy
+let js_value = serde_wasm_bindgen::to_value(&context_json)
+    .unwrap_or(wasm_bindgen::JsValue::NULL);
+
+web_sys::console::log_1(&js_value);
     let render_result = (|| -> Result<(), String> {
         let rendered = get_tera()
             .render(&page_data.template, &context)
