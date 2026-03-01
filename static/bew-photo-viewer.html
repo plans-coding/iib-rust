@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Immich Photo Viewer</title>
+
+<style>
+  body {
+    font-family: system-ui, sans-serif;
+    padding: 16px;
+    background: #000;
+    color: #fff;
+  }
+
+  select {
+    margin-bottom: 12px;
+    padding: 6px 10px;
+    font-size: 14px;
+  }
+
+  iframe {
+    width: 100%;
+    height: 85vh;
+    border: 0;
+    background: #111;
+  }
+</style>
+</head>
+
+<body>
+
+<select id="dateSelect"></select>
+<iframe id="viewer"></iframe>
+
+<script>
+/* ==============================
+   URL parsing
+============================== */
+
+function parseUrl() {
+  const params = new URLSearchParams(location.search);
+
+  const scopeRaw = params.get("scope") || "";
+  const ref = params.get("ref") || "";
+  const currentDate = location.hash.replace(/^#/, "");
+
+  const [startPos, endPos, tripId] = scopeRaw.split(":");
+
+  return { startPos, endPos, tripId, ref, currentDate };
+}
+
+
+/* ==============================
+   Date helpers
+============================== */
+
+function toDate(yyyymmdd) {
+  return new Date(
+    +yyyymmdd.slice(0,4),
+    +yyyymmdd.slice(4,6)-1,
+    +yyyymmdd.slice(6,8)
+  );
+}
+
+// IMMICH REQUIRES ISO YYYY-MM-DD
+function isoDate(d){
+  return d.toISOString().slice(0,10);
+}
+
+function hhmmToColon(hhmm){
+  if(!hhmm) return "00:00";
+  return hhmm.slice(0,2) + ":" + hhmm.slice(2,4);
+}
+
+function buildRange(startStr, endStr){
+  const out=[];
+  const d = toDate(startStr);
+  const end = toDate(endStr);
+
+  while(d <= end){
+    out.push(isoDate(d));
+    d.setDate(d.getDate()+1);
+  }
+  return out;
+}
+
+
+/* ==============================
+   Immich iframe loader
+============================== */
+
+function updateIframe(dateISO, data){
+
+  const startTime = hhmmToColon(data.startPos?.split("-")[1]);
+  const endTime   = hhmmToColon(data.endPos?.split("-")[1]);
+
+  const query = {
+    takenAfter:  `${dateISO}T${startTime}:00.000Z`,
+    takenBefore: `${dateISO}T${endTime}:59.999Z`
+  };
+
+  const base = new URL(data.ref);        // safe
+  const url  = new URL("search", base); // safe join
+
+  url.searchParams.set("query", JSON.stringify(query));
+
+  document.getElementById("viewer").src = url.toString();
+}
+
+
+/* ==============================
+   Main
+============================== */
+
+const data = parseUrl();
+
+const startDate = data.startPos?.slice(0,8);
+const endDate   = data.endPos?.slice(0,8);
+
+const select = document.getElementById("dateSelect");
+
+if(startDate && endDate){
+
+  const dates = buildRange(startDate, endDate);
+
+  // build dropdown
+  dates.forEach(d=>{
+    const opt=document.createElement("option");
+    opt.value=d;
+    opt.textContent=d;
+    select.appendChild(opt);
+  });
+
+  // preselect hash or first
+  let initial =
+    (data.currentDate && dates.includes(data.currentDate))
+      ? data.currentDate
+      : dates[0];
+
+  select.value = initial;
+  location.hash = initial;
+
+  updateIframe(initial, data);
+
+  // dropdown change
+  select.addEventListener("change", e=>{
+    const d = e.target.value;
+    location.hash = d;
+    updateIframe(d, data);
+  });
+
+  // manual hash change
+  window.addEventListener("hashchange", ()=>{
+    const d = location.hash.slice(1);
+    if(dates.includes(d)){
+      select.value=d;
+      updateIframe(d, data);
+    }
+  });
+}
+</script>
+
+</body>
+</html>
