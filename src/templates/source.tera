@@ -94,31 +94,27 @@ body {
 
 {% endif %}
   </div>#}
-        <script id="immichUrl" type="application/json">{{ settings.Photos.ImmichUrl | safe }}</script>
-    <script id="coverPhotoOriginalPaths" type="application/json">{{ cover_photo_original_paths | json_encode | safe }}</script>
 
-        {% if settings.Photos and settings.Photos.Immich == "Enabled" %}
+        {% if settings.Photos %}
+		<script id="immichUrl" type="application/json">{{ settings.Photos.ImmichUrl | safe }}</script>
+    		<script id="coverPhotoOriginalPaths" type="application/json">{{ cover_photo_original_paths | json_encode | safe }}</script>
+	{% endif %}
+        {% if settings and settings.Photos and settings.Photos.Immich == "Enabled" %}
 
-    <div class="breadcrumb">
+    {#<div class="breadcrumb">
       <!--<img class="icon-color" src="static/images/frog.svg" />-->
       <div class="">{{ translation.source.immichInstance | default(value='Immich Instance') }}</div>
     </div>
 
     <div class="red-text" id="immich_authorization_status" style="display:block;">
 
-      <div id="immich_authorization_status_NOT_OK" style="display:none;">{{ translation.source.immichNotLoggedOn | default(value='You need to be logged in to you Immich instance for the synchronization to work, please login at') }} <a class="single-link" target="_blank" href="{{ settings.Photos.ImmichUrl }}">{{ settings.Photos.ImmichUrl }}</a>.</div>
+      <div id="immich_authorization_status_NOT_OK" style="display:none;">{{ translation.source.immichNotLoggedOn | default(value='You need to be logged in to you Immich instance for the synchronization to work, please login at') }} <a class="single-link" target="_blank" href="{{ settings.Photos.ImmichUrl }}"></a>.</div>
 
       <div id="immich_authorization_status_OK" style="display:none;">
         {{ translation.source.immichLoggedOn | default(value='You are logged in to you Immich instance at') }} <a class="single-link" target="_blank" href="{{ settings.Photos.ImmichUrl }}">{{ settings.Photos.ImmichUrl }}</a>.
       </div>
 
-    </div>
-
-    <div id="immich_authorization_status_OK_buttons" style="display:none;margin:auto;">
-        <button class="filter-button" onclick="sync_album_covers('{{ settings.Photos.ImmichUrl }}', '{{ settings.Photos.ImmichCoverAlbumId }}');">{{ translation.source.syncCoverAlbum | default(value='Synchronize Immich Cover Photo Album') }}</button> &nbsp;&nbsp;<span id="count_missing_photos"></span>
-        <button class="filter-button" onclick="save_album_covers_ids2OPFS('{{ settings.Photos.ImmichUrl }}', '{{ settings.Photos.ImmichCoverAlbumId }}');">{{ translation.source.saveCoverJson | default(value='Save Immich Cover Photo Album List to OPFS') }}</button> &nbsp;&nbsp;<span id="cover2opfs"></span>
-      </div>
-
+    </div>#}
 {% endif %}
 
     <!-- Status Bar -->
@@ -145,13 +141,21 @@ body {
       </div>
       <div class="status-item">
         <div class="status-dot" id="dotImmich"></div>
-        <span class="status-label">Immich status:</span>
-        <span class="status-value" id="valImmich">—</span>
+        <span class="status-label">Immich:</span>
+        <span class="status-value" id="valImmich">{% if settings.Photos %}{{ settings.Photos.ImmichUrl | default(value="—") }}{% else %}—{% endif %}</span>
       </div>
       <div class="status-item">
         <div class="status-dot" id="dotImmichSync"></div>
-        <span class="status-label">Bound file:</span>
+        <span class="status-label">Cover photo file:</span>
         <span class="status-value" id="valImmichSync">—</span>
+      </div>
+      <div class="status-item">
+      	{% if settings.Photos %}
+          <div id="immich_authorization_status_OK_buttons">
+              <button class="filter-button" onclick="sync_album_covers('{{ settings.Photos.ImmichUrl }}', '{{ settings.Photos.ImmichCoverAlbumId }}');">{{ translation.source.syncCoverAlbum | default(value='Synchronize Immich Cover Photo Album') }}</button> &nbsp;&nbsp;<span id="count_missing_photos"></span>
+              <button class="filter-button" onclick="save_album_covers_ids2OPFS('{{ settings.Photos.ImmichUrl }}', '{{ settings.Photos.ImmichCoverAlbumId }}');">{{ translation.source.saveCoverJson | default(value='Save Immich Cover Photo Album List to OPFS') }}</button> &nbsp;&nbsp;<span id="cover2opfs"></span>
+            </div>
+        {% endif %}
       </div>
     </div>
 

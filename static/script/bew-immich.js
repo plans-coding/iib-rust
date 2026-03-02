@@ -4,12 +4,8 @@ async function check_immich_authorization() {
     const immichUrl = document.getElementById("immichUrl").textContent;
     try {
         const response = await fetch(immichUrl + "api/auth/status");
-        document.getElementById("immich_authorization_status").classList.remove("red-text");
-        document.getElementById("immich_authorization_status").classList.add("green-text");
-        document.getElementById("immich_authorization_status_OK").style.display = "block";
-        document.getElementById("immich_authorization_status_OK_buttons").style.display = "block";
         console.log("Immich Auth OK");
-        return response.status === 200;
+        if ( response.status === 200 ) { document.getElementById('dotImmich').className = 'status-dot green'; }
     } catch (err) {
         document.getElementById("immich_authorization_status_NOT_OK").style.display = "block";
         console.log("Immich Auth NOT OK");
