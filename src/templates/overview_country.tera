@@ -29,7 +29,7 @@
       {% endif %}
 
       <div class="row">
-        <div class="row-left">{{ row.Country }}</div>
+        <div class="row-left text-left">{{ row.Country }}</div>
         <div class="row-right">
       {% set_global last_country = row.Country %}
     {% endif %}

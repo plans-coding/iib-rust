@@ -155,7 +155,7 @@
           
           {% for movie in trip_extension_movie %}
               <a href="{{ movie.MovieUrl }}" target="_blank">
-                <button class="filter-button full-width-button">
+                <button class="item-viewer-button filter-button full-width-button">
                   <img src="static/images/photos.svg" />
                   {{ movie.MovieId }}
                 </button>

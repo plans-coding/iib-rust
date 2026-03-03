@@ -105,7 +105,7 @@ fn get_tera() -> &'static Tera {
             ("statistics_overnights", bc("statistics:overnights", TEMPLATE_STATISTICS_OVERNIGHTS)),
             ("statistics_themes", bc("statistics:themes", TEMPLATE_STATISTICS_THEMES)),
             ("source", bc("source", TEMPLATE_SOURCE)),
-            ("about", bc("about", TEMPLATE_ABOUT)),
+            ("about",TEMPLATE_ABOUT.to_string()),
             ("report", bc("report", TEMPLATE_TOOLBOX_REPORT)),
             ("trip", TEMPLATE_TRIP.to_string()),
             ("images", TEMPLATE_IMAGES.to_string()),
