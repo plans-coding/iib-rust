@@ -1053,7 +1053,7 @@ background-color: rgb(from var(--color-background) r g b / 0.8);
             padding: 1rem;
             /*background: var(--domain-color);*/
             cursor: pointer;
-            background-image: repeating-linear-gradient(to right, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.25) 24px, transparent 2px, transparent 10px), radial-gradient(circle at top center, rgba(255, 255, 255, 0.15) 0%, transparent 60%), linear-gradient(to right, var(--domain-color), var(--domain-color));
+                        background-image: repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 0.3) 100%), linear-gradient(to bottom, var(--domain-color), var(--domain-color));
         }
 
         &[open] summary {
@@ -1350,11 +1350,11 @@ background-color: rgb(from var(--color-background) r g b / 0.8);
         cursor: pointer;
     }
 
-    /* Top controls */
     .top-controls {
         display: flex;
         padding: 10pt 5pt 5pt 5pt;
         gap: 5pt;
+        background-color: var(--color-hover-background);
     }
 
     #loading-overlay {
@@ -1375,24 +1375,18 @@ background-color: rgb(from var(--color-background) r g b / 0.8);
         max-height: 20%;
         overflow: auto;
     }
-
-    /* Rotate animation */
     .rotate-animation {
         animation: spin 1s linear infinite;
     }
 
-    @keyframes spin {
-        100% { transform: rotate(360deg); }
-    }
 
-    /* Buttons */
+
     .black-button {
-        /* add your styles */
+        background-color:#000;
     }
 
     .filter-button {
         flex: 1;
-        /* add your styles */
     }
 
     #left-column {
@@ -1404,8 +1398,6 @@ background-color: rgb(from var(--color-background) r g b / 0.8);
         gap:2pt;
         overflow-y: auto;
         overflow-x: hidden;
-        background-color:var(--color-hover-background);
-        /*background: linear-gradient(125deg, var(--color-hover-background), var(--color-hover-background-alpha));*/
     }
     #right-column {
         display: flex;
@@ -1440,34 +1432,8 @@ background-color: rgb(from var(--color-background) r g b / 0.8);
     details div {font-size:0.9em;padding:3pt;color:var(--color-text);}
     .clickable:hover {background-color:var(--color-filter);border-radius:3pt;color:var(--color-filter-text);}
 
-    .rotate-animation {
-        transform-origin: center;
-        animation: spin 2s linear infinite; /* continuous clockwise rotation */
-    }
-
-    @keyframes spin {
-        from { transform: rotate(0deg); }
-        to   { transform: rotate(360deg); }
-    }
-
     .inactivated-button {background-color:var(--color-hover-background) !important;color:var(--color-hover-text) !important;}
 
-    .jspreadsheet thead th,
-    .jspreadsheet tbody th {
-        position: sticky;
-        background: #f0f0f0;
-    }
-    .jspreadsheet thead th {
-        top: 0;
-        z-index: 2;
-    }
-    .jspreadsheet tbody th {
-        left: 0;
-        z-index: 1;
-    }
-    .jspreadsheet thead th:first-child {
-        z-index: 3;
-    }
     .ͼb { color: var(--color-filter) !important; }
     .ͼd { color: red; }
     .ͼ2 .cm-gutters,
@@ -1475,30 +1441,8 @@ background-color: rgb(from var(--color-background) r g b / 0.8);
         background-color: var(--color-background);
         color: var(--color-text);
     }
-    .tabulator-header-contents,
-    .tabulator-tableholder,
-    .tabulator-frozen,
-    .tabulator-col-content {
-        background-color: var(--color-background);
-        color: var(--color-text);
-    }
-    .tabulator-cell {
-        background-color: var(--color-hover-background);
-        color: var(--color-text);
-    }
-    .tabulator-range-row-header,
-    .tabulator-row.tabulator-range-highlight .tabulator-cell.tabulator-range-row-header {
-        color: var(--color-filter);
-    }
-    .tabulator-row .tabulator-cell.tabulator-range-selected:not(.tabulator-range-only-cell-selected):not(.tabulator-range-row-header) {
-        background-color: var(--color-filter);
-        color: #000;
-    }
-    #cellViewer {
-        background-color: var(--cv-bg);
-        color: var(--cv-text);
-    }
 
+   .tabulator-range-active {}
 }
 html:has(#path-dataset), body:has(#path-dataset) {
     height: 100%;
@@ -1506,6 +1450,10 @@ html:has(#path-dataset), body:has(#path-dataset) {
     section {max-width:100%!important;width:100%!important;margin:0!important;}
     #iib-foot{display:none;}
     #app {height: 100%;overflow: auto;}
+}
+body:has(#path-dataset) { background-color: var(--color-hover-background); }
+@keyframes spin {
+    100% { transform: rotate(360deg); }
 }
 
 #path-search {
@@ -1547,4 +1495,32 @@ html:has(#path-dataset), body:has(#path-dataset) {
             margin-bottom: 0.5em;
         }
     }
+}
+
+
+
+.moving-green-text {
+    text-align:center;
+    font-size: 2em;
+    font-weight: bold;
+
+    background: linear-gradient(
+        90deg,
+        var(--gradient-green),
+        var(--gradient-gold),
+        var(--gradient-green)
+    );
+    background-size: 200% auto;
+
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+
+    animation: slide-gradient 3s linear infinite;
+}
+
+@keyframes slide-gradient {
+    0%   { background-position: 0%   center; }
+    100% { background-position: 200% center; }
 }

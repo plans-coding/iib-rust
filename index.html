@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Immer in Bewegung</title>
         <meta name="mobile-web-app-capable" content="yes">
-        <meta name="theme-color" content="#6f757e" id="themeColorMeta">
+        <meta name="theme-color" content="#D7D700" id="themeColorMeta">
         <meta name="msapplication-navbutton-color" content="#6f757e">
         <link rel="shortcut icon" href="static/images/frog.svg" />
 
@@ -43,18 +43,19 @@
 
         <section id="app">
 
-            <div style="text-align:center;margin-top:50pt;"><img src="static/images/frog.svg" style="width:233px;height:233px;" class="delayed-pulse" /><br><div onclick="(async()=>{const r=await navigator.storage.getDirectory();for await(const[e,h]of r.entries()){await r.removeEntry(e,{recursive:true})}})()">    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+            <div style="text-align:center;margin-top:50pt;"><img src="static/images/frog.svg" style="width:233px;height:233px;" class="delayed-pulse" /><!--<br><div onclick="(async()=>{const r=await navigator.storage.getDirectory();for await(const[e,h]of r.entries()){await r.removeEntry(e,{recursive:true})}})()">    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
       <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
       <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
-    </svg>OPFS</div>
+    </svg>OPFS</div>-->
             </div>
-            <br>
+            <div class="moving-green-text"><span class="immer-in-font-uc">Immer in</span> <span class="bewegung-font-uc">Bewegung</span></div>
             <div id="error_msg"></div>
 
         </section>
 
-        <div id="iib-foot" style="text-align:center;font-size:32pt;padding-top:20pt;padding-bottom:30pt;"><span class="immer-in-font-uc">II</span><span class="bewegung-font-uc">B</span>
-        <!--<br/><div style="font-size:12pt;font-family: 'Francois+One', sans-serif;">Revisit your travel memories</div>--></div>
+        <!--<div id="iib-foot" style="text-align:center;font-size:32pt;padding-top:20pt;padding-bottom:30pt;"><span class="immer-in-font-uc">II</span><span class="bewegung-font-uc">B</span></div>-->
+        <!--<br/><div style="font-size:12pt;font-family: 'Francois+One', sans-serif;">Revisit your travel memories</div>-->
+
         
         
         <dialog id="image-viewer-dialog" style="overflow:hidden;">

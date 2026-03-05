@@ -699,6 +699,7 @@ async fn page_load_internal() {
         ("report", _, _) => {
             page_data = Some(PageData { title: tr("/toolbox/report", "Report"), template: "report".into(), queries: vec![] });
             all_state["date_now"] = serde_json::json!(Local::now().format("%Y-%m-%d").to_string());
+            all_state["year_now"] = serde_json::json!(Local::now().format("%Y").to_string());
         }
 
         ("report:output", title, backside) => {
