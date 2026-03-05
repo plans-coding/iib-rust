@@ -113,7 +113,7 @@ fn get_tera() -> &'static Tera {
             ("dataset", TEMPLATE_DATASET.to_string()),
             ("search", TEMPLATE_SEARCH.to_string()),
             ("report_output", TEMPLATE_TOOLBOX_REPORT_OUTPUT.to_string()),
-            ("toolbox", TEMPLATE_TOOLBOX_INPUT.to_string()),
+            ("toolbox", bc("toolbox", TEMPLATE_TOOLBOX_INPUT)),
         ];
 
         for (name, content) in templates {

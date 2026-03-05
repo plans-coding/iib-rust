@@ -150,6 +150,11 @@
         <img class="icon-color" src="static/images/frog.svg" />
         <div class="">{{ translation.source.title | default(value='Configure your data source') }}</div>
     </div>
+    {% elif page == "toolbox" %}
+    <div class="breadcrumb">
+        <img class="icon-color" src="images/frog.svg" />
+        <div>{{ translation.input.title | default(value="Create trip") }}</div>
+    </div>
     {% elif page == "about" %}
         <div class="breadcrumb widescreen">
         <img class="icon-color" src="static/images/frog.svg" />

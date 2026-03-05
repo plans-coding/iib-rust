@@ -7,23 +7,6 @@
 		<script id="immichUrl" type="application/json">{{ settings.Photos.ImmichUrl | safe }}</script>
     		<script id="coverPhotoOriginalPaths" type="application/json">{{ cover_photo_original_paths | json_encode | safe }}</script>
 	{% endif %}
-        {% if settings and settings.Photos and settings.Photos.Immich == "Enabled" %}
-
-    {#<div class="breadcrumb">
-      <!--<img class="icon-color" src="static/images/frog.svg" />-->
-      <div class="">{{ translation.source.immichInstance | default(value='Immich Instance') }}</div>
-    </div>
-
-    <div class="red-text" id="immich_authorization_status" style="display:block;">
-
-      <div id="immich_authorization_status_NOT_OK" style="display:none;">{{ translation.source.immichNotLoggedOn | default(value='You need to be logged in to you Immich instance for the synchronization to work, please login at') }} <a class="single-link" target="_blank" href="{{ settings.Photos.ImmichUrl }}"></a>.</div>
-
-      <div id="immich_authorization_status_OK" style="display:none;">
-        {{ translation.source.immichLoggedOn | default(value='You are logged in to you Immich instance at') }} <a class="single-link" target="_blank" href="{{ settings.Photos.ImmichUrl }}">{{ settings.Photos.ImmichUrl }}</a>.
-      </div>
-
-    </div>#}
-{% endif %}
 
     <!-- Status Bar -->
     <div class="status-bar blur">
@@ -57,17 +40,16 @@
         <span class="status-label">Cover photo file:</span>
         <span class="status-value" id="valImmichSync">—</span>
       </div>
-      <div class="status-item">
+    </div>
+    <div id="source_settings_buttons"  style="display:flex;flex-direction:row;flex-wrap:wrap;gap:5pt;">
       	{% if settings.Photos %}
-          <div id="immich_authorization_status_OK_buttons">
-              <button class="item-viewer-button filter-button" onclick="sync_album_covers('{{ settings.Photos.ImmichUrl }}', '{{ settings.Photos.ImmichCoverAlbumId }}');"><img class="immich-icon" src="static/images/immich-logo-inline-dark-small.png"></button> &nbsp;&nbsp;<span id="count_missing_photos"></span>
+              <button class="item-viewer-button filter-button" onclick="sync_album_covers('{{ settings.Photos.ImmichUrl }}', '{{ settings.Photos.ImmichCoverAlbumId }}');"><img class="immich-icon" src="static/images/immich-logo-inline-dark-small.png"> <span id="count_missing_photos"></span></button>
               <button class="item-viewer-button filter-button" onclick="save_album_covers_ids2OPFS('{{ settings.Photos.ImmichUrl }}', '{{ settings.Photos.ImmichCoverAlbumId }}');">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-floppy-fill" viewBox="0 0 16 16">
                 <path d="M0 1.5A1.5 1.5 0 0 1 1.5 0H3v5.5A1.5 1.5 0 0 0 4.5 7h7A1.5 1.5 0 0 0 13 5.5V0h.086a1.5 1.5 0 0 1 1.06.44l1.415 1.414A1.5 1.5 0 0 1 16 2.914V14.5a1.5 1.5 0 0 1-1.5 1.5H14v-5.5A1.5 1.5 0 0 0 12.5 9h-9A1.5 1.5 0 0 0 2 10.5V16h-.5A1.5 1.5 0 0 1 0 14.5z"/>
                 <path d="M3 16h10v-5.5a.5.5 0 0 0-.5-.5h-9a.5.5 0 0 0-.5.5zm9-16H4v5.5a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5zM9 1h2v4H9z"/>
-              </svg>
-              </button> &nbsp;&nbsp;<span id="cover2opfs"></span>
-            </div>
+              </svg> <span id="cover2opfs"></span>
+              </button>
         {% endif %}
 
         <button class="item-viewer-button source-button" onclick="
@@ -89,27 +71,26 @@
             </svg>
             {{ translation.source.delete_cache | default(value='Delete web app cache') }}
           </button>
-
-      </div>
-    </div>
+	</div>
 
     <!-- Radio Options -->
+	<div id="bind-container">
     <div class="options">
       <label class="option-card" data-mode="fetch">
         <input type="radio" name="mode" value="fetch" />
-        <h3>① Fetch from Server</h3>
+        <h3>Fetch from server</h3>
         <p>Read the DB path from <code>server_db_path.txt</code>, fetch the <code>.sqlite</code> file, and persist it into OPFS.</p>
       </label>
 
       <label class="option-card" data-mode="folder">
         <input type="radio" name="mode" value="folder" />
-        <h3>② Bind Local File <span class="badge readonly">Read-only</span> <span class="badge sync">Auto-sync</span></h3>
+        <h3>Bind local file<!-- <span class="badge readonly">Read-only</span> <span class="badge sync">Auto-sync</span>--></h3>
         <p>Pick a local <code>.sqlite</code> file. A copy is saved to OPFS. The file handle is <strong>persisted across reloads</strong> via IndexedDB. On reload, the file is compared by hash and re-synced if changed.</p>
       </label>
 
       <label class="option-card" data-mode="upload">
         <input type="radio" name="mode" value="upload" />
-        <h3>③ Upload Directly</h3>
+        <h3>Upload directly</h3>
         <p>Drag-and-drop or browse to upload a <code>.sqlite</code> file straight into OPFS.</p>
       </label>
     </div>
@@ -118,7 +99,7 @@
     <div class="action-area">
       <!-- FETCH panel -->
       <div id="panel-fetch" class="hidden">
-        <h4>Fetch from Server</h4>
+        <h4>Fetch from server</h4>
         <div class="input-row">
           <input type="text" id="fetchPathOverride" placeholder="Or paste a direct URL to .sqlite (optional)" />
           <button class="btn" id="btnFetch">⬇ Fetch</button>
@@ -130,7 +111,7 @@
 
       <!-- FOLDER panel -->
       <div id="panel-folder" class="hidden">
-        <h4>Bind Local File</h4>
+        <h4>Bind local file</h4>
         <div class="btn-row">
           <button class="btn" id="btnPickFile">Upload</button>
           <button class="btn btn-outline hidden" id="btnResync">Check and sync</button>
@@ -147,7 +128,7 @@
 
       <!-- UPLOAD panel -->
       <div id="panel-upload" class="hidden">
-        <h4>Upload SQLite File</h4>
+        <h4>Upload file</h4>
         <div class="file-drop" id="dropZone">
           <input type="file" id="fileInput" accept=".sqlite,.db,.sqlite3" />
           <span class="icon">📄</span>
@@ -167,6 +148,6 @@
       </div>
       <div id="log"></div>
     </div>
-
+	</div>
 
 </div>

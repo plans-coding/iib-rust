@@ -3,17 +3,18 @@
     <table>
         <thead>
             <tr>
-                <td><b>{{ theme_config[1] | default(value="Theme") }}</b></td>
-                <td><b>{{ theme_config[2] | default(value="Count") }}</b></td>
+                <td>{{ theme_config[1] | default(value="Theme") }}</td>
+                <td>{{ theme_config[2] | default(value="Count") }}</td>
             </tr>
         </thead>
-
+	<tbody>
         {% for theme_row in statistics_theme_count %}
                 <tr>
                     <td>{{ theme_row.ThemeDescription }}</td>
                     <td>{{ theme_row.ThemeCount }}</td>
                 </tr>
         {% endfor %}
+	</tbody>
     </table>
 
     {% else %}

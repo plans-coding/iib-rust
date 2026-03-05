@@ -4,12 +4,7 @@ body {backdrop-filter: none !important;} /* Position fixed do not work with back
 </style>
 <div id="current_trip_documentation_status" style="z-index:10000;border:5pt solid red;position:fixed;top:0;right:0;background-color:var(--color-filter);"></div>
 
-<div class="path-toolbox">
-  <div class="breadcrumb">
-    <img class="icon-color" src="images/frog.svg" />
-    <div>{{ translation.input.title | default(value="Create trip") }}</div>
-
-  </div>
+<div id="path-toolbox">
     <div style="overflow-x: auto;display:flex;">
         <div style="display:flex;gap:3pt;margin-bottom:3pt;justify-content:flex-end;">
 
