@@ -12,142 +12,138 @@
     <div class="status-bar blur">
       <div class="status-item">
         <div class="status-dot" id="dotOpfs"></div>
-        <span class="status-label">OPFS:</span>
-        <span class="status-value" id="valOpfs">Checking…</span>
+        <span class="status-label">{{ translation.source.opfs | default(value="OPFS") }}:</span>
+        <span class="status-value" id="valOpfs">{{ translation.source.checking | default(value="Checking…") }}</span>
       </div>
       <div class="status-item">
         <div class="status-dot" id="dotDb"></div>
-        <span class="status-label">DB in OPFS:</span>
+        <span class="status-label">{{ translation.source.db_in_opfs | default(value="DB in OPFS") }}:</span>
         <span class="status-value" id="valDb">—</span>
       </div>
       <div class="status-item">
         <div class="status-dot" id="dotSize"></div>
-        <span class="status-label">Size:</span>
+        <span class="status-label">{{ translation.source.size | default(value="Size") }}:</span>
         <span class="status-value" id="valSize">—</span>
       </div>
       <div class="status-item">
         <div class="status-dot" id="dotBound"></div>
-        <span class="status-label">Bound file:</span>
+        <span class="status-label">{{ translation.source.bound_file | default(value="Bound file") }}:</span>
         <span class="status-value" id="valBound">—</span>
       </div>
       <div class="status-item">
         <div class="status-dot" id="dotImmich"></div>
-        <span class="status-label">Immich:</span>
+        <span class="status-label">{{ translation.source.immich | default(value="Immich") }}:</span>
         <span class="status-value" id="valImmich">{% if settings.Photos %}{{ settings.Photos.ImmichUrl | default(value="—") }}{% else %}—{% endif %}</span>
       </div>
       <div class="status-item">
         <div class="status-dot" id="dotImmichSync"></div>
-        <span class="status-label">Cover photo file:</span>
+        <span class="status-label">{{ translation.source.cover_photo_file | default(value="Cover photo file") }}:</span>
         <span class="status-value" id="valImmichSync">—</span>
       </div>
     </div>
-    <div id="source_settings_buttons"  style="display:flex;flex-direction:row;flex-wrap:wrap;gap:5pt;">
+
+    <div id="source_settings_buttons" style="display:flex;flex-direction:row;flex-wrap:wrap;gap:5pt;">
       	{% if settings.Photos %}
-              <button class="item-viewer-button filter-button" onclick="sync_album_covers('{{ settings.Photos.ImmichUrl }}', '{{ settings.Photos.ImmichCoverAlbumId }}');"><img class="immich-icon" src="static/images/immich-logo-inline-dark-small.png"> <span id="count_missing_photos"></span></button>
+              <button class="item-viewer-button filter-button" onclick="sync_album_covers('{{ settings.Photos.ImmichUrl }}', '{{ settings.Photos.ImmichCoverAlbumId }}');">
+              <img class="immich-icon" src="static/images/immich-logo-inline-dark-small.png">
+              <span id="count_missing_photos"></span>
+              </button>
+
               <button class="item-viewer-button filter-button" onclick="save_album_covers_ids2OPFS('{{ settings.Photos.ImmichUrl }}', '{{ settings.Photos.ImmichCoverAlbumId }}');">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-floppy-fill" viewBox="0 0 16 16">
                 <path d="M0 1.5A1.5 1.5 0 0 1 1.5 0H3v5.5A1.5 1.5 0 0 0 4.5 7h7A1.5 1.5 0 0 0 13 5.5V0h.086a1.5 1.5 0 0 1 1.06.44l1.415 1.414A1.5 1.5 0 0 1 16 2.914V14.5a1.5 1.5 0 0 1-1.5 1.5H14v-5.5A1.5 1.5 0 0 0 12.5 9h-9A1.5 1.5 0 0 0 2 10.5V16h-.5A1.5 1.5 0 0 1 0 14.5z"/>
                 <path d="M3 16h10v-5.5a.5.5 0 0 0-.5-.5h-9a.5.5 0 0 0-.5.5zm9-16H4v5.5a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5zM9 1h2v4H9z"/>
-              </svg> <span id="cover2opfs"></span>
+              </svg>
+              <span id="cover2opfs"></span>
               </button>
         {% endif %}
 
         <button class="item-viewer-button source-button" onclick="
           navigator.storage.getDirectory()
-          .then(d=>d.removeEntry('chronik.sqlite'))
+          .then(d=>d.removeEntry('app.sqlite'))
           .catch(()=>{})
           .then(()=>{document.getElementById('opfsStatus').textContent='{{ translation.source.missing | default(value='Database file missing in OPFS.') }}';document.getElementById('opfsStatus').className='red-text';}).then(()=>{location.reload()});">
+
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
             <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
             <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
           </svg>
-          {{ translation.source.delete_db | default(value='Delete database file') }}
-          </button>
 
-          <button class="item-viewer-button source-button" onclick="localStorage.clear(); caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))); navigator.serviceWorker.getRegistrations().then(r => r.forEach(reg => reg.unregister())).then(()=>{location.reload()});">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
-              <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
-              <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
-            </svg>
-            {{ translation.source.delete_cache | default(value='Delete web app cache') }}
-          </button>
+          {{ translation.source.delete_db | default(value='Delete database file') }}
+        </button>
+
+        <button class="item-viewer-button source-button" onclick="localStorage.clear(); caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))); navigator.serviceWorker.getRegistrations().then(r => r.forEach(reg => reg.unregister())).then(()=>{location.reload()});">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+            <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+            <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
+          </svg>
+          {{ translation.source.delete_cache | default(value='Delete web app cache') }}
+        </button>
 	</div>
 
     <!-- Radio Options -->
 	<div id="bind-container">
     <div class="options">
+
       <label class="option-card" data-mode="fetch">
         <input type="radio" name="mode" value="fetch" />
-        <h3>Fetch from server</h3>
-        <p>Read the DB path from <code>server_db_path.txt</code>, fetch the <code>.sqlite</code> file, and persist it into OPFS.</p>
+        <h3>{{ translation.source.fetch_from_server | default(value="Fetch from server") }}</h3>
+        <p>{{ translation.source.fetch_from_server_desc | default(value="Read the DB path from server_db_path.txt, fetch the .sqlite file, and persist it into OPFS.") }}</p>
       </label>
 
       <label class="option-card" data-mode="folder">
         <input type="radio" name="mode" value="folder" />
-        <h3>Bind local file<!-- <span class="badge readonly">Read-only</span> <span class="badge sync">Auto-sync</span>--></h3>
-        <p>Pick a local <code>.sqlite</code> file. A copy is saved to OPFS. The file handle is <strong>persisted across reloads</strong> via IndexedDB. On reload, the file is compared by hash and re-synced if changed.</p>
+        <h3>{{ translation.source.bind_local_file | default(value="Bind local file") }}</h3>
+        <p>{{ translation.source.bind_local_file_desc | default(value="Pick a local .sqlite file. A copy is saved to OPFS. The file handle is persisted across reloads via IndexedDB. On reload, the file is compared by hash and re-synced if changed.") }}</p>
       </label>
 
       <label class="option-card" data-mode="upload">
         <input type="radio" name="mode" value="upload" />
-        <h3>Upload directly</h3>
-        <p>Drag-and-drop or browse to upload a <code>.sqlite</code> file straight into OPFS.</p>
+        <h3>{{ translation.source.upload_directly | default(value="Upload directly") }}</h3>
+        <p>{{ translation.source.upload_directly_desc | default(value="Drag-and-drop or browse to upload a .sqlite file straight into OPFS.") }}</p>
       </label>
+
     </div>
 
     <!-- Action Panels -->
     <div class="action-area">
-      <!-- FETCH panel -->
+
       <div id="panel-fetch" class="hidden">
-        <h4>Fetch from server</h4>
+        <h4>{{ translation.source.fetch_from_server | default(value="Fetch from server") }}</h4>
         <div class="input-row">
-          <input type="text" id="fetchPathOverride" placeholder="Or paste a direct URL to .sqlite (optional)" />
-          <button class="btn" id="btnFetch">⬇ Fetch</button>
-        </div>
-        <div class="progress-wrap hidden" id="fetchProgress">
-          <div class="progress-bar" id="fetchBar"></div>
+          <input type="text" id="fetchPathOverride" placeholder="{{ translation.source.fetch_override_placeholder | default(value='Or paste a direct URL to .sqlite (optional)') }}" />
+          <button class="btn" id="btnFetch">⬇ {{ translation.source.fetch | default(value="Fetch") }}</button>
         </div>
       </div>
 
-      <!-- FOLDER panel -->
       <div id="panel-folder" class="hidden">
-        <h4>Bind local file</h4>
+        <h4>{{ translation.source.bind_local_file | default(value="Bind local file") }}</h4>
         <div class="btn-row">
-          <button class="btn" id="btnPickFile">Upload</button>
-          <button class="btn btn-outline hidden" id="btnResync">Check and sync</button>
-          <button class="btn btn-danger hidden" id="btnUnbind">✕ Unbind</button>
-        </div>
-        <div class="folder-info hidden" id="folderInfo">
-          <div class="filename" id="folderFilename"></div>
-          <div class="meta" id="folderMeta"></div>
-        </div>
-        <div class="progress-wrap hidden" id="folderProgress">
-          <div class="progress-bar" id="folderBar"></div>
+          <button class="btn" id="btnPickFile">{{ translation.source.upload | default(value="Upload") }}</button>
+          <button class="btn btn-outline hidden" id="btnResync">{{ translation.source.check_and_sync | default(value="Check and sync") }}</button>
+          <button class="btn btn-danger hidden" id="btnUnbind">✕ {{ translation.source.unbind | default(value="Unbind") }}</button>
         </div>
       </div>
 
-      <!-- UPLOAD panel -->
       <div id="panel-upload" class="hidden">
-        <h4>Upload file</h4>
+        <h4>{{ translation.source.upload_file | default(value="Upload file") }}</h4>
         <div class="file-drop" id="dropZone">
           <input type="file" id="fileInput" accept=".sqlite,.db,.sqlite3" />
           <span class="icon">📄</span>
-          Drop your <strong>.sqlite</strong> file here or <strong>click to browse</strong>
-        </div>
-        <div class="progress-wrap hidden" id="uploadProgress">
-          <div class="progress-bar" id="uploadBar"></div>
+          {{ translation.source.drop_sqlite | default(value="Drop your .sqlite file here or click to browse") }}
         </div>
       </div>
+
     </div>
 
     <!-- Log -->
     <div class="log-panel">
       <div class="log-header">
-        <h4>Activity Log</h4>
-        <button id="btnClearLog">Clear</button>
+        <h4>{{ translation.source.activity_log | default(value="Activity Log") }}</h4>
+        <button id="btnClearLog">{{ translation.source.clear | default(value="Clear") }}</button>
       </div>
       <div id="log"></div>
     </div>
-	</div>
 
+	</div>
 </div>

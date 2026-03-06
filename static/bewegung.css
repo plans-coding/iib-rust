@@ -2,17 +2,19 @@
 
     --gradient-gold: gold;
     --gradient-green: green;
-
+    --color-silver: #f4f7fa;
 
     --color-background: #f8fafd;
     --color-white: #fff;
     --color-background-alpha: #f8fafdaa;
     --color-text: #000;
-    --color-hover-background: #6f757eaa;
+    --color-hover-background: #6f757e;
     --color-hover-background-alpha: #6f757e22;
     --color-hover-text: #fff;
 
-    --color-filter: #ffbf00;
+    --color-filter-old: #ffbf00;
+    --color-filter: #D7D700;
+
     --color-chart-text: #000;
     --color-filter-alpha: #ffbf00bb;
     --color-filter-background: #fdf8ee;
@@ -33,6 +35,7 @@ body.dark {
 
     --gradient-gold: #4d4203;
     --gradient-green: #023602;
+    --color-silver: #022626;
 
     --color-background: #022626;
     --color-white: #022626aa;
@@ -91,6 +94,25 @@ body {
     color: var(--color-text);
     background-color: var(--color-background);
     transition: background-color 0.3s ease, color 0.3s ease;
+
+    /*background-image: linear-gradient(to bottom, transparent, var(--color-background) 100pt, var(--color-background) 100%), repeating-linear-gradient(to right, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.25) 24px, transparent 2px, transparent 10px), radial-gradient(circle at top center, rgba(255, 255, 255, 0.15) 0%, transparent 60%), linear-gradient(to right, var(--gradient-gold), var(--gradient-green));
+    background-blend-mode: overlay;*/
+
+    /*background-image:
+    repeating-linear-gradient(to right, rgba(0,0,0,0.05), rgba(0,0,0,0.25) 24px, transparent 2px, transparent 10px),
+    radial-gradient(circle at top center, rgba(255,255,255,0.15) 0%, transparent 60%),
+    linear-gradient(to right, var(--gradient-gold), var(--gradient-green)),
+    linear-gradient(to bottom, transparent, var(--color-background) 130pt);
+
+    background-size:
+    100% 60pt,
+    100% 60pt,
+    100% 60pt,
+    100% 60pt;
+
+    background-repeat: no-repeat;*/
+
+
 }
 
 
@@ -296,6 +318,9 @@ dialog{width:100vw;height:100vh;}
 #component-menu {
     --transition-speed: 0.2s;
 
+    .frog {display:flex;align-items: center;}
+    .shortcut {color:var(--color-text);}
+
     .iib-menu {
         display: flex;
         flex-direction: column;
@@ -304,12 +329,12 @@ dialog{width:100vw;height:100vh;}
 
         a {
             text-decoration: none;
-            color: var(--color-text);
+            color: var(--color-hover-text);
             transition: background-color var(--transition-speed);
 
             &:hover {
                 color: var(--color-hover-text);
-                background-color: var(--color-hover-background);
+                background-color: #ffffff44;
             }
         }
     }
@@ -328,8 +353,8 @@ dialog{width:100vw;height:100vh;}
         &:has(#submenu-more:hover) #more, #more:hover,
         &:has(#submenu-search:hover) #search, #search:hover,
         #themeToggle:hover {
-            background-color: var(--color-hover-background);
-            color: var(--color-hover-text);
+            background-color: #ffffff44;
+            color: var(--color-text);
         }
     }
 
@@ -338,11 +363,13 @@ dialog{width:100vw;height:100vh;}
         flex-direction: row;
         border-bottom: 1px solid var(--color-hover-background);
         box-shadow: 0 4px 0 rgba(0, 0, 0, 0.15);
-        background-image: repeating-linear-gradient(to right, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.25) 24px, transparent 2px, transparent 10px), radial-gradient(circle at top center, rgba(255, 255, 255, 0.15) 0%, transparent 60%), linear-gradient(to right, var(--gradient-gold), var(--gradient-green));
-        background-blend-mode: overlay;
-	margin: 10pt 10pt 0 10pt;
-	border-radius: var(--radius);
-	font-size:1.2rem;
+        /*background-image: repeating-linear-gradient(to right, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.25) 24px, transparent 2px, transparent 10px), radial-gradient(circle at top center, rgba(255, 255, 255, 0.15) 0%, transparent 60%), linear-gradient(to right, var(--gradient-gold), var(--gradient-green));
+        background-blend-mode: overlay;*/
+        /*background-image: linear-gradient(to right, var(--gradient-gold), var(--gradient-green));*/
+        background-color: #6E7F80;
+        margin: 10pt 10pt 0 10pt;
+        border-radius: var(--radius);
+        font-size:1.2rem;
 
         & img, & svg, #more {
             vertical-align: middle;
@@ -522,7 +549,7 @@ dialog{width:100vw;height:100vh;}
         border-radius: 5px;
         border: 1px solid var(--color-hover-background-alpha);
         border-left: 5pt solid var(--domain-color);
-        padding: 5px;
+        padding: ;
         color: var(--color-text);
         text-decoration: none;
 
@@ -543,19 +570,19 @@ dialog{width:100vw;height:100vh;}
     .card-title {
         font-family: 'Cairo', sans-serif;
         font-weight: bold;
+        padding: 5pt 10pt 5pt 10pt;
         font-size: 1.25rem;
-        padding: 5px;
         line-height: 1.2;
     }
 
     .card-text {
-        padding: 5px;
+        padding: 5pt 10pt 5pt 10pt;
     }
     .card-footer {
-        background-image: repeating-linear-gradient(to right, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.25) 24px, transparent 2px, transparent 10px), radial-gradient(circle at top center, rgba(255, 255, 255, 0.15) 0%, transparent 60%), linear-gradient(to right, var(--domain-color), var(--domain-color));
+        background-image: repeating-linear-gradient(to right, transparent, rgba(255, 255, 255, 0.1) 100%), linear-gradient(to bottom, var(--domain-color), var(--domain-color));
         color:#fff;
         padding:4pt 6pt 4pt 6pt;
-        border-radius: 5px;
+        border-right-bottom-radius: var(--radius-small);
     }
     h2 {text-align:center;}
     .component-breadcrumb { justify-items:center; }
@@ -714,6 +741,7 @@ dialog{width:100vw;height:100vh;}
 
     .option-card h3 {
       margin-bottom: 4px;
+      font-family: Cairo, sans-serif;
     }
 
     .option-card p {
@@ -976,6 +1004,13 @@ dialog{width:100vw;height:100vh;}
 #path-about {
     .single-link {text-decoration:none;color:#1d655e;}
     .element {
+        margin:30pt;
+        padding:20pt;
+        border-radius: var(--radius);
+        background-image: repeating-linear-gradient(to right, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.25) 24px, transparent 2px, transparent 10px), radial-gradient(circle at top center, rgba(255, 255, 255, 0.15) 0%, transparent 60%), linear-gradient(to right, var(--gradient-gold), var(--gradient-green));
+
+    }
+    .lead {
 	padding:15pt;
 	max-width:600pt;
 	margin:auto;
@@ -985,8 +1020,9 @@ background-color: rgb(from var(--color-background) r g b / 0.8);
     border: 1pt solid rgba(255, 255, 255, .5);
     box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
     --tw-shadow: 0 25px 50px -12px var(--tw-shadow-color, #00000040);
-    border-radius:20px;
+    border-radius:var(--radius);
 	}
+
 }
 #path-report {}
 
@@ -1053,7 +1089,7 @@ background-color: rgb(from var(--color-background) r g b / 0.8);
             padding: 1rem;
             /*background: var(--domain-color);*/
             cursor: pointer;
-                        background-image: repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 0.3) 100%), linear-gradient(to bottom, var(--domain-color), var(--domain-color));
+                        background-image: repeating-linear-gradient(to right, transparent, rgba(255, 255, 255, 0.1) 100%), linear-gradient(to bottom, var(--domain-color), var(--domain-color));
         }
 
         &[open] summary {
