@@ -261,6 +261,7 @@ function sync_db_init() {
       log(`❌ ${err.message}`, 'error');
     } finally {
       btn.disabled = false;
+      location.reload(); //Added by Plans
     }
   });
 

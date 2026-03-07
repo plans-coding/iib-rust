@@ -5,6 +5,7 @@
     --menu-behind: #6E7F80; /*#f4f7fa*/
     --menu-bg-color: gold; /*#6E7F80;*/
     --menu-txt-color: #000;
+    --domain-color: gold; /* Before it is overwritten */
 
     --color-background: #f8fafd; /*#f8fafd;*/
     --color-white: #fff;
@@ -200,9 +201,10 @@ section {max-width:800pt;margin:10pt auto auto;width:100%; }
 .filter-button:hover {background-color:#FFBF00cc;}
 .black-button {font-family:arial;font-size:12pt;background-color:#000000;color:#var(--color-text);border:0;border-radius:5pt;padding:8pt;cursor:pointer;color:#fff;}
 .black-button:hover {background-color:#000000cc;}
-.source-button {width:200pt;margin:auto;font-family:arial;font-size:12pt;background-color:#dc3545;color:var(--color-hover-text);border:0;border-radius:5pt;padding:8pt;cursor:pointer;}
+.source-button {width:200pt;margin:auto;font-family:arial;font-size:12pt;background-color:#dc2626;color:var(--color-hover-text);border:0;border-radius:5pt;padding:8pt;cursor:pointer;}
 .source-button:hover {background-color:#dc3545cc;}
-
+.item-viewer-filename{color: #000000;background-color: #ffffffaa;}
+.item-viewer-button{border:0;bwidth:30pt;height:30pt;border-radius:5pt;cursor:pointer;}
 
 .overflow-scroll { max-width:100%;overflow-x:auto; }
 
@@ -292,8 +294,7 @@ dialog{width:100vw;height:100vh;}
 }
 
 .themePinColor {fill:var(--color-filter);}
-.item-viewer-filename{color: #000000;background-color: #ffffffaa;}
-.item-viewer-button{border:0;background-color: gold;width:30pt;height:30pt;border-radius:5pt;cursor:pointer;}
+
 #close-dialog {cursor:pointer;background-color:#dc3545;border:0;border-radius:40pt;color:#fff;height:40pt;width:40pt;}
 
 @media (min-width: 601px) {
@@ -702,7 +703,7 @@ dialog{width:100vw;height:100vh;}
       max-width: 680px;
     }
 
-	#bind-container {background-color:var(--color-hover-background-alpha);padding:10pt;border-radius:var(--radius);}
+	#bind-container {background-color:var(--color-hover-background-alpha);padding:10pt;border-radius:var(--radius);margin-bottom:10pt;}
 
     #source_settings_buttons > * {
 	flex:1;
@@ -842,11 +843,8 @@ dialog{width:100vw;height:100vh;}
       font-weight: 600;
       cursor: pointer;
       transition: background 0.15s, opacity 0.15s;
-      color: #fff;
-      background: var(--accent);
     }
 
-    .btn:hover { background: var(--accent-hover); }
     .btn:disabled { opacity: 0.45; cursor: not-allowed; }
 
     .btn-outline {
@@ -1407,7 +1405,7 @@ background-color: rgb(from var(--color-background) r g b / 0.8);
         display: flex;
         padding: 10pt 5pt 5pt 5pt;
         gap: 5pt;
-        background-color: var(--color-hover-background);
+
     }
 
     #loading-overlay {
@@ -1419,7 +1417,7 @@ background-color: rgb(from var(--color-background) r g b / 0.8);
         height: 40px;
     }
 
-    /* Editor container */
+
     #editor-container {
         margin: 0 5pt 5pt 5pt;
         background-color: var(--color-background);
@@ -1457,7 +1455,7 @@ background-color: rgb(from var(--color-background) r g b / 0.8);
         flex-direction: column;
         flex: 1;
         overflow: hidden;
-        background-color:var(--color-submenu-background);
+        background-color: var(--color-hover-background);
     }
 
     #sql-output {
@@ -1466,7 +1464,11 @@ background-color: rgb(from var(--color-background) r g b / 0.8);
         padding-top:5pt;
     }
 
-    #cellViewer { padding:3pt 5pt 3pt 5pt;margin:5pt;border-radius:3pt;font-size:0.8em;max-height:20%;overflow:auto; }
+    #cellViewer {
+    padding:3pt 5pt 3pt 5pt;margin:5pt;border-radius:3pt;font-size:0.8em;max-height:20%;overflow:auto;
+
+    background-color:var(--color-submenu-background);
+    }
 
     .tabulator {
         margin:0 5pt 5pt 5pt;

@@ -11,79 +11,84 @@ use std::collections::HashMap;
 mod sqlite_query;
 
 macro_rules! define_resources {
-    ($($name:ident => $path:expr),+ $(,)?) => {
-        $( pub const $name: &str = include_str!($path); )+
-        pub const ALL_QUERIES: &[(&str, &str)] = &[ $( define_resources!(@is_query $name) ),+ ];
+    (
+        queries { $($qname:ident => $qpath:expr),+ $(,)? }
+        other   { $($oname:ident => $opath:expr),+ $(,)? }
+    ) => {
+        $( pub const $qname: &str = include_str!($qpath); )+
+        $( pub const $oname: &str = include_str!($opath); )+
+
+        pub const ALL_QUERIES: &[(&str, &str)] = &[
+            $( (stringify!($qname), $qname) ),+
+        ];
     };
-    (@is_query $name:ident) => { { (stringify!($name), $name) } };
 }
 
 define_resources! {
+    queries {
+        QUERY_EXPLORE                       => "../src/queries/explore/explore.sql",
+        QUERY_OVERVIEW_YEAR                 => "../src/queries/overview/overview_year.sql",
+        QUERY_OVERVIEW_COUNTRY              => "../src/queries/overview/overview_country.sql",
+        QUERY_OVERVIEW_PLAIN                => "../src/queries/overview/overview_plain.sql",
+        QUERY_TRIP_PREVIOUS                 => "../src/queries/trip/trip_previous.sql",
+        QUERY_TRIP_NEXT                     => "../src/queries/trip/trip_next.sql",
+        QUERY_TRIP_SUMMARY                  => "../src/queries/trip/trip_summary.sql",
+        QUERY_TRIP_EVENTS                   => "../src/queries/trip/trip_events.sql",
+        QUERY_TRIP_UNIQUE_COUNTRIES         => "../src/queries/trip/trip_unique_countries.sql",
+        QUERY_TRIP_BORDER_CROSSINGS         => "../src/queries/trip/trip_border_crossings.sql",
+        QUERY_TRIP_MAP_PINS_ACCOMMODATION   => "../src/queries/trip/trip_map_pins_accommodation.sql",
+        QUERY_TRIP_MAP_PINS_OVERALL         => "../src/queries/trip/trip_map_pins_overall.sql",
+        QUERY_TRIP_IMMICH_DESC_SEARCH       => "../src/queries/trip/trip_immich_desc_search.sql",
+        QUERY_TRIP_IMMICH_ALBUM_NAME        => "../src/queries/trip/trip_immich_album_name.sql",
+        QUERY_TRIP_EXTENSION_MOVIE          => "../src/queries/_extensions/trip_movie.sql",
+        QUERY_TRIP_EXTENSION_REFERENCE_ITEMS => "../src/queries/_extensions/trip_reference_items.sql",
+        QUERY_STATISTICS_VISITS             => "../src/queries/statistics/statistics_visits.sql",
+        QUERY_STATISTICS_OVERNIGHTS         => "../src/queries/statistics/statistics_overnights.sql",
+        QUERY_STATISTICS_PER_DOMAIN_YEAR    => "../src/queries/statistics/statistics_per_domain_year.sql",
+        QUERY_STATISTICS_THEME_COUNT        => "../src/queries/statistics/statistics_theme_count.sql",
+        QUERY_STATISTICS_TRIP_COUNT         => "../src/queries/statistics/statistics_trip_count.sql",
+        QUERY_COMMON_PARTICIPANT_GROUPS     => "../src/queries/_common/common_participant_groups.sql",
+        QUERY_COMMON_TRIP_DOMAINS           => "../src/queries/_common/common_trip_domains.sql",
+        QUERY_COMMON_TRIP_LABELS            => "../src/queries/_common/common_trip_labels.sql",
+        QUERY_IMAGES_DATE_LIST              => "../src/queries/images/images_date_list.sql",
+        QUERY_IMAGES_PHOTO_TIME             => "../src/queries/images/images_photo_time.sql",
+        QUERY_MAP_CONTOUR                   => "../src/queries/map/map_contour.sql",
+        QUERY_MAP_COUNTRY                   => "../src/queries/map/map_country.sql",
+        QUERY_MAP_COUNTRY_LIST              => "../src/queries/map/map_country_list.sql",
+        QUERY_MAP_THEME                     => "../src/queries/map/map_theme.sql",
+        QUERY_SEARCH_EVENT                  => "../src/queries/search/search_event.sql",
+        QUERY_SEARCH_TRIP                   => "../src/queries/search/search_trip.sql",
+        QUERY_REPORT_ALL_OVERVIEW           => "../src/queries/report/report_all_overview.sql",
+        QUERY_REPORT_ALL_EVENTS             => "../src/queries/report/report_all_events.sql",
+    }
+    other {
+        CURRENT_VERSION                     => "../version",
 
-    CURRENT_VERSION => "../version",
+        TEMPLATE_MENU                       => "../src/templates/_menu.tera",
+        TEMPLATE_BREADCRUMBS                => "../src/templates/_breadcrumbs.tera",
+        TEMPLATE_EXPLORE                    => "../src/templates/explore.tera",
+        TEMPLATE_OVERVIEW_YEAR              => "../src/templates/overview_year.tera",
+        TEMPLATE_OVERVIEW_COUNTRY           => "../src/templates/overview_country.tera",
+        TEMPLATE_OVERVIEW_PLAIN             => "../src/templates/overview_plain.tera",
+        TEMPLATE_TRIP                       => "../src/templates/trip.tera",
+        TEMPLATE_IMAGES                     => "../src/templates/images.tera",
+        TEMPLATE_MAP                        => "../src/templates/map.tera",
+        TEMPLATE_STATISTICS_SUMMARY         => "../src/templates/statistics_summary.tera",
+        TEMPLATE_STATISTICS_VISITS          => "../src/templates/statistics_visits.tera",
+        TEMPLATE_STATISTICS_OVERNIGHTS      => "../src/templates/statistics_overnights.tera",
+        TEMPLATE_STATISTICS_THEMES          => "../src/templates/statistics_themes.tera",
+        TEMPLATE_DATASET                    => "../src/templates/dataset.tera",
+        TEMPLATE_SOURCE                     => "../src/templates/source.tera",
+        TEMPLATE_ABOUT                      => "../src/templates/about.tera",
+        TEMPLATE_SEARCH                     => "../src/templates/search.tera",
+        TEMPLATE_TOOLBOX_REPORT             => "../src/templates/report.tera",
+        TEMPLATE_TOOLBOX_REPORT_OUTPUT      => "../src/templates/report_output.tera",
+        TEMPLATE_TOOLBOX_INPUT              => "../src/templates/toolbox.tera",
 
-    TEMPLATE_MENU => "../src/templates/_menu.tera",
-    TEMPLATE_BREADCRUMBS => "../src/templates/_breadcrumbs.tera",
-    TEMPLATE_EXPLORE => "../src/templates/explore.tera",
-    TEMPLATE_OVERVIEW_YEAR => "../src/templates/overview_year.tera",
-    TEMPLATE_OVERVIEW_COUNTRY => "../src/templates/overview_country.tera",
-    TEMPLATE_OVERVIEW_PLAIN => "../src/templates/overview_plain.tera",
-    TEMPLATE_TRIP => "../src/templates/trip.tera",
-    TEMPLATE_IMAGES => "../src/templates/images.tera",
-    TEMPLATE_MAP => "../src/templates/map.tera",
-    TEMPLATE_STATISTICS_SUMMARY => "../src/templates/statistics_summary.tera",
-    TEMPLATE_STATISTICS_VISITS => "../src/templates/statistics_visits.tera",
-    TEMPLATE_STATISTICS_OVERNIGHTS => "../src/templates/statistics_overnights.tera",
-    TEMPLATE_STATISTICS_THEMES => "../src/templates/statistics_themes.tera",
-    TEMPLATE_DATASET => "../src/templates/dataset.tera",
-    TEMPLATE_SOURCE => "../src/templates/source.tera",
-    TEMPLATE_ABOUT => "../src/templates/about.tera",
-    TEMPLATE_SEARCH => "../src/templates/search.tera",
-    TEMPLATE_TOOLBOX_REPORT => "../src/templates/report.tera",
-    TEMPLATE_TOOLBOX_REPORT_OUTPUT => "../src/templates/report_output.tera",
-    TEMPLATE_TOOLBOX_INPUT => "../src/templates/toolbox.tera",
-
-    QUERY_EXPLORE => "../src/queries/explore/explore.sql",
-    QUERY_OVERVIEW_YEAR => "../src/queries/overview/overview_year.sql",
-    QUERY_OVERVIEW_COUNTRY => "../src/queries/overview/overview_country.sql",
-    QUERY_OVERVIEW_PLAIN => "../src/queries/overview/overview_plain.sql",
-    QUERY_TRIP_PREVIOUS => "../src/queries/trip/trip_previous.sql",
-    QUERY_TRIP_NEXT => "../src/queries/trip/trip_next.sql",
-    QUERY_TRIP_SUMMARY => "../src/queries/trip/trip_summary.sql",
-    QUERY_TRIP_EVENTS => "../src/queries/trip/trip_events.sql",
-    QUERY_TRIP_UNIQUE_COUNTRIES => "../src/queries/trip/trip_unique_countries.sql",
-    QUERY_TRIP_BORDER_CROSSINGS => "../src/queries/trip/trip_border_crossings.sql",
-    QUERY_TRIP_MAP_PINS_ACCOMMODATION => "../src/queries/trip/trip_map_pins_accommodation.sql",
-    QUERY_TRIP_MAP_PINS_OVERALL => "../src/queries/trip/trip_map_pins_overall.sql",
-    QUERY_TRIP_IMMICH_DESC_SEARCH => "../src/queries/trip/trip_immich_desc_search.sql",
-    QUERY_TRIP_IMMICH_ALBUM_NAME => "../src/queries/trip/trip_immich_album_name.sql",
-    QUERY_TRIP_EXTENSION_MOVIE => "../src/queries/_extensions/trip_movie.sql",
-    QUERY_TRIP_EXTENSION_REFERENCE_ITEMS => "../src/queries/_extensions/trip_reference_items.sql",
-    QUERY_STATISTICS_VISITS => "../src/queries/statistics/statistics_visits.sql",
-    QUERY_STATISTICS_OVERNIGHTS => "../src/queries/statistics/statistics_overnights.sql",
-    QUERY_STATISTICS_PER_DOMAIN_YEAR => "../src/queries/statistics/statistics_per_domain_year.sql",
-    QUERY_STATISTICS_THEME_COUNT => "../src/queries/statistics/statistics_theme_count.sql",
-    QUERY_STATISTICS_TRIP_COUNT => "../src/queries/statistics/statistics_trip_count.sql",
-    QUERY_COMMON_PARTICIPANT_GROUPS => "../src/queries/_common/common_participant_groups.sql",
-    QUERY_COMMON_TRIP_DOMAINS => "../src/queries/_common/common_trip_domains.sql",
-    QUERY_COMMON_TRIP_LABELS => "../src/queries/_common/common_trip_labels.sql",
-    QUERY_IMAGES_DATE_LIST => "../src/queries/images/images_date_list.sql",
-    QUERY_IMAGES_PHOTO_TIME => "../src/queries/images/images_photo_time.sql",
-    QUERY_MAP_CONTOUR => "../src/queries/map/map_contour.sql",
-    QUERY_MAP_COUNTRY => "../src/queries/map/map_country.sql",
-    QUERY_MAP_COUNTRY_LIST => "../src/queries/map/map_country_list.sql",
-    QUERY_MAP_THEME => "../src/queries/map/map_theme.sql",
-    QUERY_SEARCH_EVENT => "../src/queries/search/search_event.sql",
-    QUERY_SEARCH_TRIP => "../src/queries/search/search_trip.sql",
-    QUERY_REPORT_ALL_OVERVIEW => "../src/queries/report/report_all_overview.sql",
-    QUERY_REPORT_ALL_EVENTS => "../src/queries/report/report_all_events.sql",
-
-    CHART_JS => "../bundle/chartjs/chart.js",
-    //MAPLIBRE_JS => "../bundle/maplibre-gl/maplibre-gl.js",
-    //MAPLIBRE_CSS => "../bundle/maplibre-gl/maplibre-gl.css",
-    //BEWGUNG_CSS => "../bewegung.css",
-
+        CHART_JS                            => "../bundle/chartjs/chart.js",
+    }
 }
+
 
 static TERA: OnceCell<Tera> = OnceCell::new();
 
