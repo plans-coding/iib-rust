@@ -204,7 +204,7 @@ section {max-width:800pt;margin:10pt auto auto;width:100%; }
 .source-button {width:200pt;margin:auto;font-family:arial;font-size:12pt;background-color:#dc2626;color:var(--color-hover-text);border:0;border-radius:5pt;padding:8pt;cursor:pointer;}
 .source-button:hover {background-color:#dc3545cc;}
 .item-viewer-filename{color: #000000;background-color: #ffffffaa;}
-.item-viewer-button{border:0;bwidth:30pt;height:30pt;border-radius:5pt;cursor:pointer;}
+.item-viewer-button{border:0;bwidth:30pt;height:30pt;border-radius:5pt;cursor:pointer;color:#fff;}
 
 .overflow-scroll { max-width:100%;overflow-x:auto; }
 
@@ -443,7 +443,7 @@ dialog{width:100vw;height:100vh;}
     #submenu-filter {
         background-color: rgb(215 215 0 / 80%);
         select { font-size: 1rem; padding: 0.5rem; }
-        padding: 2px;
+        padding: 5px;
     }
 
     #submenu-search {
@@ -1046,12 +1046,32 @@ background-color: rgb(from var(--color-background) r g b / 0.8);
     padding-bottom:3pt;
 
     #trip_navigation {
-        position:absolute;display:flex;width:100%;max-width:800pt;justify-content: space-between;align-items: center;
-        a { padding:11pt;background-color:var(--domain-color);margin:12pt;border-radius:var(--radius-small);color:#fff;            height: 18pt;
-            width: 14pt; }
+
+        position:relative;display:flex;width:100%;max-width:800pt;justify-content: space-between;align-items: center;
+
+        a {
+            position:absolute;
+            padding:11pt;
+            background-color:var(--domain-color);
+            margin:12pt;
+            border-radius:5px;
+            color:#fff;
+            height: 18pt;
+            width: 14pt;
+            display: flex;
+            align-items: center;
+            top:0;
+        }
+
+            a:first-child{
+            left:0;
+            }
+
+            a:last-child{
+            right:0;
+            }
     }
 
-    /* Top */
     .breadcrumb-trip {
         color: var(--color-text);
         display: grid;
@@ -1220,6 +1240,7 @@ background-color: rgb(from var(--color-background) r g b / 0.8);
         border-radius: 12px;
         padding: 1rem;
         margin-top: 1rem;
+        margin-bottom: 1rem;
         background-color: color-mix(in srgb, var(--color-background), transparent 20%);
         border: 1px solid var(--domain-color);
 
