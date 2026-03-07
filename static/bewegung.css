@@ -1045,6 +1045,12 @@ background-color: rgb(from var(--color-background) r g b / 0.8);
 
     padding-bottom:3pt;
 
+    #trip_navigation {
+        position:absolute;display:flex;width:100%;max-width:800pt;justify-content: space-between;align-items: center;
+        a { padding:11pt;background-color:var(--domain-color);margin:12pt;border-radius:var(--radius-small);color:#fff;            height: 18pt;
+            width: 14pt; }
+    }
+
     /* Top */
     .breadcrumb-trip {
         color: var(--color-text);
@@ -1067,6 +1073,9 @@ background-color: rgb(from var(--color-background) r g b / 0.8);
         border-radius: 5px;
         transition: all 0.2s ease;
         padding:5pt;
+        width:20pt;
+        text-align:center;
+        margin:0 5pt 0 5pt;
 
         &:hover {
             background-color: var(--color-hover-background);
@@ -1077,8 +1086,8 @@ background-color: rgb(from var(--color-background) r g b / 0.8);
     .breadcrumb-trip-info {
         color: #fff;
         background-color: var(--domain-color);
+        border: 1pt solid var(--color-hover-background);
         padding: 5px 10px 5px 10px;
-        border-radius:10px;
         line-height:1.2;
     }
     .trip-grid-row {
@@ -1100,11 +1109,12 @@ background-color: rgb(from var(--color-background) r g b / 0.8);
 
         summary {
             color: #fff;
-            font-weight: bold;
             padding: 1rem;
             /*background: var(--domain-color);*/
             cursor: pointer;
-                        background-image: repeating-linear-gradient(to right, transparent, rgba(255, 255, 255, 0.1) 100%), linear-gradient(to bottom, var(--domain-color), var(--domain-color));
+            width: calc(100% - 100pt);
+            margin: auto;
+            background-image: repeating-linear-gradient(to right, transparent, rgba(255, 255, 255, 0.1) 100%), linear-gradient(to bottom, var(--domain-color), var(--domain-color));
         }
 
         &[open] summary {
