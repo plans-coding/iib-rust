@@ -26,17 +26,9 @@ CountryMapping AS (
 )
 
 SELECT
+    ROW_NUMBER() OVER (ORDER BY e.Date ASC) - 1 AS DayNumber,
     e.*,
     o.OuterId,
-    o.OverallDestination,
-    o.TripDescription,
-    o.DepartureDate,
-    o.ReturnDate,
-    CAST(
-        julianday(o.ReturnDate) - julianday(o.DepartureDate)
-        AS INTEGER
-    ) AS NumberOfDays,
-    o.ParticipantGroup,
     o.TripDomain,
         CASE
         WHEN cm.ISO IS NOT NULL THEN char(

@@ -1,6 +1,10 @@
 SELECT
     *,
-    CAST(strftime('%Y', DepartureDate) AS INTEGER) AS TripYear
+    CAST(strftime('%Y', DepartureDate) AS TEXT) AS TripYear,
+    CAST(
+    julianday(ReturnDate) - julianday(DepartureDate)
+    AS INTEGER
+) AS NumberOfDays
 FROM bewa_Overview
 WHERE
     OuterId IS NOT NULL

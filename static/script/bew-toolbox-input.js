@@ -226,7 +226,7 @@ function checkDates() {
     if (!startDateInput || !endDateInput || !dateStatusEl) return;
 
     if (!startDateInput.value || !endDateInput.value) {
-        dateStatusEl.textContent = "Select start and end date";
+        //dateStatusEl.textContent = "Select start and end date";
         dateStatusEl.style.display = "block";
     } else {
         dateStatusEl.textContent = ""; // clear message
