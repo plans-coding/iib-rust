@@ -6,12 +6,12 @@
 
       <div>
           <label for="grInputTitle">{{ translation.report.titleText | default(value="Title") }}</label>
-          <input type="text" class="form-control" id="grInputTitle" value="{{ translation.report.myTripsUntil | default(value="My trips until") }} {{ all.date_now }}">
+          <input type="text" class="form-control" id="grInputTitle" value="{{ translation.report.myTripsUntil | default(value="My trips until") }} {{ all.year_now }}">
       </div>
 
       <div class="">
           <label for="grInputInfo" class="">{{ translation.report.backsideText | default(value="Backside") }}</label>
-          <input type="text" class="form-control" id="grInputInfo" value="{{ translation.report.generated | default(value="Generated") }} {{ all.year_now }}">
+          <input type="text" class="form-control" id="grInputInfo" value="{{ translation.report.generated | default(value="Generated") }} {{ all.date_now }}">
       </div>
 
 

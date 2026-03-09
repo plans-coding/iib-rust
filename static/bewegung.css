@@ -1585,12 +1585,16 @@ body:has(#path-dataset) { background-color: var(--color-hover-background); }
 	.blank-page, .trip-section { break-before: page; }
 	.toc, .final-page { break-before: page;}
 
-    .trip_header {
-        color: #fff;
-        padding: 1rem;
-        margin-bottom: 4pt;
-        /*background: var(--domain-color);*/
-        background-image: repeating-linear-gradient(to right, transparent, rgba(255, 255, 255, 0.1) 100%), linear-gradient(to bottom, var(--domain-color), var(--domain-color));
+    section.title-page::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100vh;
+        height: 15cm;
+        background: #1d655e;
+        z-index: -1;
+        margin:-1in;
     }
 
     .title-page {
@@ -1610,7 +1614,21 @@ body:has(#path-dataset) { background-color: var(--color-hover-background); }
         height: 100pt;
         margin-top: 100pt;
         line-height: 0;
+        font-size: 30pt;
+        font-family: 'Cairo', sans-serif;
     }
+
+    h1 {font-family: 'Cairo', sans-serif;}
+
+    .trip_header {
+        color: #fff;
+        padding: 1rem;
+        margin-bottom: 4pt;
+        /*background: var(--domain-color);*/
+        background-image: repeating-linear-gradient(to right, transparent, rgba(255, 255, 255, 0.1) 100%), linear-gradient(to bottom, var(--domain-color), var(--domain-color));
+    }
+
+
 
     .query-param {
         height: 100pt;
@@ -1640,6 +1658,8 @@ body:has(#path-dataset) { background-color: var(--color-hover-background); }
     .id-badge {
         padding: 2px 5px;
         border-radius: 4px;
+        background-color: var(--domain-color);
+        color: #fff;
     }
 
     .destination-label {
