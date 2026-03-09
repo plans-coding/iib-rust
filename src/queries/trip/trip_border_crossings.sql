@@ -90,4 +90,5 @@ FROM AllCrossings a
 --LEFT JOIN UniqueList u USING (InnerId)
 LEFT JOIN bewa_Overview b USING (InnerId)
 LEFT JOIN RouteList r USING (OuterId)
-WHERE b.OuterId = b.OuterId AND a.InnerId = a.InnerId;
+WHERE b.OuterId = b.OuterId AND a.InnerId = a.InnerId AND b.ParticipantGroup IN (ParticipantGroup) AND b.TripDomain IN (TripDomain) AND 1=1
+ORDER BY DepartureDate;

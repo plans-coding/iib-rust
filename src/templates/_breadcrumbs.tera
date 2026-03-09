@@ -4,6 +4,7 @@
 {% if settings.Extension.Theme is defined %}
     {% set theme_config = settings.Extension.Theme | split(pat="\n") | first | split(pat=",") %}
 {% endif %}
+
 <div class="component-breadcrumb">
     <div class=" breadcrumb {% if page != 'explore' and page != 'source' %}widescreen{% endif %}">
 
@@ -39,128 +40,9 @@
         {% elif page == "report" %}
             <div>{{ translation.menu.report | default(value="Generate report") }}</div>
 
-        {% endif %}
-        
-    </div>
+    	{% elif page == "input" %}
+	        <div>{{ translation.input.title | default(value="Create trip") }}</div>
+	{% endif %} 
 
-    {#{% set page = "_PAGE_" %}
-
-    {% if page == "explore" %}
-    <div class="breadcrumb">
-        <img class="icon-color" src="static/images/frog.svg" />
-        <div>{{ translation.explore.title | default(value="Explore") }}</div>
-        <!--<img src="static/images/arrow-right.svg" />
-        <div class="breadcrumb-link active warning"><span class="immer-in-font-uc" style="font-weight:normal;">Immer in</span>&nbsp;<span class="bewegung-font-uc">Bewegung</span></div>
-        -->
-    </div>
-    {% elif page == "overview:year" %}
-        <div class="breadcrumb">
-        <img class="widescreen icon-color" src="static/images/frog.svg" />
-        <div class="widescreen">{{ translation.overview.title | default(value="Overview") }}</div>
-        <img class="widescreen" src="static/images/arrow-right.svg" />
-        <a href="?path=overview:year" class="breadcrumb-link {% if all.query_params.path == 'overview:year' %}active{% endif %}">{{ translation.overview.year | default(value="Year") }}</a>
-        <a href="?path=overview:country" class="breadcrumb-link {% if all.query_params.path == 'overview:country' %}active{% endif %}">{{ translation.overview.country | default(value="Country") }}</a>
-        <a href="?path=overview:plain" class="breadcrumb-link {% if all.query_params.path == 'overview:plain' %}active{% endif %}">{{ translation.overview.plain | default(value="Plain") }}</a>
-        </div>
-    {% elif page == "overview:country" %}
-        <div class="breadcrumb">
-        <img class="widescreen icon-color" src="static/images/frog.svg" />
-        <div class="widescreen">{{ translation.overview.title | default(value="Overview") }}</div>
-        <img class="widescreen" src="static/images/arrow-right.svg" />
-        <a href="?path=overview:year" class="breadcrumb-link {% if all.query_params.path == 'overview:year' %}active{% endif %}">{{ translation.overview.year | default(value="Year") }}</a>
-        <a href="?path=overview:country" class="breadcrumb-link {% if all.query_params.path == 'overview:country' %}active{% endif %}">{{ translation.overview.country | default(value="Country") }}</a>
-        <a href="?path=overview:plain" class="breadcrumb-link {% if all.query_params.path == 'overview:plain' %}active{% endif %}">{{ translation.overview.plain | default(value="Plain") }}</a>
-    </div>
-
-    {% elif page == "overview:plain" %}
-        <div class="breadcrumb">
-        <img class="widescreen icon-color" src="static/images/frog.svg" />
-        <div class="widescreen">{{ translation.overview.title | default(value="Overview") }}</div>
-        <img class="widescreen" src="static/images/arrow-right.svg" />
-        <a href="?path=overview:year" class="breadcrumb-link {% if all.query_params.path == 'overview:year' %}active{% endif %}">{{ translation.overview.year | default(value="Year") }}</a>
-        <a href="?path=overview:country" class="breadcrumb-link {% if all.query_params.path == 'overview:country' %}active{% endif %}">{{ translation.overview.country | default(value="Country") }}</a>
-        <a href="?path=overview:plain" class="breadcrumb-link {% if all.query_params.path == 'overview:plain' %}active{% endif %}">{{ translation.overview.plain | default(value="Plain") }}</a>
-        </div>
-    {% elif page == "statistics:summary" %}
-        <div class="breadcrumb widescreen">
-        <img class="icon-color" src="static/images/frog.svg" />
-        <div>{{ translation.statistics.title | default(value="Summary") }}</div>
-        <img src="static/images/arrow-right.svg" />
-        <a href="?path=statistics:summary" class="breadcrumb-link {% if all.query_params.path == 'statistics:summary' %}active{% endif %}">{{ translation.statistics.summary | default(value="Summary") }}</a>
-        <a href="?path=statistics:visits" class="breadcrumb-link {% if all.query_params.path == 'statistics:visits' %}active{% endif %}">{{ translation.statistics.visits | default(value="Visits") }}</a>
-        <a href="?path=statistics:overnights" class="breadcrumb-link {% if all.query_params.path == 'statistics:overnights' %}active{% endif %}">{{ translation.statistics.overnights | default(value="Overnights") }}</a>
-                {% set theme_config = [] %}
-                {% if settings.Extension is defined and settings.Extension.Theme is defined %}
-                    {% set theme_config = settings.Extension.Theme | split(pat="\n") | first | split(pat=",") %}
-                {% endif %}
-
-                {% if theme_config | length >= 2 and theme_config[0] == "Enabled" %}
-            <a href="?path=statistics:themes" class="breadcrumb-link {% if all.query_params.path == 'statistics:themes' %}active{% endif %}">{{ theme_config[1] | default(value="Themes") }}</a>
-        {% endif %}
-        </div>
-    {% elif page == "statistics:visits" %}
-        <div class="breadcrumb widescreen">
-        <img class="icon-color" src="static/images/frog.svg" />
-        <div>{{ translation.statistics.title | default(value="Summary") }}</div>
-        <img src="static/images/arrow-right.svg" />
-        <a href="?path=statistics:summary" class="breadcrumb-link {% if all.query_params.path == 'statistics:summary' %}active{% endif %}">{{ translation.statistics.summary | default(value="Summary") }}</a>
-        <a href="?path=statistics:visits" class="breadcrumb-link {% if all.query_params.path == 'statistics:visits' %}active{% endif %}">{{ translation.statistics.visits | default(value="Visits") }}</a>
-        <a href="?path=statistics:overnights" class="breadcrumb-link {% if all.query_params.path == 'statistics:overnights' %}active{% endif %}">{{ translation.statistics.overnights | default(value="Overnights") }}</a>
-                {% set theme_config = [] %}
-                {% if settings.Extension is defined and settings.Extension.Theme is defined %}
-                    {% set theme_config = settings.Extension.Theme | split(pat="\n") | first | split(pat=",") %}
-                {% endif %}
-
-                {% if theme_config | length >= 2 and theme_config[0] == "Enabled" %}
-            <a href="?path=statistics:themes" class="breadcrumb-link {% if all.query_params.path == 'statistics:themes' %}active{% endif %}">{{ theme_config[1] | default(value="Themes") }}</a>
-        {% endif %}
-        </div>
-    {% elif page == "statistics:overnights" %}
-        <div class="breadcrumb widescreen">
-        <img class="icon-color" src="static/images/frog.svg" />
-        <div>{{ translation.statistics.title | default(value="Summary") }}</div>
-        <img src="static/images/arrow-right.svg" />
-        <a href="?path=statistics:summary" class="breadcrumb-link {% if all.query_params.path == 'statistics:summary' %}active{% endif %}">{{ translation.statistics.summary | default(value="Summary") }}</a>
-        <a href="?path=statistics:visits" class="breadcrumb-link {% if all.query_params.path == 'statistics:visits' %}active{% endif %}">{{ translation.statistics.visits | default(value="Visits") }}</a>
-        <a href="?path=statistics:overnights" class="breadcrumb-link {% if all.query_params.path == 'statistics:overnights' %}active{% endif %}">{{ translation.statistics.overnights | default(value="Overnights") }}</a>
-                {% set theme_config = [] %}
-                {% if settings.Extension is defined and settings.Extension.Theme is defined %}
-                    {% set theme_config = settings.Extension.Theme | split(pat="\n") | first | split(pat=",") %}
-                {% endif %}
-
-                {% if theme_config | length >= 2 and theme_config[0] == "Enabled" %}
-            <a href="?path=statistics:themes" class="breadcrumb-link {% if all.query_params.path == 'statistics:themes' %}active{% endif %}">{{ theme_config[1] | default(value="Themes") }}</a>
-        {% endif %}
-        </div>
-    {% elif page == "statistics:themes" %}
-        <div class="breadcrumb widescreen">
-    <img class="icon-color" src="static/images/frog.svg" />
-    <div>{{ translation.statistics.title | default(value="Themes") }}</div>
-    <img src="static/images/arrow-right.svg" />
-    <a href="?path=statistics:summary" class="breadcrumb-link {% if all.query_params.path == 'statistics:summary' %}active{% endif %}">{{ translation.statistics.summary | default(value="Summary") }}</a>
-    <a href="?path=statistics:visits" class="breadcrumb-link {% if all.query_params.path == 'statistics:visits' %}active{% endif %}">{{ translation.statistics.visits | default(value="Visits") }}</a>
-    <a href="?path=statistics:overnights" class="breadcrumb-link {% if all.query_params.path == 'statistics:overnights' %}active{% endif %}">{{ translation.statistics.overnights | default(value="Overnights") }}</a>
-    {% set theme_config = settings.Extension.Theme | split(pat="\n") | first | split(pat=",") %}
-    {% if theme_config[0] == "Enabled" %}
-        <a href="?path=statistics:themes" class="breadcrumb-link {% if all.query_params.path == 'statistics:themes' %}active{% endif %}">{{ theme_config[1] | default(value="Themes") }}</a>
-    {% endif %}
-    </div>
-    {% elif page == "source" %}
-        <div class="breadcrumb">
-        <img class="icon-color" src="static/images/frog.svg" />
-        <div class="">{{ translation.source.title | default(value='Configure your data source') }}</div>
-    </div>
-    {% elif page == "toolbox" %}
-    <div class="breadcrumb">
-        <img class="icon-color" src="images/frog.svg" />
-        <div>{{ translation.input.title | default(value="Create trip") }}</div>
-    </div>
-    {% elif page == "about" %}
-        <div class="breadcrumb widescreen">
-        <img class="icon-color" src="static/images/frog.svg" />
-        <div class="">{{ translation.about.title | default(value='About') }}</div>
-        </div>
-    {% else %}
-
-    {% endif %}#}
+	</div>
 </div>

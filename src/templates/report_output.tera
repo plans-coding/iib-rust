@@ -1,69 +1,7 @@
-<style>
-    /* Layout & Typography */
-    .title-page {
-        text-align: center;
-    }
-
-    .frog-logo {
-        height: 200pt;
-        filter: drop-shadow(0 0 25px rgba(255, 255, 255, 0.4));
-        margin-top: -100pt;
-    }
-
-    .report-title {
-        height: 100pt;
-        margin-top: 100pt;
-        line-height: 0;
-    }
-
-    .query-param {
-        height: 100pt;
-        font-family: 'Cairo', sans-serif;
-        font-size: 2em;
-    }
-
-    /* Table of Contents Styling */
-    .toc-row {
-        display: flex;
-        align-items: center;
-        margin-bottom: 8px;
-    }
-
-    .year-column {
-        width: 1.5cm;
-        font-size: 1.2em;
-        font-weight: bold;
-    }
-
-    .id-wrapper {
-        width: 3cm;
-        display: inline-block;
-        text-align: center;
-    }
-
-    .id-badge {
-        padding: 2px 5px;
-        border-radius: 4px;
-        /* themeBgColor class is expected to provide background-color */
-    }
-
-    .destination-label {
-        font-weight: bold;
-        margin-left: 10px;
-    }
-
-    .link {
-        text-decoration: none;
-        color: inherit;
-        display: flex;
-        align-items: center;
-    }
-</style>
-
-
+<div id="path-report-output">
 
 <!-- Cover page -->
-<section class="title-page title-page-background">
+<section class="title-page">
     <div>
         <img src="static/images/frog.svg" class="frog-logo" />
         <div class="image-mask"></div>
@@ -81,12 +19,12 @@
 
 
 <!-- Blank page -->
-<section class="blank-page"></section>
+<!--<section class="blank-page"></section>-->
 
 
 
 <!-- Table of Contents -->
-<section>
+<section class="toc">
     <h1>{{ translation.menu.overview | default(value='Overview') }}</h1>
 
     {% set_global currentYear = "" %}
@@ -122,12 +60,18 @@
 
 {% set_global currentTrip = "" %}
 {% set_global currentTripCount = 0 %}
+{% set_global open_tag  = 0 %}
 
 {% for row in all_events %}
-<section class="trip-section">
   {% if currentTrip != row.OuterId %}
-    <div class="trip-overview">
-      {{ all_overview[currentTripCount].TripDescription }}
+	{% if open_tag == 1 %}</section>{% set_global open_tag  = 0 %}{% endif %}
+  <section class="trip-section">
+    <div class="trip-overview" data-trip-domain="{{ all_overview[currentTripCount].TripDomain }}">
+      <div class="trip_header" data-trip-domain="{{ all_overview[currentTripCount].TripDomain }}">
+          <b>{{ all_overview[currentTripCount].OuterId }} {{ translation.trip.to | default(value="to") }}
+	      {{ all_overview[currentTripCount].OverallDestination }}</b>
+		  &nbsp;&nbsp;&nbsp;{{ all_overview[currentTripCount].TripDescription }}
+      </div>
 
 
 
@@ -167,7 +111,11 @@
 	          <div class="trip-details-container">
 	            <label class="trip-details-label">{{ translation.trip.numberOfCountries | default(value="Countries Count") }}</label>
 	            <div class="trip-details-field" data-trip-domain="{{ all_overview[currentTripCount].TripDomain }}">
-	              {#{% if trip_unique_countries | length > 0 %}{{ trip_unique_countries | length }}{% else %}-{% endif %}#}
+	              {% if all_borders_countries[currentTripCount].UniqueCountries %}
+                    {{ all_borders_countries[currentTripCount].UniqueCountries | split(pat=", ") | length }}
+	              {% else %}
+                    -
+                  {% endif %}
 	            </div>
 	          </div>
 	        </div>
@@ -176,25 +124,25 @@
 	          <div class="trip-details-container">
 	            <label class="trip-details-label">{{ translation.trip.uniqueCountries | default(value="Unique Countries") }}</label>
 	            <div class="trip-details-field" data-trip-domain="{{ all_overview[currentTripCount].TripDomain }}">
-	              {#{% if trip_unique_countries | length > 0 %}
-	                {% for country in trip_unique_countries %}
-	                  {{ country.Flag }}&nbsp;{{ country.Country }}{% if not loop.last %}, {% endif %}
-	                {% endfor %}
-	              {% else %} - {% endif %}#}
+	              {% if all_borders_countries[currentTripCount].UniqueCountries %}
+	                  {{ all_borders_countries[currentTripCount].UniqueCountries }}
+	              {% else %}
+                      -
+                  {% endif %}
 	            </div>
 	          </div>
 
 	          <div class="trip-details-container">
 	            <label class="trip-details-label">{{ translation.trip.overallRoute | default(value="Overall Route") }}</label>
 	            <div class="trip-details-field" data-trip-domain="{{ all_overview[currentTripCount].TripDomain }}">
-	              {{ trip_border_crossings[0].OverallRoute | default(value="-") }}
+	              {{ all_borders_countries[currentTripCount].OverallRoute | default(value="-") }}
 	            </div>
 	          </div>
 
 	          <div class="trip-details-container">
 	            <label class="trip-details-label">{{ translation.trip.countryTripMovements | default(value="Country Trip Movements") }}</label>
 	            <div class="trip-details-field" data-trip-domain="{{ all_overview[currentTripCount].TripDomain }}">
-	              {{ trip_border_crossings[0].AllBorderCrossings | default(value="-") }}
+	              {{ all_borders_countries[currentTripCount].AllBorderCrossings | default(value="-") }}
 	            </div>
 	          </div>
 
@@ -220,11 +168,11 @@
               {{ row.Events }}
           </div>
 
-          <div class="day-foot" data-trip-domain="">
-            <div class="day-label"><div class="day-icon" data-trip-domain=''>{{ row.DayNumber }}</div> {{ row.Weekday | default(value="") }} {{ row.Date }}</div>
+          <div class="day-foot" data-trip-domain="{{ row.TripDomain }}">
+            <div class="day-label"><div class="day-icon" data-trip-domain='{{ row.TripDomain }}'>{{ row.DayNumber }}</div> {{ row.Weekday | default(value="") }} {{ row.Date }}</div>
             &nbsp;
             <a class="acc-link" target="_blank" href="{{ settings.Other.ExternalMapProvider }}{{ row.AccommodationCoordinates }}" data-trip-domain="">
-                <div class="acc-icon" data-trip-domain=''></div>
+                <div class="acc-icon" data-trip-domain='{{ row.TripDomain }}'></div>
                 <span class="acc-text">{{ row.Accommodation }} – {{ row.AccommodationCountryFlag }} {{ row.AccommodationCountry }} – {{ row.AccommodationCoordinates }} {{ row.AccommodationCoordinateAccuracy | default(value="") }}</span>
             </a>
           </div>
@@ -237,7 +185,7 @@
 
 
 <!-- Last page -->
-<section class="final-page" style="break-before: left;">
+<section class="final-page">
   <div>
     <img src="static/images/frog.svg" style="height:50pt;" />
   </div>
@@ -248,3 +196,5 @@
     {{ backside_string }}
   </div>
 </section>
+
+</div>

@@ -60,6 +60,8 @@ define_resources! {
         QUERY_SEARCH_TRIP                   => "../src/queries/search/search_trip.sql",
         QUERY_REPORT_ALL_OVERVIEW           => "../src/queries/report/report_all_overview.sql",
         QUERY_REPORT_ALL_EVENTS             => "../src/queries/report/report_all_events.sql",
+        QUERY_REPORT_ALL_BORDERS_COUNTRIES  => "../src/queries/report/report_all_borders_countries.sql",
+
     }
     other {
         CURRENT_VERSION                     => "../version",
@@ -83,7 +85,7 @@ define_resources! {
         TEMPLATE_SEARCH                     => "../src/templates/search.tera",
         TEMPLATE_TOOLBOX_REPORT             => "../src/templates/report.tera",
         TEMPLATE_TOOLBOX_REPORT_OUTPUT      => "../src/templates/report_output.tera",
-        TEMPLATE_TOOLBOX_INPUT              => "../src/templates/toolbox.tera",
+        TEMPLATE_INPUT                      => "../src/templates/toolbox.tera",
 
         CHART_JS                            => "../bundle/chartjs/chart.js",
     }
@@ -118,7 +120,7 @@ fn get_tera() -> &'static Tera {
             ("dataset", TEMPLATE_DATASET.to_string()),
             ("search", TEMPLATE_SEARCH.to_string()),
             ("report_output", TEMPLATE_TOOLBOX_REPORT_OUTPUT.to_string()),
-            ("toolbox", bc("toolbox", TEMPLATE_TOOLBOX_INPUT)),
+            ("input", bc("input", TEMPLATE_INPUT)),
         ];
 
         for (name, content) in templates {
@@ -496,7 +498,7 @@ async fn page_load_internal() {
 
     impl QueryFilters for str {
         fn apply_filters(&self, group: &str, domain: &str, label: &str) -> String {
-            self.replace("/*", "")
+            self.replace("/*", "") // This is dangerous if the code contains other comments with slash + asterisk
                 .replace("*/", "")
                 .replace("(ParticipantGroup)", group)
                 .replace("(TripDomain)", domain)
@@ -714,6 +716,7 @@ async fn page_load_internal() {
                 queries: vec![
                     ("all_overview".into(), QUERY_REPORT_ALL_OVERVIEW.apply_filters(&participant_group, &trip_domain, &trip_label)),
                     ("all_events".into(), QUERY_REPORT_ALL_EVENTS.apply_filters(&participant_group, &trip_domain, &trip_label)),
+                    ("all_borders_countries".into(), QUERY_REPORT_ALL_BORDERS_COUNTRIES.apply_filters(&participant_group, &trip_domain, &trip_label)),
                 ],
             });
             all_state["title_string"] = serde_json::json!(title);
@@ -721,7 +724,7 @@ async fn page_load_internal() {
         }
 
         ("input", _, _) => {
-            page_data = Some(PageData { title: tr("/toolbox/input", "Input"), template: "toolbox".into(), queries: vec![] });
+            page_data = Some(PageData { title: tr("/toolbox/input", "Input"), template: "input".into(), queries: vec![] });
             execute_after = vec!["init_create_trip".into()];
         }
 

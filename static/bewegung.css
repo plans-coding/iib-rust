@@ -131,8 +131,8 @@ body::before {
     background-position: 0 0, 180px 180px;
 
     background-repeat: repeat;
-    opacity: 0.03;
-    filter: grayscale(1) brightness(0.80);
+    opacity: 0.02;
+    filter: grayscale(1) contrast(0.9) brightness(0.80);
 }
 
 section {max-width:800pt;margin:10pt auto auto;width:100%; }
@@ -1560,7 +1560,233 @@ body:has(#path-dataset) { background-color: var(--color-hover-background); }
     }    
 }
 
-#path-report-output {}
+
+@page {
+	size: A4;
+	@top-right {
+		content: counter(page);
+	}
+}
+
+@media print {
+
+    .final-page {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        align-items: center;
+        height: 100vh;
+    }
+    .final-page > div:last-child {margin-bottom: 100pt;}
+
+}
+#path-report-output {
+
+	.blank-page, .trip-section { break-before: page; }
+	.toc, .final-page { break-before: page;}
+
+    .trip_header {
+        color: #fff;
+        padding: 1rem;
+        margin-bottom: 4pt;
+        /*background: var(--domain-color);*/
+        background-image: repeating-linear-gradient(to right, transparent, rgba(255, 255, 255, 0.1) 100%), linear-gradient(to bottom, var(--domain-color), var(--domain-color));
+    }
+
+    .title-page {
+        display:flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-end;
+    }
+
+    .frog-logo {
+        height: 200pt;
+        filter: drop-shadow(0 0 25px rgba(255, 255, 255, 0.4));
+        margin-top: 200pt;
+    }
+
+    .report-title {
+        height: 100pt;
+        margin-top: 100pt;
+        line-height: 0;
+    }
+
+    .query-param {
+        height: 100pt;
+        font-family: 'Cairo', sans-serif;
+        font-size: 2em;
+    }
+
+    /* Table of Contents Styling */
+    .toc-row {
+        display: flex;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+
+    .year-column {
+        width: 1.5cm;
+        font-size: 1.2em;
+        font-weight: bold;
+    }
+
+    .id-wrapper {
+        width: 3cm;
+        display: inline-block;
+        text-align: center;
+    }
+
+    .id-badge {
+        padding: 2px 5px;
+        border-radius: 4px;
+    }
+
+    .destination-label {
+        font-weight: bold;
+        margin-left: 10px;
+    }
+
+    .link {
+        text-decoration: none;
+        color: inherit;
+        display: flex;
+        align-items: center;
+    }
+
+    .column-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 2pt;
+    }
+    .trip-layout {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 4px;
+    }
+
+    .row-flex {
+        display: flex;
+        gap: 2pt;
+        flex-direction: row;
+    }
+
+    .trip-overview { background-color:var(--domain-alpha);padding:5pt; }
+    .trip-details-container {
+        position: relative; flex: 1;
+    }
+
+    .trip-details-field {
+        width: 100%;
+        padding: 1.5rem 0.5rem 0.5rem 0.8rem;
+        font-size: 1rem;
+        border: 0;
+        border-radius: 4px;
+        box-sizing: border-box;
+        background: var(--domain-alpha);
+    }
+
+    .trip-details-label {
+        position: absolute;
+        top: 0.3rem;
+        left: 0.5rem;
+        font-size: 0.8rem;
+        color: #666;
+        padding: 0 4px;
+        pointer-events: none;
+    }
+    .days {
+        display: flex;
+        flex-direction: column;
+        border-radius: 12px;
+        padding: 1rem;
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+        background-color: color-mix(in srgb, var(--color-background), transparent 20%);
+        border: 1px solid var(--domain-color);
+
+        .theme-link {
+            color: var(--domain-color);
+            background: var(--domain-alpha);
+            text-decoration: underline;
+        }
+    }
+
+    .day {
+        display: grid;
+        grid-template-columns: 1fr;
+        padding: 1rem;
+        gap: 0.5rem;
+        transition: background-color 0.2s ease;
+
+        &:not(:last-child) {
+            border-bottom: 1px solid var(--domain-alpha);
+        }
+    }
+
+    .day-left,
+    .day-right {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .day-right {
+        gap: 2px;
+    }
+
+    .day-foot {
+        display: flex;
+        flex-direction: row;
+        margin-top: 0.5rem;
+        align-items: center;
+        color: var(--domain-color);
+
+        a {
+            color: var(--domain-color);
+        }
+    }
+
+    .day-icon {
+        background-color: var(--domain-color);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.3em;
+        height: 1.3em;
+        margin: 0 0.3em;
+        border-radius: 50%;
+        color: #fff;
+        font-size: 0.7em;
+        font-weight: 600;
+        line-height: 1;
+        vertical-align: middle;
+    }
+
+    .acc-icon {
+        background-color: var(--domain-color);
+        mask: url('images/house.svg') no-repeat center / contain;
+        -webkit-mask: url('images/house.svg') no-repeat center / contain;
+        width: 0.9em;
+        height: 0.9em;
+        display: inline-block;
+        transform: translateY(2px);
+    }
+
+    .acc-link {
+        text-decoration: none;
+    }
+
+
+}
+body:has(#path-report-output)::before {
+	background:none;
+}
+body:has(#path-report-output) {
+	background:none;
+	nav#menu {display:none;}
+	section {max-width:none;margin:0;}
+}
+
 #path-toolbox {
     details#trip_summary_inputs {
         border-radius: 12px;
