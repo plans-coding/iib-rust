@@ -197,6 +197,8 @@ extern "C" {
     fn init_create_trip();
     fn load_filter_OPFS();
 
+    fn runIfOnBewegungOnline();
+
     fn sync_db_init();
 
     #[wasm_bindgen(catch)]
@@ -891,7 +893,8 @@ async fn page_load_internal() {
             "sync_db_init" => sync_db_init(),
             "check_immich_authorization" => check_immich_authorization(),
             "init_create_trip" => init_create_trip(),
-            "about" => {}
+            "about" => {},
+            "source" => runIfOnBewegungOnline(),
             _ => {}
         }
     }

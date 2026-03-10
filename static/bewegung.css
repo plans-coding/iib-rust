@@ -1562,47 +1562,87 @@ body:has(#path-dataset) { background-color: var(--color-hover-background); }
 
 
 @page {
-	size: A4;
-	@top-right {
-		content: counter(page);
-	}
+    size: A4;
 }
 
-@media print {
-
-    .final-page {
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-end;
-        align-items: center;
-        height: 100vh;
+@page :right {
+    margin-left: 2cm;
+    @bottom-center { content: counter(tripnumber); }
+    @bottom-right {
+        content: counter(page);
     }
-    .final-page > div:last-child {margin-bottom: 100pt;}
-
 }
+
+@page :left  {
+    margin-right: 2cm;
+    @bottom-center { content: counter(tripnumber); }
+    @bottom-left {
+        content: counter(page);
+    }
+}
+
+@page :first {
+    margin:0;
+    @bottom-right { content: none; }
+    @bottom-left { content: none; }
+}
+
+@page title {
+    margin:0;
+    @bottom-center { content: none; }
+    @bottom-right { content: none; }
+}
+
+.title-page {
+    page: title;
+    display: flex;
+    flex-direction: column;
+    padding-top: 90pt;
+    justify-content: top;
+    align-items: center;
+}
+
+#title-page-background {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vh;
+    height: 15cm;
+    background: #1d655e;
+}
+
+.blank-page, .toc { break-before: page;}
+.toc a::after {
+    /*content: target-counter(attr(href), page);*/
+    margin-left: 0.5em;
+}
+
+@page final-page {
+    @bottom-right { content: none; }
+    @bottom-left { content: none; }
+}
+.final-page {
+    page: final-page;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    height: 90vh;
+}
+
 #path-report-output {
 
-	.blank-page, .trip-section { break-before: page; }
-	.toc, .final-page { break-before: page;}
+    counter-reset: tripnumber;
 
-    section.title-page::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100vh;
-        height: 15cm;
-        background: #1d655e;
-        z-index: -1;
-        margin:-1in;
-    }
+}
 
-    .title-page {
-        display:flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: flex-end;
-    }
+.trip-section {
+    break-before: page;
+    counter-increment: tripnumber;
+}
+
+#path-report-output {
 
     .frog-logo {
         height: 200pt;
@@ -1681,7 +1721,7 @@ body:has(#path-dataset) { background-color: var(--color-hover-background); }
     }
     .trip-layout {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1fr; /* with map 1fr 1fr */
         gap: 4px;
     }
 
@@ -1722,7 +1762,7 @@ body:has(#path-dataset) { background-color: var(--color-hover-background); }
         padding: 1rem;
         margin-top: 1rem;
         margin-bottom: 1rem;
-        background-color: color-mix(in srgb, var(--color-background), transparent 20%);
+        /*background-color: color-mix(in srgb, var(--color-background), transparent 20%);*/
         border: 1px solid var(--domain-color);
 
         .theme-link {

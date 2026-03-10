@@ -1,3 +1,27 @@
+// FOR BEWEGUNG ONLINE DEMO
+
+function runIfOnBewegungOnline() {
+  try {
+    const url = new URL(window.location.href);
+    const isTargetOrigin = url.origin === 'https://online.bewegung.app';
+    const isRootPath = url.pathname === '/' || url.pathname === '';
+
+    if (isTargetOrigin && isRootPath) {
+      const btn = document.getElementById('btnFetch');
+      if (!btn) {
+        console.warn('Element with id "btnFetch" not found.');
+        return;
+      }
+      if (typeof btn.click === 'function') {
+        btn.click();
+        return;
+      }
+    }
+  } catch (err) {
+    console.error('Invalid URL', err);
+  }
+}
+
 // SQLITE -----------------------------
 async function read_opfs_text(path) {
   const buffer = await readOPFSFile(path);

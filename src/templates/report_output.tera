@@ -2,6 +2,9 @@
 
 <!-- Cover page -->
 <section class="title-page">
+
+    <div id="title-page-background"></div>
+
     <div>
         <img src="static/images/frog.svg" class="frog-logo" />
         <div class="image-mask"></div>
@@ -19,7 +22,7 @@
 
 
 <!-- Blank page -->
-<!--<section class="blank-page"></section>-->
+<section class="blank-page"></section>
 
 
 
@@ -48,6 +51,7 @@
                             </div>
                         </div>
                         <span class="destination-label">{{ row.OverallDestination }}</span>
+                        <span class="page-number"></span>
                     </a>
                 </div>
             </div>
@@ -60,129 +64,173 @@
 
 {% set_global currentTrip = "" %}
 {% set_global currentTripCount = 0 %}
-{% set_global open_tag  = 0 %}
 
 {% for row in all_events %}
-  {% if currentTrip != row.OuterId %}
-	{% if open_tag == 1 %}</section>{% set_global open_tag  = 0 %}{% endif %}
-  <section class="trip-section">
-    <div class="trip-overview" data-trip-domain="{{ all_overview[currentTripCount].TripDomain }}">
-      <div class="trip_header" data-trip-domain="{{ all_overview[currentTripCount].TripDomain }}">
-          <b>{{ all_overview[currentTripCount].OuterId }} {{ translation.trip.to | default(value="to") }}
-	      {{ all_overview[currentTripCount].OverallDestination }}</b>
-		  &nbsp;&nbsp;&nbsp;{{ all_overview[currentTripCount].TripDescription }}
-      </div>
+    {% if loop.first or row.OuterId != currentTrip %}
+        {% if not loop.first %}
+                </div>
+            </section>
+        {% endif %}
 
+        <section class="trip-section" id="{{ row.InnerId }}">
+            <div class="trip-overview" data-trip-domain="{{ all_overview[currentTripCount].TripDomain }}">
+                <div class="trip_header" data-trip-domain="{{ all_overview[currentTripCount].TripDomain }}">
+                    <b>
+                        {{ all_overview[currentTripCount].OuterId }}
+                        {{ translation.trip.to | default(value="to") }}
+                        {{ all_overview[currentTripCount].OverallDestination }}
+                    </b>
+                    &nbsp;&nbsp;&nbsp;
+                    {{ all_overview[currentTripCount].TripDescription }}
+                </div>
 
+                <div class="trip-layout">
+                    <div class="column-stack">
+                        <div class="row-flex">
+                            <div class="trip-details-container">
+                                <label class="trip-details-label">
+                                    {{ translation.trip.departureDate | default(value="Departure Date") }}
+                                </label>
+                                <div class="trip-details-field" data-trip-domain="{{ all_overview[currentTripCount].TripDomain }}">
+                                    {{ all_overview[currentTripCount].DepartureDate }}
+                                </div>
+                            </div>
 
-      	    <div class="trip-layout">
-	      <div class="column-stack">
+                            <div class="trip-details-container">
+                                <label class="trip-details-label">
+                                    {{ translation.trip.returnDate | default(value="Return Date") }}
+                                </label>
+                                <div class="trip-details-field" data-trip-domain="{{ all_overview[currentTripCount].TripDomain }}">
+                                    {{ all_overview[currentTripCount].ReturnDate }}
+                                </div>
+                            </div>
 
-	        <div class="row-flex">
-	          <div class="trip-details-container">
-	            <label class="trip-details-label">{{ translation.trip.departureDate | default(value="Departure Date") }}</label>
-	            <div class="trip-details-field" data-trip-domain="{{ all_overview[currentTripCount].TripDomain }}">{{ all_overview[currentTripCount].DepartureDate }}</div>
-	          </div>
+                            <div class="trip-details-container">
+                                <label class="trip-details-label">
+                                    {{ translation.trip.numberOfDays | default(value="Days Count") }}
+                                </label>
+                                <div class="trip-details-field" data-trip-domain="{{ all_overview[currentTripCount].TripDomain }}">
+                                    {{ all_overview[currentTripCount].NumberOfDays }}
+                                </div>
+                            </div>
+                        </div>
 
-	          <div class="trip-details-container">
-	            <label class="trip-details-label">{{ translation.trip.returnDate | default(value="Return Date") }}</label>
-	            <div class="trip-details-field" data-trip-domain="{{ all_overview[currentTripCount].TripDomain }}">{{ all_overview[currentTripCount].ReturnDate }}</div>
-	          </div>
+                        <div class="row-flex">
+                            <div class="trip-details-container">
+                                <label class="trip-details-label">
+                                    {{ translation.trip.participantGroup | default(value="Participant Group") }}
+                                </label>
+                                <div class="trip-details-field" data-trip-domain="{{ all_overview[currentTripCount].TripDomain }}">
+                                    {{ all_overview[currentTripCount].ParticipantGroup }}
+                                </div>
+                            </div>
 
-	          <div class="trip-details-container">
-	            <label class="trip-details-label">{{ translation.trip.numberOfDays | default(value="Days Count") }}</label>
-	            <div class="trip-details-field" data-trip-domain="{{ all_overview[currentTripCount].TripDomain }}">{{ all_overview[currentTripCount].NumberOfDays }}</div>
-	          </div>
-	        </div>
+                            <div class="trip-details-container">
+                                <label class="trip-details-label">
+                                    {{ translation.trip.outerId | default(value="ID") }}
+                                    ({{ all_overview[currentTripCount].InnerId }})
+                                </label>
+                                <div class="trip-details-field" data-trip-domain="{{ all_overview[currentTripCount].TripDomain }}">
+                                    {{ all_overview[currentTripCount].OuterId }}
+                                    <span class="small-muted-text"></span>
+                                </div>
+                            </div>
 
-	        <div class="row-flex">
-	          <div class="trip-details-container">
-	            <label class="trip-details-label">{{ translation.trip.participantGroup | default(value="Participant Group") }}</label>
-	            <div class="trip-details-field" data-trip-domain="{{ all_overview[currentTripCount].TripDomain }}">{{ all_overview[currentTripCount].ParticipantGroup }}</div>
-	          </div>
+                            <div class="trip-details-container">
+                                <label class="trip-details-label">
+                                    {{ translation.trip.numberOfCountries | default(value="Countries Count") }}
+                                </label>
+                                <div class="trip-details-field" data-trip-domain="{{ all_overview[currentTripCount].TripDomain }}">
+                                    {% if all_borders_countries[currentTripCount].UniqueCountries %}
+                                        {{ all_borders_countries[currentTripCount].UniqueCountries | split(pat=", ") | length }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
 
-	          <div class="trip-details-container">
-	            <label class="trip-details-label">{{ translation.trip.outerId | default(value="ID") }} ({{ all_overview[currentTripCount].InnerId }})</label>
-	            <div class="trip-details-field" data-trip-domain="{{ all_overview[currentTripCount].TripDomain }}">
-	              {{ all_overview[currentTripCount].OuterId }} <span class="small-muted-text"></span>
-	            </div>
-	          </div>
+                        <div class="column-stack">
+                            <div class="trip-details-container">
+                                <label class="trip-details-label">
+                                    {{ translation.trip.uniqueCountries | default(value="Unique Countries") }}
+                                </label>
+                                <div class="trip-details-field" data-trip-domain="{{ all_overview[currentTripCount].TripDomain }}">
+                                    {% if all_borders_countries[currentTripCount].UniqueCountries %}
+                                        {{ all_borders_countries[currentTripCount].UniqueCountries }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </div>
+                            </div>
 
-	          <div class="trip-details-container">
-	            <label class="trip-details-label">{{ translation.trip.numberOfCountries | default(value="Countries Count") }}</label>
-	            <div class="trip-details-field" data-trip-domain="{{ all_overview[currentTripCount].TripDomain }}">
-	              {% if all_borders_countries[currentTripCount].UniqueCountries %}
-                    {{ all_borders_countries[currentTripCount].UniqueCountries | split(pat=", ") | length }}
-	              {% else %}
-                    -
-                  {% endif %}
-	            </div>
-	          </div>
-	        </div>
+                            <div class="trip-details-container">
+                                <label class="trip-details-label">
+                                    {{ translation.trip.overallRoute | default(value="Overall Route") }}
+                                </label>
+                                <div class="trip-details-field" data-trip-domain="{{ all_overview[currentTripCount].TripDomain }}">
+                                    {{ all_borders_countries[currentTripCount].OverallRoute | default(value="-") }}
+                                </div>
+                            </div>
 
-	        <div class="column-stack">
-	          <div class="trip-details-container">
-	            <label class="trip-details-label">{{ translation.trip.uniqueCountries | default(value="Unique Countries") }}</label>
-	            <div class="trip-details-field" data-trip-domain="{{ all_overview[currentTripCount].TripDomain }}">
-	              {% if all_borders_countries[currentTripCount].UniqueCountries %}
-	                  {{ all_borders_countries[currentTripCount].UniqueCountries }}
-	              {% else %}
-                      -
-                  {% endif %}
-	            </div>
-	          </div>
+                            <div class="trip-details-container">
+                                <label class="trip-details-label">
+                                    {{ translation.trip.countryTripMovements | default(value="Country Trip Movements") }}
+                                </label>
+                                <div class="trip-details-field" data-trip-domain="{{ all_overview[currentTripCount].TripDomain }}">
+                                    {{ all_borders_countries[currentTripCount].AllBorderCrossings | default(value="-") }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-	          <div class="trip-details-container">
-	            <label class="trip-details-label">{{ translation.trip.overallRoute | default(value="Overall Route") }}</label>
-	            <div class="trip-details-field" data-trip-domain="{{ all_overview[currentTripCount].TripDomain }}">
-	              {{ all_borders_countries[currentTripCount].OverallRoute | default(value="-") }}
-	            </div>
-	          </div>
+                    <div style="display:none">
+                        <div id="map-{{ row.InnerId }}" class="map-frame"></div>
+                    </div>
+                </div>
+            </div>
 
-	          <div class="trip-details-container">
-	            <label class="trip-details-label">{{ translation.trip.countryTripMovements | default(value="Country Trip Movements") }}</label>
-	            <div class="trip-details-field" data-trip-domain="{{ all_overview[currentTripCount].TripDomain }}">
-	              {{ all_borders_countries[currentTripCount].AllBorderCrossings | default(value="-") }}
-	            </div>
-	          </div>
+            <div class="days" data-trip-domain="{{ row.TripDomain }}">
+                {% set_global currentTrip = row.OuterId %}
+                {% set_global currentTripCount = currentTripCount + 1 %}
+    {% endif %}
 
-	        </div>
-	      </div>
-
-	      <div><div id="map" class="map-frame"></div></div>
-	      {#<div id="map-pin-data" data-trip-map-overall='{{ trip_map_pins_overall | json_encode }}' data-trip-map-accommodation='{{ trip_map_pins_accommodation | json_encode | escape }}' data-theme-color="{{ theme_color }}"></div>#}
-	    </div>
-
-
-
-
-    </div>
-    {% set_global currentTrip = row.OuterId %}
-    {% set_global currentTripCount = currentTripCount + 1 %}
-  {% endif %}
-
-
-  <div class="day" data-trip-domain="">
+    <div class="day">
         <div class="day-left">
-          <div class="day-event">
-              {{ row.Events }}
-          </div>
+            <div class="day-event">
+                {{ row.Events }}
+            </div>
 
-          <div class="day-foot" data-trip-domain="{{ row.TripDomain }}">
-            <div class="day-label"><div class="day-icon" data-trip-domain='{{ row.TripDomain }}'>{{ row.DayNumber }}</div> {{ row.Weekday | default(value="") }} {{ row.Date }}</div>
-            &nbsp;
-            <a class="acc-link" target="_blank" href="{{ settings.Other.ExternalMapProvider }}{{ row.AccommodationCoordinates }}" data-trip-domain="">
-                <div class="acc-icon" data-trip-domain='{{ row.TripDomain }}'></div>
-                <span class="acc-text">{{ row.Accommodation }} – {{ row.AccommodationCountryFlag }} {{ row.AccommodationCountry }} – {{ row.AccommodationCoordinates }} {{ row.AccommodationCoordinateAccuracy | default(value="") }}</span>
-            </a>
-          </div>
+            <div class="day-foot" data-trip-domain="{{ row.TripDomain }}">
+                <div class="day-label">
+                    <div class="day-icon" data-trip-domain="{{ row.TripDomain }}">
+                        {{ row.DayNumber }}
+                    </div>
+                    {{ row.Weekday | default(value="") }}
+                    {{ row.Date }}
+                </div>
+                &nbsp;
+                <a class="acc-link" target="_blank" href="{{ settings.Other.ExternalMapProvider }}{{ row.AccommodationCoordinates }}">
+                    <div class="acc-icon" data-trip-domain="{{ row.TripDomain }}"></div>
+                    <span class="acc-text">
+                        {{ row.Accommodation }}
+                        –
+                        {{ row.AccommodationCountryFlag }}
+                        {{ row.AccommodationCountry }}
+                        –
+                        {{ row.AccommodationCoordinates }}
+                        {{ row.AccommodationCoordinateAccuracy | default(value="") }}
+                    </span>
+                </a>
+            </div>
         </div>
-      </div>
+    </div>
 
-
-</section>
+    {% if loop.last %}
+            </div>
+        </section>
+    {% endif %}
 {% endfor %}
-
 
 <!-- Last page -->
 <section class="final-page">
