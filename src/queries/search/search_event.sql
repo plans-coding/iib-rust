@@ -1,5 +1,6 @@
 SELECT
     TripDomain AS DomainAbbreviation,
+    TripDomain AS TripDomain,
     o.OuterId AS OuterId,
     e.InnerId,
     o.OverallDestination AS OverallDestination,

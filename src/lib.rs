@@ -723,6 +723,7 @@ async fn page_load_internal() {
             });
             all_state["title_string"] = serde_json::json!(title);
             all_state["backside_string"] = serde_json::json!(backside);
+            all_state["cover_photos_list"] = serde_json::to_value(&cover_photos_map).unwrap();
         }
 
         ("input", _, _) => {

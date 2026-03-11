@@ -1,3 +1,19 @@
+<style>
+    {% for row in all_overview %}
+	@page {{ row.OuterId }} { @bottom-center {content: "#{{ loop.index }}  — {{ row.OuterId }}";} }
+    {% endfor %}
+
+</style>
+
+<div id="print-control">
+	<span>Use margin 'Default'.</span> 
+	<button class="item-viewer-button black-button" onclick="window.print()">
+		Print
+	</button>
+	<button class="item-viewer-button black-button" onclick="document.querySelector('section.toc')?.insertAdjacentElement('afterend', Object.assign(document.createElement('section'), {className:'blank-page'}))">Add +1 blank page after TOC</button>
+	<button class="item-viewer-button black-button" onclick="document.querySelector('section.final-page')?.insertAdjacentElement('beforebegin', Object.assign(document.createElement('section'), {className:'blank-page'}))">Add +1 blank page before final page</button>
+</div>
+
 <div id="path-report-output">
 
 <!-- Cover page -->
@@ -51,7 +67,7 @@
                             </div>
                         </div>
                         <span class="destination-label">{{ row.OverallDestination }}</span>
-                        <span class="page-number"></span>
+                        &nbsp;&nbsp;#<span class="page-number">{{ loop.index }}</span>
                     </a>
                 </div>
             </div>
@@ -72,7 +88,9 @@
             </section>
         {% endif %}
 
-        <section class="trip-section" id="{{ row.InnerId }}">
+	{% set cover_photo_id = all.cover_photos_list | get(key=row.OuterId, default="NO") %}
+        <section class="trip-section" id="{{ row.InnerId }}" style="page:{{ row.OuterId }}; --cover-url: url('{{ cover_photo_id | safe }}');">
+
             <div class="trip-overview" data-trip-domain="{{ all_overview[currentTripCount].TripDomain }}">
                 <div class="trip_header" data-trip-domain="{{ all_overview[currentTripCount].TripDomain }}">
                     <b>
