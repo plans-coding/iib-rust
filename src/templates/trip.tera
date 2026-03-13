@@ -244,7 +244,7 @@
 	          </div>
 	                  
 	          <div class="day-foot" data-trip-domain="{{ trip_summary[0].DomainAbbreviation }}">
-	            <div class="day-label"><div class="day-icon" data-trip-domain='{{ trip_summary[0].DomainAbbreviation }}'>{{ day.DayNumber }}</div> {{ day.Weekday | default(value="") }} {{ day.Date }}</div>
+	            <div class="day-label"><div class="day-icon" data-trip-domain='{{ trip_summary[0].DomainAbbreviation }}'>{{ day.DayNumber }}</div> {{ translation.trip | get(key=day.Weekday | lower) }} {{ day.Date }}</div>
 	            &nbsp; 
 	            <a class="acc-link" target="_blank" href="{{ settings.Other.ExternalMapProvider }}{{ day.AccommodationCoordinates }}" data-trip-domain="{{ trip_summary[0].DomainAbbreviation }}">
 	                <div class="acc-icon" data-trip-domain='{{ trip_summary[0].DomainAbbreviation }}'></div>

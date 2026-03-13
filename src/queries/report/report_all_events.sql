@@ -27,6 +27,15 @@ CountryMapping AS (
 
 SELECT
     ROW_NUMBER() OVER (PARTITION BY o.OuterId ORDER BY e.Date ASC) - 1 AS DayNumber,
+        CASE strftime('%w', Date)
+        WHEN '1' THEN 'Monday'
+        WHEN '2' THEN 'Tuesday'
+        WHEN '3' THEN 'Wednesday'
+        WHEN '4' THEN 'Thursday'
+        WHEN '5' THEN 'Friday'
+        WHEN '6' THEN 'Saturday'
+        WHEN '0' THEN 'Sunday'
+    END AS Weekday,
     e.*,
     o.OuterId,
     o.TripDomain,
@@ -46,4 +55,5 @@ LEFT JOIN CountryMapping cm
 WHERE
     e.InnerId IS NOT NULL
     AND o.TripDomain IN (TripDomain)
-    AND o.ParticipantGroup IN (ParticipantGroup) AND 1=1;
+    AND o.ParticipantGroup IN (ParticipantGroup) AND 1=1
+ORDER BY DepartureDate;

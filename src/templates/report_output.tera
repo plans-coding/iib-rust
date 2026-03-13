@@ -88,8 +88,8 @@
             </section>
         {% endif %}
 
-	{% set cover_photo_id = all.cover_photos_list | get(key=row.OuterId, default="NO") %}
-        <section class="trip-section" id="{{ row.InnerId }}" style="page:{{ row.OuterId }}; --cover-url: url('{{ cover_photo_id | safe }}?size=preview');">
+	{% set cover_photo_id = all.cover_photos_list | get(key=all_overview[currentTripCount].OuterId, default="NO") %}
+        <section class="trip-section" id="{{ all_overview[currentTripCount].InnerId }}" style="page:{{ all_overview[currentTripCount].OuterId }}; --cover-url: url('{{ cover_photo_id | safe }}?size=preview');">
 	
 	<div class="trip-cover" data-trip-domain="{{ all_overview[currentTripCount].TripDomain }}">
 		<div class="trip-cover-header">
@@ -226,10 +226,9 @@
                     <div class="day-icon" data-trip-domain="{{ row.TripDomain }}">
                         {{ row.DayNumber }}
                     </div>
-                    {{ row.Weekday | default(value="") }}
+                    {{ translation.trip | get(key=row.Weekday | lower) }}
                     {{ row.Date }}
                 </div>
-                &nbsp;
                 <a class="acc-link" target="_blank" href="{{ settings.Other.ExternalMapProvider }}{{ row.AccommodationCoordinates }}">
                     <div class="acc-icon" data-trip-domain="{{ row.TripDomain }}"></div>
                     <span class="acc-text">
@@ -238,7 +237,7 @@
                         {{ row.AccommodationCountryFlag }}
                         {{ row.AccommodationCountry }}
                         –
-                        {{ row.AccommodationCoordinates }}
+                        <span style="white-space:nowrap;">{{ row.AccommodationCoordinates }}</span>
                         {{ row.AccommodationCoordinateAccuracy | default(value="") }}
                     </span>
                 </a>

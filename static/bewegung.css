@@ -39,6 +39,7 @@ body.dark {
     --gradient-gold: #4d4203;
     --gradient-green: #023602;
     --color-silver: #022626;
+    --menu-behind: #022626;
     --menu-bg-color: #1d655e; /*#6E7F80;*/
     --menu-txt-color: #fff;
 
@@ -137,7 +138,7 @@ body::before {
     filter: grayscale(1) contrast(0.9) brightness(0.80);*/
 }
 
-section {max-width:800pt;margin:10pt auto auto;width:100%; }
+section {max-width:800pt;margin:10pt auto auto;width:100%;padding:3pt;box-sizing: border-box; }
 
 #app {}
 
@@ -1289,11 +1290,14 @@ background-color: rgb(from var(--color-background) r g b / 0.8);
         margin-top: 0.5rem;
         align-items: center;
         color: var(--domain-color);
+        gap: 10pt;
+        align-items: flex-start;
 
         a {
             color: var(--domain-color);
         }
     }
+    .day-label { white-space: nowrap; }
 
     .explore-cover {
         background: var(--domain-alpha);
@@ -1422,7 +1426,7 @@ background-color: rgb(from var(--color-background) r g b / 0.8);
 html:has(#path-map) {
 	height:100%;
 	body {height:100%;}
-	section {max-width:100%!important;width:100%!important;margin:0!important;}
+	section {max-width:100%!important;width:100%!important;margin:0!important;padding:0;}
 	#app{flex:1;}
 	#iib-foot{display:none;}
 }
@@ -1837,11 +1841,14 @@ body:has(#path-dataset) { background-color: var(--color-hover-background); }
         margin-top: 0.5rem;
         align-items: center;
         color: var(--domain-color);
+        gap: 10pt;
+        align-items: flex-start;
 
         a {
             color: var(--domain-color);
         }
     }
+    .day-label { white-space: nowrap; }
 
     .day-icon {
         background-color: var(--domain-color);

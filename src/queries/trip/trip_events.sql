@@ -46,6 +46,15 @@ CountryMapping AS (
 )
 SELECT
     ROW_NUMBER() OVER (ORDER BY e.Date ASC) - 1 AS DayNumber,
+        CASE strftime('%w', Date)
+        WHEN '1' THEN 'Monday'
+        WHEN '2' THEN 'Tuesday'
+        WHEN '3' THEN 'Wednesday'
+        WHEN '4' THEN 'Thursday'
+        WHEN '5' THEN 'Friday'
+        WHEN '6' THEN 'Saturday'
+        WHEN '0' THEN 'Sunday'
+    END AS Weekday,
     o.OuterId,
     e.InnerId,
     o.OverallDestination AS OverallDestination,
