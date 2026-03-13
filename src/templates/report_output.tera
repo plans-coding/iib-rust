@@ -1,6 +1,6 @@
 <style>
     {% for row in all_overview %}
-	@page {{ row.OuterId }} { @bottom-center {content: "#{{ loop.index }}  — {{ row.OuterId }}";} }
+	@page {{ row.OuterId }} { @bottom-center {content: "#{{ loop.index }}  — {{ row.OuterId }} {{ row.OverallDestination }}";} }
     {% endfor %}
 
 </style>
@@ -89,18 +89,20 @@
         {% endif %}
 
 	{% set cover_photo_id = all.cover_photos_list | get(key=row.OuterId, default="NO") %}
-        <section class="trip-section" id="{{ row.InnerId }}" style="page:{{ row.OuterId }}; --cover-url: url('{{ cover_photo_id | safe }}');">
+        <section class="trip-section" id="{{ row.InnerId }}" style="page:{{ row.OuterId }}; --cover-url: url('{{ cover_photo_id | safe }}?size=preview');">
+	
+	<div class="trip-cover" data-trip-domain="{{ all_overview[currentTripCount].TripDomain }}">
+		<div class="trip-cover-header">
+                    {{ all_overview[currentTripCount].OuterId }}
+                    {{ translation.trip.to | default(value="to") }}
+                    {{ all_overview[currentTripCount].OverallDestination }}
+		</div>
+		<div class="trip-cover-sub-header">
+                    {{ all_overview[currentTripCount].TripDescription }}
+		</div>
+	</div>
 
             <div class="trip-overview" data-trip-domain="{{ all_overview[currentTripCount].TripDomain }}">
-                <div class="trip_header" data-trip-domain="{{ all_overview[currentTripCount].TripDomain }}">
-                    <b>
-                        {{ all_overview[currentTripCount].OuterId }}
-                        {{ translation.trip.to | default(value="to") }}
-                        {{ all_overview[currentTripCount].OverallDestination }}
-                    </b>
-                    &nbsp;&nbsp;&nbsp;
-                    {{ all_overview[currentTripCount].TripDescription }}
-                </div>
 
                 <div class="trip-layout">
                     <div class="column-stack">

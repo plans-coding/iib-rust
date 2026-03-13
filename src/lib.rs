@@ -697,7 +697,7 @@ async fn page_load_internal() {
                 },
             });
             all_state["db_loaded"] = serde_json::json!(if !db_bytes.is_empty() { "stored" } else { "missing" });
-            execute_after = vec!["check_immich_authorization".into(),"sync_db_init".into()];
+            execute_after = vec!["runIfOnBewegungOnline".into(), "check_immich_authorization".into(),"sync_db_init".into()];
         }
 
         ("about", _, _) => {
@@ -832,10 +832,10 @@ async fn page_load_internal() {
         }
     }
 
-    let context_json = context.clone().into_json();
+    /*let context_json = context.clone().into_json();
     let js_value = serde_wasm_bindgen::to_value(&context_json)
     .unwrap_or(wasm_bindgen::JsValue::NULL);
-    web_sys::console::log_1(&js_value);
+    web_sys::console::log_1(&js_value);*/
     
     let render_result = (|| -> Result<(), String> {
         let rendered = get_tera()
@@ -894,8 +894,7 @@ async fn page_load_internal() {
             "sync_db_init" => sync_db_init(),
             "check_immich_authorization" => check_immich_authorization(),
             "init_create_trip" => init_create_trip(),
-            "about" => {},
-            "source" => runIfOnBewegungOnline(),
+            "runIfOnBewegungOnline" => runIfOnBewegungOnline(),
             _ => {}
         }
     }

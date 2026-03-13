@@ -102,9 +102,9 @@
 
 	  <details open class="trip" data-trip-domain="{{ trip_summary[0].DomainAbbreviation }}">
 	    <summary data-trip-domain="{{ trip_summary[0].DomainAbbreviation }}" class="trip-summary-header">
-	      <b>{{ trip_summary[0].OuterId }} {{ translation.trip.to | default(value="to") }}
-	      {{ trip_summary[0].OverallDestination }}</b>
-		  &nbsp;&nbsp;&nbsp;{{ trip_summary[0].TripDescription }}
+	      <div><b>{{ trip_summary[0].OuterId }} {{ translation.trip.to | default(value="to") }}
+	      {{ trip_summary[0].OverallDestination }}</b></div>
+	      <div>{{ trip_summary[0].TripDescription }}</div>
 	    </summary>
 
 	    <div class="trip-layout">

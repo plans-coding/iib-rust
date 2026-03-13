@@ -26,7 +26,7 @@ CountryMapping AS (
 )
 
 SELECT
-    ROW_NUMBER() OVER (ORDER BY e.Date ASC) - 1 AS DayNumber,
+    ROW_NUMBER() OVER (PARTITION BY o.OuterId ORDER BY e.Date ASC) - 1 AS DayNumber,
     e.*,
     o.OuterId,
     o.TripDomain,

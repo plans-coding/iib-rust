@@ -3,7 +3,7 @@
     --gradient-gold: gold;
     --gradient-green: green;
     --menu-behind: #6E7F80; /*#f4f7fa*/
-    --menu-bg-color: #d9efcb; /*#6E7F80;*/
+    --menu-bg-color: #f4f7fa; /*#6E7F80;*/
     --menu-txt-color: #000;
     --domain-color: #1d655e; /* Before it is overwritten */
 
@@ -39,6 +39,8 @@ body.dark {
     --gradient-gold: #4d4203;
     --gradient-green: #023602;
     --color-silver: #022626;
+    --menu-bg-color: #1d655e; /*#6E7F80;*/
+    --menu-txt-color: #fff;
 
     --color-background: #022626;
     --color-white: #022626aa;
@@ -338,7 +340,7 @@ dialog{width:100vw;height:100vh;}
     --transition-speed: 0.2s;
     background-color: var(--menu-behind);
     .frog {display:flex;align-items: center;}
-    .shortcut {color:var(--menu-txt-color);}
+    .shortcut {color:var(--menu-txt-color);cursor: pointer;}
 
     .iib-menu {
         display: flex;
@@ -353,7 +355,7 @@ dialog{width:100vw;height:100vh;}
 
             &:hover {
                 color: var(--color-text);
-                background-color: #ffffff44;
+                background-color: var(--color-hover-background-alpha);
             }
         }
     }
@@ -372,7 +374,7 @@ dialog{width:100vw;height:100vh;}
         &:has(#submenu-more:hover) #more, #more:hover,
         &:has(#submenu-search:hover) #search, #search:hover,
         #themeToggle:hover {
-            background-color: #ffffff44;
+            background-color: var(--color-hover-background-alpha);
             color: var(--color-text);
         }
     }
@@ -411,9 +413,9 @@ dialog{width:100vw;height:100vh;}
         z-index: 10;
         max-width: 100%;
         overflow-x: auto;
-	margin: 0 5pt 0 5pt;
-	border-bottom-left-radius:var(--radius-small);
-	border-bottom-right-radius:var(--radius-small);
+        margin: 0 5pt 0 5pt;
+        border-bottom-left-radius:var(--radius-small);
+        border-bottom-right-radius:var(--radius-small);
 
         background-color: var(--color-submenu-background);
         border-bottom: 1px solid var(--color-hover-background);
@@ -429,7 +431,7 @@ dialog{width:100vw;height:100vh;}
     }
 
     #filter {
-        background-color:rgb(223 220 224 / 52%);
+        background-color:rgb(215 215 0 / 80%);
         cursor: pointer;
 
         .iib-menu:hover & { border-radius: 0; }
@@ -1195,6 +1197,10 @@ background-color: rgb(from var(--color-background) r g b / 0.8);
     .trip-summary-header {
         border-radius: 3pt;
         user-select: none;
+	display:flex;
+	flex-direction:row;
+	flex-wrap: wrap;
+	gap: 10pt;
     }
 
 
@@ -1751,7 +1757,11 @@ body:has(#path-dataset) { background-color: var(--color-hover-background); }
         display: grid;
         grid-template-columns: 1fr; /* with map 1fr 1fr */
         gap: 4px;
-    }
+    	background-color: color-mix(in srgb, var(--domain-color) 13%, transparent);
+	margin-top:10pt;
+	border-radius: var(--radius);
+	padding: 5pt;
+     }
 
     .row-flex {
         display: flex;
@@ -1759,7 +1769,6 @@ body:has(#path-dataset) { background-color: var(--color-hover-background); }
         flex-direction: row;
     }
 
-    .trip-overview { background-color:var(--domain-alpha);padding:5pt; }
     .trip-details-container {
         position: relative; flex: 1;
     }
@@ -1954,14 +1963,52 @@ background: #1d655e;
     align-items: center;
     height: 90vh;
 }
+h1 { font-size:40pt; }
+.trip-cover {
+	height:12cm;
+	position: absolute;
+	display: flex;
+	justify-items: flex-end;
+	justify-content: flex-end;
+	color: #fff;
+	background: linear-gradient(to bottom, transparent 50%, var(--domain-color)), var(--cover-url), var(--domain-color);
+	background-size: 110%;
+	background-position: center;
+	width:100%;
+	flex-direction: column;
+	border-radius: var(--radius);
+}
+.trip-cover-header {
+	font-family: 'Cairo', sans-serif;	
+	font-size: 40pt;
+	font-weight: bold;
+	padding: 0 40pt;
+	line-height: 1.2;
+}
+.trip-cover-sub-header {
+	font-size: 16pt;
+	padding: 15pt 40pt 20pt 40pt;
+}
+.trip-overview { padding-top:12cm; }
 
-.trip-section {
+.trip-section::before {
+/*	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100vh;
+	height: 12cm;
+	content: "";
+	background-color: var(--domain-color);
+	background-size: cover;
+	background-position: center;
+	background-repeat: no-repeat;
 /*	background-image: var(--cover-url);
 	background-repeat: no-repeat;
 	background-size: contain;*/
 }
 
 .trip-section {
+	position: relative;
     break-before: page;
 }
 
