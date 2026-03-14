@@ -4,7 +4,6 @@
     {% for tripDomain in common.common_trip_domains %}
       [data-trip-domain="{{ tripDomain.DomainAbbreviation }}"] {
         --domain-color: {{ tripDomain.Color }};
-        --color-text: #fff;
       }
     {% endfor %}
 

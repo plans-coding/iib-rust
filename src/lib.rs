@@ -224,7 +224,7 @@ pub async fn start() -> Result<(), JsValue> {
         .set(Mutex::new(render_structure))
         .expect("Render structure already initialized");
 
-    page_load_internal("app", false).await;
+    page_load_internal("app", 0).await;
     Ok(())
 }
 
@@ -232,8 +232,8 @@ pub async fn start() -> Result<(), JsValue> {
 // MAKE RUST FUNCTIONS AVAILABLE FOR JAVASCRIPT
 // -----------------------------------------------------------------------
 #[wasm_bindgen]
-pub async fn page_load(destination: &str, special: bool) {
-    page_load_internal(destination, special).await;
+pub async fn page_load(destination: &str, choice: u8) {
+    page_load_internal(destination, choice).await;
 }
 
 #[wasm_bindgen(getter)]
@@ -390,7 +390,7 @@ async fn session_load() -> (Vec<u8>, tera::Context) {
 // -----------------------------------------------------------------------
 // HOT RELOAD
 // -----------------------------------------------------------------------
-async fn page_load_internal(destination: &str, special: bool) {
+async fn page_load_internal(destination: &str, choice: u8) {
     //web_sys::console::log_1(&">>----------------------".into());
 
     let db_bytes = DB_BYTES.get().expect("DB not initialized");
@@ -417,8 +417,10 @@ async fn page_load_internal(destination: &str, special: bool) {
         page = "source".to_string();
     }
 
-    if special == true {
+    if choice == 1 {
         page = "overview:year".to_string();
+    } else if choice == 2 {
+        page = "overview:country".to_string();
     }
 
     //web_sys::console::log_1(&format!("Loading page: {}",page).into());
@@ -796,11 +798,13 @@ async fn page_load_internal(destination: &str, special: bool) {
     };
 
     // SET TITLE  -----------------------------------------------------------------------
-    web_sys::window()
-        .expect("ERROR")
-        .document()
-        .expect("ERROR")
-        .set_title(&format!("{} - Immer in Bewegung", page_data.title));
+    if choice == 0 {
+        web_sys::window()
+            .expect("ERROR")
+            .document()
+            .expect("ERROR")
+            .set_title(&format!("{} - Immer in Bewegung", page_data.title));
+    }
 
     // RUN SQLITE QUERIES  -----------------------------------------------------------------------
 
