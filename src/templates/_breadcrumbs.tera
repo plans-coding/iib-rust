@@ -6,7 +6,7 @@
 {% endif %}
 
 <div class="component-breadcrumb">
-    <div class=" breadcrumb {% if page != 'explore' and page != 'source' %}widescreen{% endif %}">
+    <div class=" breadcrumb {# if page != 'explore' and page != 'source' %}widescreen{% endif #}">
 
         <img class="icon-color {% if page is starting_with('overview') %}widescreen{% endif %}" src="static/images/frog.svg" />
 
@@ -18,7 +18,7 @@
             <img class="widescreen" src="static/images/arrow-right.svg" />
             <a href="?path=overview:year" class="breadcrumb-link {% if all.query_params.path == 'overview:year' %}active{% endif %}">{{ translation.overview.year | default(value="Year") }}</a>
             <a href="?path=overview:country" class="breadcrumb-link {% if all.query_params.path == 'overview:country' %}active{% endif %}">{{ translation.overview.country | default(value="Country") }}</a>
-            <a href="?path=overview:plain" class="breadcrumb-link {% if all.query_params.path == 'overview:plain' %}active{% endif %}">{{ translation.overview.plain | default(value="Plain") }}</a>
+            <a href="?path=overview:plain" class="breadcrumb-link plain {% if all.query_params.path == 'overview:plain' %}active{% endif %}">{{ translation.overview.plain | default(value="Plain") }}</a>
 
         {% elif page is starting_with("statistics:") %}
             <div>{{ translation.statistics.title | default(value="Summary") }}</div>

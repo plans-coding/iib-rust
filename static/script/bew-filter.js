@@ -23,7 +23,11 @@ async function save_filter_OPFS() {
         //console.log("Saved filter to OPFS:", filterObj);
 
         updateFilterButtonVisibility();
-        page_load();
+        await page_load("app", false);
+
+        if ( document.getElementById('trip-side-navigator').style.display === 'block' ) {
+            await page_load('trip-side-navigator-content', true);
+        }
 
     } catch (err) {
         console.error("Failed to save filter to OPFS:", err);
@@ -88,7 +92,11 @@ async function remove_filter() {
     await dir.removeEntry('filter.json').catch(()=>{});
 
     updateFilterButtonVisibility();
-    page_load();
+    await page_load("app", false);
+
+    if ( document.getElementById('trip-side-navigator').style.display === 'block' ) {
+        await page_load('trip-side-navigator-content', true);
+    }
 }
 
 function updateFilterButtonVisibility() {

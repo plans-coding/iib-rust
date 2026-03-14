@@ -200,6 +200,7 @@ extern "C" {
     fn runIfOnBewegungOnline();
 
     fn sync_db_init();
+    fn init_trip_navigator();
 
     #[wasm_bindgen(catch)]
     async fn get_filter_value_OPFS() -> Result<JsValue, JsValue>;
@@ -223,7 +224,7 @@ pub async fn start() -> Result<(), JsValue> {
         .set(Mutex::new(render_structure))
         .expect("Render structure already initialized");
 
-    page_load_internal().await;
+    page_load_internal("app", false).await;
     Ok(())
 }
 
@@ -231,8 +232,8 @@ pub async fn start() -> Result<(), JsValue> {
 // MAKE RUST FUNCTIONS AVAILABLE FOR JAVASCRIPT
 // -----------------------------------------------------------------------
 #[wasm_bindgen]
-pub async fn page_load() {
-    page_load_internal().await;
+pub async fn page_load(destination: &str, special: bool) {
+    page_load_internal(destination, special).await;
 }
 
 #[wasm_bindgen(getter)]
@@ -389,7 +390,7 @@ async fn session_load() -> (Vec<u8>, tera::Context) {
 // -----------------------------------------------------------------------
 // HOT RELOAD
 // -----------------------------------------------------------------------
-async fn page_load_internal() {
+async fn page_load_internal(destination: &str, special: bool) {
     //web_sys::console::log_1(&">>----------------------".into());
 
     let db_bytes = DB_BYTES.get().expect("DB not initialized");
@@ -414,6 +415,10 @@ async fn page_load_internal() {
 
     if !db_loaded {
         page = "source".to_string();
+    }
+
+    if special == true {
+        page = "overview:year".to_string();
     }
 
     //web_sys::console::log_1(&format!("Loading page: {}",page).into());
@@ -452,7 +457,7 @@ async fn page_load_internal() {
                 .filter_map(|v| v.as_str())
                 .map(|s| format!("(',' || REPLACE(TripLabels,' ','') || ',') LIKE '%,{},%'", s.replace('\'', "''")))
                 .collect::<Vec<_>>()
-                .join(" AND ");
+                .join(" OR ");
             format!("({})", conds)
         })
         .unwrap_or_else(|| "1=1".to_string());
@@ -738,7 +743,7 @@ async fn page_load_internal() {
                 queries: get_trip_queries("InnerId", inner_id, &participant_group, &trip_domain, &trip_label),
             });
             all_state["cover_photos_list"] = serde_json::to_value(&cover_photos_map).unwrap();
-            execute_after = vec!["load_trip_map".into()];
+            execute_after = vec!["load_trip_map".into(), "init_trip_navigator".into()];
         }
 
         ("trip", outer_id, _) if !outer_id.is_empty() => {
@@ -751,7 +756,7 @@ async fn page_load_internal() {
                 queries,
             });
             all_state["cover_photos_list"] = serde_json::to_value(&cover_photos_map).unwrap();
-            execute_after = vec!["load_trip_map".into()];
+            execute_after = vec!["load_trip_map".into(), "init_trip_navigator".into()];
         }
 
         ("images", trip_id, trip_date) => {
@@ -865,8 +870,8 @@ async fn page_load_internal() {
 
         web_sys::window()
             .and_then(|w| w.document())
-            .and_then(|d| d.get_element_by_id("app"))
-            .ok_or_else(|| "Element #app not found".to_string())?
+            .and_then(|d| d.get_element_by_id(destination))
+            .ok_or_else(|| "Destination element not found".to_string())?
             .set_inner_html(&rendered);
 
         Ok(())
@@ -895,6 +900,7 @@ async fn page_load_internal() {
             "check_immich_authorization" => check_immich_authorization(),
             "init_create_trip" => init_create_trip(),
             "runIfOnBewegungOnline" => runIfOnBewegungOnline(),
+            "init_trip_navigator" => init_trip_navigator(),
             _ => {}
         }
     }

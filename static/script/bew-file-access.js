@@ -211,12 +211,12 @@ function sync_db_init() {
     if (info) {
       $('#dotDb').className   = 'status-dot green';
       $('#valDb').textContent = OPFS_DB_NAME;
-      $('#dotSize').className   = 'status-dot green';
+      $('#dotSize').className = 'status-dot green';
       $('#valSize').textContent = fmtSize(info.size);
     } else {
-      $('#dotDb').className     = 'status-dot';
-      $('#valDb').textContent   = '—';
-      $('#dotSize').className   = 'status-dot';
+      $('#dotDb').className   = 'status-dot';
+      $('#valDb').textContent = '—';
+      $('#dotSize').className = 'status-dot';
       $('#valSize').textContent = '—';
     }
 
@@ -228,8 +228,17 @@ function sync_db_init() {
       $('#dotBound').className   = 'status-dot';
       $('#valBound').textContent = '—';
     }
-  }
+    try {
+      const dir = await navigator.storage.getDirectory();
+      await dir.getFileHandle("cover_photos.json");
 
+      $('#dotImmichSync').className   = 'status-dot green';
+      $('#valImmichSync').textContent = 'cover_photos.json';
+    } catch {
+      $('#dotImmichSync').className   = 'status-dot';
+      $('#valImmichSync').textContent = '—';
+    }
+  }
   // ─── 1) Fetch from server ───────────────────────────────
   $('#btnFetch').addEventListener('click', async () => {
     const btn = $('#btnFetch');
