@@ -1,6 +1,6 @@
 // FOR BEWEGUNG ONLINE DEMO
 
-function runIfOnBewegungOnline() {
+async function runIfOnBewegungOnline() {
   try {
     const url = new URL(window.location.href);
     const isTargetOrigin = url.origin === 'https://online.bewegung.app';
@@ -12,11 +12,16 @@ function runIfOnBewegungOnline() {
         console.warn('Element with id "btnFetch" not found.');
         return;
       }
-      if (typeof btn.click === 'function') {
+
+      // Access the click handler directly
+      const clickHandler = btn._clickHandler; // see note below
+      if (clickHandler) {
+        await clickHandler();
+      } else {
         btn.click();
-        return;
       }
     }
+    console.log('Checked if on Bewegung Online');
   } catch (err) {
     console.error('Invalid URL', err);
   }

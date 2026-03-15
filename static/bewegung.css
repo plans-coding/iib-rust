@@ -200,7 +200,7 @@ main { display: flex;height: 100%; }
     overflow-x: hidden;
 }
 
-section {max-width:800pt;margin:10pt auto auto;width:100%;padding:3pt;box-sizing: border-box; }
+section#app {max-width:800pt;margin:10pt auto auto;width:100%;padding:3pt;box-sizing: border-box; }
 
 #app {}
 
@@ -311,6 +311,7 @@ section {max-width:800pt;margin:10pt auto auto;width:100%;padding:3pt;box-sizing
 }
 
 .delayed-pulse {
+    display: none; /* inactivated */
     opacity: 0;
     animation: showImage 2s 3s forwards, pulse 1s 2s infinite;
 }
@@ -1515,7 +1516,7 @@ dialog{width:100vw;height:100vh;}
 html:has(#path-map) {
 	height:100%;
 	body {height:100%;}
-	section {max-width:100%!important;width:100%!important;margin:0!important;padding:0;}
+	section {margin:0!important;padding:0;}
 	#app{flex:1;}
 	#iib-foot{display:none;}
 }
@@ -1968,17 +1969,33 @@ body:has(#path-dataset) { background-color: var(--color-dataset-background); }
         text-decoration: none;
     }
 
+    .trip-cover {
+        height:12cm;
+        position: absolute;
+        display: flex;
+        justify-items: flex-end;
+        justify-content: flex-end;
+        color: #fff;
+        background: linear-gradient(to bottom, transparent 50%, var(--domain-color)), var(--cover-url), var(--domain-color);
+        background-size: 110%;
+        background-position: center;
+        width:100%;
+        flex-direction: column;
+        border-radius: var(--radius);
+        box-sizing: content-box;
+    }
+
 
 }
 body:has(#path-report-output)::before {
 	background:none;
 }
 body:has(#path-report-output) {
-	background:none;
-	nav#menu {display:none;}
-	section {max-width:none;margin:0;}
+	background: none;
+	nav#menu { display: none; }
+	main { display: contents; } /* Needed for print */
+	section#app { margin:0;padding:0; }
 }
-
 
 #print-control {
 	position:fixed;
@@ -2059,20 +2076,7 @@ background: #1d655e;
     height: 90vh;
 }
 h1 { font-size:40pt; }
-.trip-cover {
-	height:12cm;
-	position: absolute;
-	display: flex;
-	justify-items: flex-end;
-	justify-content: flex-end;
-	color: #fff;
-	background: linear-gradient(to bottom, transparent 50%, var(--domain-color)), var(--cover-url), var(--domain-color);
-	background-size: 110%;
-	background-position: center;
-	width:100%;
-	flex-direction: column;
-	border-radius: var(--radius);
-}
+
 .trip-cover-header {
 	font-family: 'Cairo', sans-serif;	
 	font-size: 40pt;
@@ -2082,7 +2086,7 @@ h1 { font-size:40pt; }
 }
 .trip-cover-sub-header {
 	font-size: 16pt;
-	padding: 15pt 40pt 20pt 40pt;
+	padding: 7pt 40pt 20pt 40pt;
 }
 .trip-overview { padding-top:12cm; }
 

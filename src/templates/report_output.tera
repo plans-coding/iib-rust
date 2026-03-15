@@ -226,7 +226,7 @@
                     <div class="day-icon" data-trip-domain="{{ row.TripDomain }}">
                         {{ row.DayNumber }}
                     </div>
-                    {{ translation.trip | get(key=row.Weekday | lower) }}
+                    {% if translation.trip %}{{ translation.trip | get(key=row.Weekday | lower) }}{% else %}{{ row.Weekday }}{% endif %}
                     {{ row.Date }}
                 </div>
                 <a class="acc-link" target="_blank" href="{{ settings.Other.ExternalMapProvider }}{{ row.AccommodationCoordinates }}">
