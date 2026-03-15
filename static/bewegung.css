@@ -8,7 +8,7 @@
     --domain-color: rgb(215 215 0); /* Before it is overwritten */
 
     --color-background: #f8fafd; /*#f8fafd;*/
-    --color-white: #fff;
+    --color-white: #000;
     --color-background-alpha: #f8fafdaa;
     --color-text: #000;
     --color-hover-background: #6E7F80;/*#6f757e;*/
@@ -32,6 +32,14 @@
     --radius: 10px;
     --radius-small: 5pt;
     --view-max-width: 600px;
+    --color-sql-command: #1d655e;
+    --color-dataset-background: #6E7F80;
+    --color-background-search: #fff;
+
+    --color-bg-menu-smallscreen: gold;
+
+    --color-dark-button-text: #fff;
+    --color-light-button-text: #000;
 }
 
 body.dark {
@@ -45,7 +53,7 @@ body.dark {
     --domain-color: #1d655e;
 
     --color-background: #022626;
-    --color-white: #022626aa;
+    --color-white: #fff;
     --color-background-alpha: #022626aa;
     --color-text: #e0e0e0;
     --color-hover-background: #1d655e;
@@ -64,6 +72,13 @@ body.dark {
     --cv-text: var(--color-text);
     --map-old-filter: brightness(0.7) contrast(3) sepia(0.6) saturate(1) hue-rotate(300deg) invert(1);
     --map-filter: brightness(0.7) contrast(3) sepia(0.6) saturate(1) hue-rotate(210deg) invert(1);
+    --color-sql-command: #ffbf00;
+    --color-dataset-background: #022626;
+    --color-background-search: #022626;
+    --color-bg-menu-smallscreen: #1d655e;
+
+    --color-dark-button-text: #fff;
+    --color-light-button-text: #fff;
 }
 
 [data-trip-domain] {
@@ -88,7 +103,7 @@ body.dark {
     font-family: 'Righteous';
     src: url('../bundle/fonts/Righteous-Regular.ttf') format('truetype');
 }
-html {min-height:100%;}
+html {min-height:100%;scrollbar-color: var(--color-hover-background) var(--color-hover-background-alpha);}
 body {
     margin: 0;
     display: flex;
@@ -235,7 +250,8 @@ section {max-width:800pt;margin:10pt auto auto;width:100%;padding:3pt;box-sizing
 }
 
 
-.filter-button {font-family:arial;font-size:12pt;background-color:var(--domain-color);color:var(--color-white);border:0;border-radius:5pt;padding:8pt;cursor:pointer;}
+.dark-button {font-family:arial;font-size:12pt;background-color:var(--domain-color);color:var(--color-dark-button-text);border:0;border-radius:5pt;padding:8pt;cursor:pointer;}
+.filter-button {font-family:arial;font-size:12pt;background-color:var(--domain-color);color:var(--color-light-button-text);border:0;border-radius:5pt;padding:8pt;cursor:pointer;}
 .filter-button:hover {background-color:color-mix(in srgb, var(--domain-color) 80%, white 20%);}
 .black-button {font-family:arial;font-size:12pt;background-color:#000000;color:var(--color-white);border:0;border-radius:5pt;padding:8pt;cursor:pointer;color:#fff;}
 .black-button:hover {background-color:#000000cc;}
@@ -251,7 +267,7 @@ section {max-width:800pt;margin:10pt auto auto;width:100%;padding:3pt;box-sizing
     align-items: center;
 }
 
-#map { filter: var(--map-filter); }
+#map { filter: var(--map-filter); height: 100%; }
 #map_old { filter: var(--map-old-filter); }
 
 
@@ -435,7 +451,9 @@ dialog{width:100vw;height:100vh;}
 
         & > div, & > a { padding: 0.75rem; }
 
-	@media (max-width:  600px) { background-image:none;background-color:gold;margin:0;border-radius:0; }
+	@media (max-width:  600px) {
+        background-image:none;background-color:var(--color-bg-menu-smallscreen);margin:0;border-radius:0;
+    }
 
     }
 
@@ -486,7 +504,7 @@ dialog{width:100vw;height:100vh;}
 
     #submenu-search {
         background-color: var(--color-hover-background);
-        input { font-size: 1rem; padding: 0.5rem; }
+        input { font-size: 1rem; padding: 0.5rem; background-color: var(--color-background-search); }
     }
 
     .remove-filter {
@@ -552,6 +570,8 @@ dialog{width:100vw;height:100vh;}
 /* ------------------- */
 
 #path-explore {
+
+    input { background-color: var(--color-background-search);}
     .genre-icon-overlay {
         position: absolute;
         margin: 5px 0 0 5px;
@@ -575,7 +595,7 @@ dialog{width:100vw;height:100vh;}
     }
 
     .has-cover {
-        background-size: cover, contain;
+        background-size: 110%, contain; /* cover changed to 110% to avoid img edges */
         background-position: center, center;
         background-repeat: no-repeat, no-repeat;
     }
@@ -597,7 +617,6 @@ dialog{width:100vw;height:100vh;}
     }
 
     .card {
-        background-color: var(--color-white);
         display: flex;
         flex-direction: column;
         gap: 10px;
@@ -605,6 +624,7 @@ dialog{width:100vw;height:100vh;}
         border-radius: 5px;
         border: 1px solid var(--color-hover-background-alpha);
         border-left: 5pt solid var(--domain-color);
+        border-bottom: 1px solid var(--domain-color);
         padding: ;
         color: var(--color-text);
         text-decoration: none;
@@ -645,6 +665,7 @@ dialog{width:100vw;height:100vh;}
 }
 
 #path-overview-year, #path-overview-country {
+    padding-bottom:3pt;
     details {
         margin-top:2px;
         summary {
@@ -684,12 +705,13 @@ dialog{width:100vw;height:100vh;}
         font-weight: bold;
         padding: 0 5pt 0 5pt !important;
     }
-    .row-right { flex-direction: column !important; }
+    .row-right { flex-direction: column-reverse !important; }
     .widescreen, .plain {display:none;}
     .breadcrumb-link  { cursor: pointer; }
 }
 
 #path-overview-plain {
+    padding-bottom:3pt;
     max-width:100%;overflow-x:auto;
     a { text-decoration:none; }
     table {width:100%;border-spacing: 0 8px;}
@@ -1217,6 +1239,7 @@ dialog{width:100vw;height:100vh;}
             width: 100%;
             height: auto;
         }
+        #trip-utilities { display:none;}
     }
     .row-flex {
         display: flex;
@@ -1436,11 +1459,14 @@ dialog{width:100vw;height:100vh;}
     background: linear-gradient(to bottom, color-mix(in srgb, var(--color-background), transparent 60%), var(--color-background) 95%);
     z-index: 2;
   }
-
+  #trip-container-cover {
+    overflow: hidden;
+  }
 
   #trip-container-cover img {
-    width: 100%;
+    width: 110%;
     height: auto;
+    display: block;
   }
 
 
@@ -1555,7 +1581,6 @@ html:has(#path-map) {
         flex-direction: column;
         flex: 1;
         overflow: hidden;
-        background-color: var(--color-hover-background);
     }
 
     #sql-output {
@@ -1589,7 +1614,7 @@ html:has(#path-map) {
 
     .inactivated-button {background-color:var(--color-hover-background) !important;color:var(--color-hover-text) !important;}
 
-    .ͼb { color: var(--color-filter) !important; }
+    .ͼb { color: var(--color-sql-command) !important; }
     .ͼd { color: red; }
     .ͼ2 .cm-gutters,
     .ͼ2 .cm-activeLineGutter {
@@ -1606,7 +1631,7 @@ html:has(#path-dataset), body:has(#path-dataset) {
     #iib-foot{display:none;}
     #app {height: 100%;overflow: auto;}
 }
-body:has(#path-dataset) { background-color: var(--color-hover-background); }
+body:has(#path-dataset) { background-color: var(--color-dataset-background); }
 @keyframes spin {
     100% { transform: rotate(360deg); }
 }

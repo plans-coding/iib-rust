@@ -63,7 +63,8 @@ normalized AS (
         b.OverallDestination,
         b.ParticipantGroup,
         b.DepartureDate,
-        b.TripDomain
+        b.TripDomain,
+        b.TripLabels
     FROM BorderCrossings AS a,
         json_each('["' || REPLACE(AllBorderCrossings, ', ', '", "') || '"]')
     LEFT JOIN  bewa_Overview AS b
@@ -76,15 +77,17 @@ SELECT
     n.OuterID,
     n.TripDomain,
     n.OverallDestination,
-    n.ParticipantGroup
+    n.ParticipantGroup,
+    n.TripLabels
 FROM (
-    SELECT DISTINCT Country, OuterID, InnerId, TripDomain, OverallDestination, ParticipantGroup
+    SELECT DISTINCT Country, OuterID, InnerId, TripDomain, OverallDestination, ParticipantGroup, TripLabels
     FROM normalized
     WHERE OriginalCountry NOT LIKE '+%'
     AND OriginalCountry NOT LIKE '**%'
 ) AS n
 LEFT JOIN ContinentCountriesParsed AS c
 ON c.Country = n.Country
+WHERE InnerId IS NOT NULL /*AND TripDomain IN (TripDomain) AND ParticipantGroup IN (ParticipantGroup) AND 1=1*/
 ORDER BY
     CASE WHEN c.Continent = 'Europa' THEN 0 ELSE 1 END,
     c.Continent ASC,

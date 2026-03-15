@@ -11,6 +11,7 @@ const urlsToCache = [
   './static/script/bew-chart.js',
   './static/script/bew-tabulator.js',
   './static/script/bew-immich.js',
+  './static/script/bew-trip-navigator.js',
   './bundle/fonts/Righteous-Regular.ttf',
   './bundle/fonts/OFL.txt',
   './bundle/fonts/FrancoisOne-Regular.ttf',

@@ -1,6 +1,6 @@
 <div id="path-explore">
 
-  <input type="search" placeholder="{{ translation.menu.searchTrip | default(value="Search trip") }}" class="form-control" onkeydown="if(event.key==='Enter'){ history.pushState(null,'','?path=search:'+encodeURIComponent(this.value));page_load();}" />
+  <input type="search" placeholder="{{ translation.menu.searchTrip | default(value="Search trip") }}" class="form-control" onkeydown="if(event.key==='Enter'){ history.pushState(null,'','?path=search:'+encodeURIComponent(this.value));page_load('app', 0);}" />
   <br />
 
   <div class="card-container">

@@ -97,7 +97,7 @@
 
       </div>
       <div class="iib-menu-under" id="submenu-search">
-          <input type="search" id="top-search" placeholder="{{ translation.menu.searchTrip | default(value="Search trip") }}" style="border:0!important;border-radius:0!important;" class="form-control" onkeydown="if(event.key==='Enter'){ history.pushState(null,'','?path=search:'+encodeURIComponent(this.value));page_load();}" />
+          <input type="search" id="top-search" placeholder="{{ translation.menu.searchTrip | default(value="Search trip") }}" style="border:0!important;border-radius:0!important;" class="form-control" onkeydown="if(event.key==='Enter'){ history.pushState(null,'','?path=search:'+encodeURIComponent(this.value));page_load('app', 0);}" />
       </div>
           <div class="iib-menu-under" id="submenu-more">
           <div style="flex: 1;"></div>

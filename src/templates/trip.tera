@@ -26,7 +26,7 @@
 	      {% endif %}
 	  {% endfor %}
 
-	<div style="position:fixed;right:10pt;bottom:40pt;">
+	<div style="position:fixed;right:10pt;bottom:10pt;" id="trip-utilities">
 
 	          <div class="clickable-icon" onclick="document.getElementById('menu').style.display = (document.getElementById('menu').style.display === 'none' ? 'block' : 'none')">
 	            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="widescreen bi bi-menu-down" viewBox="0 0 16 16">
@@ -142,14 +142,14 @@
 	          {% if settings.Photos.Immich == "Enabled" %}
 	              {% if trip_immich_desc_search[0].ImmichDescSearch %}
 	                    <a class="to-image-viewer" href='{{ settings.Photos.ImmichUrl }}search?query=%7B"description"%3A"(IIB-{{ trip_summary[0].OtherId }})"%7D#search-chips' target="_blank">
-	                        <button type="button" class="item-viewer-button filter-button full-width-button" data-trip-domain="{{ trip_summary[0].DomainAbbreviation }}">
+	                        <button type="button" class="item-viewer-button dark-button full-width-button" data-trip-domain="{{ trip_summary[0].DomainAbbreviation }}">
 	                            <img src="static/images/photos.svg" />
 	                            {{ trip_immich_desc_search[0].ImmichDescSearch }}
 	                        </button>
 	                    </a>
 	              {% elif trip_immich_album_name[0].ImmichAlbumName %}
 	                    <a class="to-image-viewer" data-album="{{ trip_immich_album_name[0].ImmichAlbumName }}" onclick="get_album_id_from_name('{{ settings.Photos.ImmichUrl }}', this.dataset.album).then(function(id){window.open('/albums/'+id)})" target="_blank">
-	                        <button type="button" class="item-viewer-button filter-button full-width-button" data-trip-domain="{{ trip_summary[0].DomainAbbreviation }}">
+	                        <button type="button" class="item-viewer-button dark-button full-width-button" data-trip-domain="{{ trip_summary[0].DomainAbbreviation }}">
 	                            <img src="static/images/photos.svg" class="vertical-align-middle" />
 	                            {{ trip_immich_album_name[0].ImmichAlbumName }}
 	                        </button>
@@ -159,7 +159,7 @@
 	          
 	          {% for movie in trip_extension_movie %}
 	              <a href="{{ movie.MovieUrl }}" target="_blank">
-	                <button class="item-viewer-button filter-button full-width-button">
+	                <button class="item-viewer-button dark-button full-width-button">
 	                  <img src="static/images/photos.svg" />
 	                  {{ movie.MovieId }}
 	                </button>
@@ -191,11 +191,11 @@
 	                {% for item in trip_extension_reference_items %}
 	                  {% if item.Date == day.Date %}
 	                    {% if item.ExtensionType == "Diary" %}
-	                      <button class="item-viewer-button" onclick="const img=document.getElementById('img_{{ loop.index }}');if(!img.src) img.src=img.dataset.src;document.getElementById('dlg_{{ loop.index }}').showModal();" type="button" data-trip-domain="{{ trip_summary[0].DomainAbbreviation }}">
-	                        <img src="static/images/diary.svg" />
+	                      <button class="item-viewer-button dark-button" onclick="const img=document.getElementById('img_{{ loop.index }}');if(!img.src) img.src=img.dataset.src;document.getElementById('dlg_{{ loop.index }}').showModal();" type="button" data-trip-domain="{{ trip_summary[0].DomainAbbreviation }}">
+	                        D
 	                      </button>
 	                    {% elif item.ExtensionType == "Passport" %}
-	                      <button class="item-viewer-button" onclick="const img=document.getElementById('img_{{ loop.index }}');if(!img.src) img.src=img.dataset.src;document.getElementById('dlg_{{ loop.index }}').showModal();" type="button" data-trip-domain="{{ trip_summary[0].DomainAbbreviation }}">P</button>
+	                      <button class="item-viewer-button dark-button" onclick="const img=document.getElementById('img_{{ loop.index }}');if(!img.src) img.src=img.dataset.src;document.getElementById('dlg_{{ loop.index }}').showModal();" type="button" data-trip-domain="{{ trip_summary[0].DomainAbbreviation }}">P</button>
 	                    {% endif %}
 
 	                    <dialog class="item-viewer" id="dlg_{{ loop.index }}" onclick="this.close();">

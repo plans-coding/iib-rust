@@ -26,7 +26,7 @@ async function save_filter_OPFS() {
         await page_load("app", false);
 
         if ( document.getElementById('trip-side-navigator').style.display === 'block' ) {
-            await page_load('trip-side-navigator-content', true);
+            await load_trip_side_navigator('trip-side-navigator-content', 1);
         }
 
     } catch (err) {
@@ -95,7 +95,7 @@ async function remove_filter() {
     await page_load("app", false);
 
     if ( document.getElementById('trip-side-navigator').style.display === 'block' ) {
-        await page_load('trip-side-navigator-content', true);
+        await load_trip_side_navigator('trip-side-navigator-content', 1);
     }
 }
 

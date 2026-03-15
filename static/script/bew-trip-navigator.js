@@ -38,7 +38,7 @@ async function toggle_trip_side_navigator() {
     = (document.getElementById('trip-side-navigator').style.display === 'none' ? 'block' : 'none');
 
     if (document.getElementById('trip-side-navigator').style.display == "block") {
-        await page_load('trip-side-navigator-content', true);
+        await load_trip_side_navigator('trip-side-navigator-content', 1);
         replace_links();
     }
 }
