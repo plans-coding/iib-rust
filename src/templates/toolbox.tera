@@ -2,7 +2,7 @@
 body {backdrop-filter: none !important;} /* Position fixed do not work with backdrop */
 .event:first-child .filter-button { display:none; }
 </style>
-<div id="current_trip_documentation_status" style="z-index:10000;border:5pt solid red;position:fixed;bottom:0;right:0;background-color:var(--color-filter);"></div>
+<div id="current_trip_documentation_status" style="z-index:10000;border:5pt solid red;position:fixed;bottom:0;right:0;background-color:var(--color-filter);color: #000;"></div>
 
 <div id="path-toolbox">
     <div style="overflow-x: auto;display:flex;">

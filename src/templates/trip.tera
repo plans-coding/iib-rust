@@ -209,7 +209,7 @@
 	          </div>
 	                  
 	          <div class="day-foot" data-trip-domain="{{ trip_summary[0].DomainAbbreviation }}">
-	            <div class="day-label"><span style="white-space: nowrap;"><div class="day-icon" data-trip-domain='{{ trip_summary[0].DomainAbbreviation }}'>{{ day.DayNumber }}</div> {{ translation.trip | get(key=day.Weekday | lower) }}</span> <span style="white-space: nowrap;">{{ day.Date }}</span></div>
+	            <div class="day-label"><span style="white-space: nowrap;"><div class="day-icon" data-trip-domain='{{ trip_summary[0].DomainAbbreviation }}'>{{ day.DayNumber }}</div> {% if translation.trip %}{{ translation.trip | get(key=day.Weekday | lower) }}{% else %}{{ day.Weekday }}{% endif %}</span> <span style="white-space: nowrap;">{{ day.Date }}</span></div>
 	            &nbsp; 
 	            <a class="acc-link" target="_blank" href="{{ settings.Other.ExternalMapProvider }}{{ day.AccommodationCoordinates }}" data-trip-domain="{{ trip_summary[0].DomainAbbreviation }}">
 	                <div class="acc-icon" data-trip-domain='{{ trip_summary[0].DomainAbbreviation }}'></div>

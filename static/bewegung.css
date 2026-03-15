@@ -6,6 +6,9 @@
     --menu-bg-color: #f4f7fa; /*#6E7F80;*/
     --menu-txt-color: #000;
     --domain-color: rgb(215 215 0); /* Before it is overwritten */
+    --color-filter-menu: rgb(215 215 0 / 80%);
+
+    --color-trip-label: #666;
 
     --color-background: #f8fafd; /*#f8fafd;*/
     --color-white: #000;
@@ -40,9 +43,12 @@
 
     --color-dark-button-text: #fff;
     --color-light-button-text: #000;
+
+    --color-scrollbar-accent: #6E7F80;
+    --color-scrollbar-bg: #6f757e22;
 }
 
-body.dark {
+html.dark {
 
     --gradient-gold: #4d4203;
     --gradient-green: #023602;
@@ -51,6 +57,9 @@ body.dark {
     --menu-bg-color: #1d655e; /*#6E7F80;*/
     --menu-txt-color: #fff;
     --domain-color: #1d655e;
+    --color-filter-menu: gold;
+
+    --color-trip-label: #fff;
 
     --color-background: #022626;
     --color-white: #fff;
@@ -79,6 +88,9 @@ body.dark {
 
     --color-dark-button-text: #fff;
     --color-light-button-text: #fff;
+
+    --color-scrollbar-accent: #1d655e;
+    --color-scrollbar-bg: #6f757e22;
 }
 
 [data-trip-domain] {
@@ -103,7 +115,7 @@ body.dark {
     font-family: 'Righteous';
     src: url('../bundle/fonts/Righteous-Regular.ttf') format('truetype');
 }
-html {min-height:100%;scrollbar-color: var(--color-hover-background) var(--color-hover-background-alpha);}
+html {min-height:100%;scrollbar-color: var(--color-scrollbar-accent) var(--color-scrollbar-bg);}
 body {
     margin: 0;
     display: flex;
@@ -485,19 +497,20 @@ dialog{width:100vw;height:100vh;}
     }
 
     #filter {
-        background-color:rgb(215 215 0 / 80%);
+        background-color: var(--color-filter-menu);
         cursor: pointer;
+        color: #000;
 
         .iib-menu:hover & { border-radius: 0; }
 
         &:hover,
         .iib-menu:has(#submenu-filter:hover, select:focus, select:focus-within) & {
-            background:rgb(215 215 0 / 80%);
+            background: var(--color-filter-menu);
         }
     }
 
     #submenu-filter {
-        background-color: rgb(215 215 0 / 80%);
+        background-color: var(--color-filter-menu);
         select { font-size: 1rem; padding: 0.5rem; }
         padding: 5px;
     }
@@ -1261,7 +1274,7 @@ dialog{width:100vw;height:100vh;}
         top: 0.3rem;
         left: 0.5rem;
         font-size: 0.8rem;
-        color: #666;
+        color: var(--color-trip-label);
         padding: 0 4px;
         pointer-events: none;
     }
@@ -1867,7 +1880,7 @@ body:has(#path-dataset) { background-color: var(--color-dataset-background); }
         top: 0.3rem;
         left: 0.5rem;
         font-size: 0.8rem;
-        color: #666;
+        color: var(--color-trip-label);
         padding: 0 4px;
         pointer-events: none;
     }
@@ -2134,10 +2147,11 @@ h1 { font-size:40pt; }
         top: 0.3rem;
         left: 0.5rem;
         font-size: 0.8rem;
-        color: #000;
+        color: var(--color-trip-label);
         padding: 0 4px;
         pointer-events: none;
     }
+    input { background-color: var(--color-background-search);}
 }
 
 

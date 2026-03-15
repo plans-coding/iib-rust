@@ -80,8 +80,7 @@ self.addEventListener('fetch', (event) => {
         if (
           reqUrl.href.includes('tile.openstreetmap.org') ||
           reqUrl.href === 'https://raw.githubusercontent.com/plans-coding/immer-in-bewegung/refs/heads/main/version' ||
-          (reqUrl.origin === 'https://immich.karlaplan.dedyn.io' &&
-            reqUrl.pathname.endsWith('/static/bew-video-player.html'))
+          reqUrl.pathname.endsWith('/static/bew-video-player.html')
         ) {
           return fetch(event.request);
         }
