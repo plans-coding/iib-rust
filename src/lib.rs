@@ -197,8 +197,6 @@ extern "C" {
     fn init_create_trip();
     fn load_filter_OPFS();
 
-    fn runIfOnBewegungOnline();
-
     fn sync_db_init();
     fn init_trip_navigator();
 
@@ -704,7 +702,7 @@ async fn page_load_internal(destination: &str, choice: u8) {
                 },
             });
             all_state["db_loaded"] = serde_json::json!(if !db_bytes.is_empty() { "stored" } else { "missing" });
-            execute_after = vec!["runIfOnBewegungOnline".into(), "check_immich_authorization".into(),"sync_db_init".into()];
+            execute_after = vec!["check_immich_authorization".into(),"sync_db_init".into()];
         }
 
         ("about", _, _) => {
@@ -903,7 +901,6 @@ async fn page_load_internal(destination: &str, choice: u8) {
             "sync_db_init" => sync_db_init(),
             "check_immich_authorization" => check_immich_authorization(),
             "init_create_trip" => init_create_trip(),
-            "runIfOnBewegungOnline" => runIfOnBewegungOnline(),
             "init_trip_navigator" => init_trip_navigator(),
             _ => {}
         }

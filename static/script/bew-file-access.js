@@ -4,24 +4,15 @@ async function runIfOnBewegungOnline() {
   try {
     const url = new URL(window.location.href);
     const isTargetOrigin = url.origin === 'https://online.bewegung.app';
-    const isRootPath = url.pathname === '/' || url.pathname === '';
 
-    if (isTargetOrigin && isRootPath) {
+    if (isTargetOrigin) {
       const btn = document.getElementById('btnFetch');
       if (!btn) {
         console.warn('Element with id "btnFetch" not found.');
         return;
       }
-
-      // Access the click handler directly
-      const clickHandler = btn._clickHandler; // see note below
-      if (clickHandler) {
-        await clickHandler();
-      } else {
-        btn.click();
-      }
+      btn.click();
     }
-    console.log('Checked if on Bewegung Online');
   } catch (err) {
     console.error('Invalid URL', err);
   }
@@ -523,5 +514,12 @@ function sync_db_init() {
 
     await refreshStatus();
     await restoreBinding();
+    const existingDb = await getOpfsDbInfo();
+    if (!existingDb) {
+      await runIfOnBewegungOnline();
+    }
+
   })();
 }
+
+

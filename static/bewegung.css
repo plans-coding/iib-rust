@@ -1,11 +1,15 @@
 :root {
 
-    --gradient-gold: gold;
+    --gradient-gold: #ffbf00;
     --gradient-green: green;
     --menu-behind: #6E7F80; /*#f4f7fa*/
     --menu-bg-color: #f4f7fa; /*#6E7F80;*/
     --menu-txt-color: #000;
-    --domain-color: rgb(215 215 0); /* Before it is overwritten */
+    --domain-color: #77065d; /* Before it is overwritten */
+
+    --color-action-button-bg: #77065d;
+    --color-action-button-txt: #fff;
+
     --color-filter-menu: rgb(215 215 0 / 80%);
 
     --color-trip-label: #666;
@@ -39,13 +43,13 @@
     --color-dataset-background: #6E7F80;
     --color-background-search: #fff;
 
-    --color-bg-menu-smallscreen: gold;
+    --color-bg-menu-smallscreen: #ffbf00;
 
     --color-dark-button-text: #fff;
     --color-light-button-text: #000;
 
-    --color-scrollbar-accent: #6E7F80;
-    --color-scrollbar-bg: #6f757e22;
+    --color-scrollbar-accent: #D7D700;
+    --color-scrollbar-bg: #6E7F80;
 }
 
 html.dark {
@@ -57,9 +61,12 @@ html.dark {
     --menu-bg-color: #1d655e; /*#6E7F80;*/
     --menu-txt-color: #fff;
     --domain-color: #1d655e;
-    --color-filter-menu: gold;
+    --color-filter-menu: #ffbf00;
 
     --color-trip-label: #fff;
+
+    --color-action-button-bg: #1d655e;
+    --color-action-button-txt: #fff;
 
     --color-background: #022626;
     --color-white: #fff;
@@ -262,6 +269,7 @@ section#app {max-width:800pt;margin:10pt auto auto;width:100%;padding:3pt;box-si
 }
 
 
+.action-button {font-family:arial;font-size:12pt;background-color:var(--color-action-button-bg);color:var(--color-action-button-txt);border:0;border-radius:5pt;padding:8pt;cursor:pointer;}
 .dark-button {font-family:arial;font-size:12pt;background-color:var(--domain-color);color:var(--color-dark-button-text);border:0;border-radius:5pt;padding:8pt;cursor:pointer;}
 .filter-button {font-family:arial;font-size:12pt;background-color:var(--domain-color);color:var(--color-light-button-text);border:0;border-radius:5pt;padding:8pt;cursor:pointer;}
 .filter-button:hover {background-color:color-mix(in srgb, var(--domain-color) 80%, white 20%);}
@@ -380,7 +388,7 @@ dialog{width:100vw;height:100vh;}
 }
 
 .stripes {
-    background-image: repeating-linear-gradient(to right, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.25) 24px, transparent 2px, transparent 10px), radial-gradient(circle at top center, rgba(255, 255, 255, 0.15) 0%, transparent 60%), linear-gradient(to right, gold, green);
+    background-image: repeating-linear-gradient(to right, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.25) 24px, transparent 2px, transparent 10px), radial-gradient(circle at top center, rgba(255, 255, 255, 0.15) 0%, transparent 60%), linear-gradient(to right, #ffbf00, green);
     background-blend-mode: overlay;
     border-radius: 20pt;
     padding: 10pt;
@@ -1502,8 +1510,8 @@ dialog{width:100vw;height:100vh;}
     :root[data-bs-theme="light"] .polylineMap { stroke: #1d655e; }
 
     :root[data-bs-theme="dark"] .accommodationColor,
-    :root[data-bs-theme="dark"] .overviewColor { fill: gold; }
-    :root[data-bs-theme="dark"] .polylineMap { stroke: gold; }
+    :root[data-bs-theme="dark"] .overviewColor { fill: #ffbf00; }
+    :root[data-bs-theme="dark"] .polylineMap { stroke: #ffbf00; }
     
     .iib-map-ref {
         background-color: var(--domain-color);
@@ -1516,7 +1524,7 @@ dialog{width:100vw;height:100vh;}
 html:has(#path-map) {
 	height:100%;
 	body {height:100%;}
-	section {margin:0!important;padding:0;}
+	section {max-width:none;margin:0!important;padding:0;}
 	#app{flex:1;}
 	#iib-foot{display:none;}
 }
@@ -2121,10 +2129,10 @@ h1 { font-size:40pt; }
         background: var(--color-hover-background-alpha);
 
         summary {
-            color: var(--color-text);
+            color: var(--color-action-button-txt);
             font-weight: bold;
             padding: 1rem;
-            background: var(--domain-color);
+            background: var(--color-action-button-bg);
             cursor: pointer;
         }
 

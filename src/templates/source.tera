@@ -46,12 +46,12 @@
 
     <div id="source_settings_buttons" style="display:flex;flex-direction:row;flex-wrap:wrap;gap:5pt;">
       	{% if settings.Photos %}
-              <button class="item-viewer-button filter-button" onclick="sync_album_covers('{{ settings.Photos.ImmichUrl }}', '{{ settings.Photos.ImmichCoverAlbumId }}');">
+              <button class="item-viewer-button action-button" onclick="sync_album_covers('{{ settings.Photos.ImmichUrl }}', '{{ settings.Photos.ImmichCoverAlbumId }}');">
               <img class="immich-icon" src="static/images/immich-logo-inline-dark-small.png">
               <span id="count_missing_photos"></span>
               </button>
 
-              <button class="item-viewer-button filter-button" onclick="save_album_covers_ids2OPFS('{{ settings.Photos.ImmichUrl }}', '{{ settings.Photos.ImmichCoverAlbumId }}');">
+              <button class="item-viewer-button action-button" onclick="save_album_covers_ids2OPFS('{{ settings.Photos.ImmichUrl }}', '{{ settings.Photos.ImmichCoverAlbumId }}');">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-floppy-fill" viewBox="0 0 16 16">
                 <path d="M0 1.5A1.5 1.5 0 0 1 1.5 0H3v5.5A1.5 1.5 0 0 0 4.5 7h7A1.5 1.5 0 0 0 13 5.5V0h.086a1.5 1.5 0 0 1 1.06.44l1.415 1.414A1.5 1.5 0 0 1 16 2.914V14.5a1.5 1.5 0 0 1-1.5 1.5H14v-5.5A1.5 1.5 0 0 0 12.5 9h-9A1.5 1.5 0 0 0 2 10.5V16h-.5A1.5 1.5 0 0 1 0 14.5z"/>
                 <path d="M3 16h10v-5.5a.5.5 0 0 0-.5-.5h-9a.5.5 0 0 0-.5.5zm9-16H4v5.5a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5zM9 1h2v4H9z"/>
@@ -111,7 +111,7 @@
         <h4>{{ translation.source.fetch_from_server | default(value="Fetch from server") }}</h4>
         <div class="input-row">
           <input type="text" id="fetchPathOverride" placeholder="{{ translation.source.fetch_override_placeholder | default(value='Or paste a direct URL to .sqlite (optional)') }}" />
-          <button class="btn item-viewer-button filter-button" id="btnFetch">⬇ {{ translation.source.fetch | default(value="Fetch") }}</button>
+          <button class="btn item-viewer-button action-button" id="btnFetch">⬇ {{ translation.source.fetch | default(value="Fetch") }}</button>
         </div>
                 <div class="progress-wrap hidden" id="fetchProgress">
           <div class="progress-bar" id="fetchBar"></div>
@@ -121,7 +121,7 @@
       <div id="panel-folder" class="hidden">
         <h4>{{ translation.source.bind_local_file | default(value="Bind local file") }}</h4>
         <div class="btn-row">
-          <button class="btn item-viewer-button filter-button" id="btnPickFile">{{ translation.source.upload | default(value="Upload") }}</button>
+          <button class="btn item-viewer-button action-button" id="btnPickFile">{{ translation.source.upload | default(value="Upload") }}</button>
           <button class="btn btn-outline hidden" id="btnResync">{{ translation.source.check_and_sync | default(value="Check and sync") }}</button>
           <button class="btn btn-danger hidden" id="btnUnbind">✕ {{ translation.source.unbind | default(value="Unbind") }}</button>
         </div>

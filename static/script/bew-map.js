@@ -344,7 +344,7 @@ function load_contour_map() {
                 type: 'line',
                 source: 'contour-line',
                 paint: {
-                    'line-color': '#ffbf00',
+                    'line-color': '#8000FF',
                     'line-width': 3
                 }
             });
