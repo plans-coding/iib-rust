@@ -9,7 +9,8 @@ SELECT o.OuterId AS OuterId, e.InnerId,
        o.ParticipantGroup AS ParticipantGroup,
        e.TravelParticipants AS TravelParticipants,
 	   e.AdditionalNotes AS AdditionalNotes,
-	   e.CountriesDuringDay AS CountriesDuringDay
+	   e.CountriesDuringDay AS CountriesDuringDay,
+	   o.TripDomain
 FROM bewb_Events e
 JOIN bewa_Overview o ON e.InnerId = o.InnerId
 WHERE AccommodationCountry = '_COUNTRY_' AND TripDomain IN (TripDomain) AND ParticipantGroup IN (ParticipantGroup) AND 1=1;

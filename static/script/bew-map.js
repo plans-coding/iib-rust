@@ -130,7 +130,7 @@ function load_trip_map() {
     const overviewData = JSON.parse(mapPinDataContainer.getAttribute("data-trip-map-overall"));
     const accommodationData = JSON.parse(mapPinDataContainer.getAttribute("data-trip-map-accommodation"));
     const themeColor = mapPinDataContainer.getAttribute("data-theme-color");
-    const tripDomain = mapPinDataContainer.getAttribute("data-tripDomain");
+    const tripDomain = mapPinDataContainer.getAttribute("data-trip-domain");
 
     const overviewTranslation = mapPinDataContainer.getAttribute("data-translation-overview");
     const accommodationsTranslation = mapPinDataContainer.getAttribute("data-translation-accommodations");
@@ -384,7 +384,7 @@ function load_country_map() {
             reset_dynamic_map_content(map);
 
             jsonData.forEach(pin => {
-            const { InnerId, OuterId, OverallDestination, AccommodationCoordinates, AccommodationCoordinatesAccuracy, Accommodation, ParticipantGroup, TravelParticipants, Date } = pin;
+            const { InnerId, OuterId, OverallDestination, AccommodationCoordinates, AccommodationCoordinatesAccuracy, Accommodation, ParticipantGroup, TravelParticipants, Date, TripDomain } = pin;
 
             // Split coordinates [lat, lon] -> [lng, lat] for MapLibre
             const [lat, lon] = AccommodationCoordinates.split(',').map(coord => parseFloat(coord.trim()));
@@ -392,10 +392,14 @@ function load_country_map() {
 
             // Popup HTML
             let popupContent = `
-            <b>${Accommodation}</b> <br>
+            <a class="link-color"
+            href="https://www.google.com/maps/?q=${lat},${lon}"
+            target="_blank">
+            <b>${Accommodation}</b>
+            </a><br>
             ${ParticipantGroup} ${TravelParticipants} <br>
             ${Date} <br>
-            <a href="?path=trip:${OuterId}" class="iib-map-ref" data-iib-tripDomain="${InnerId.charAt(0)}">${OuterId} ${OverallDestination}</a> <br>
+            <a href="?path=trip:${OuterId}" class="iib-map-ref" data-trip-domain="${TripDomain}">${OuterId} ${OverallDestination}</a> <br>
             `;
             if (AccommodationCoordinatesAccuracy) {
                 popupContent += `<b>Coordinate Accuracy:</b> ${AccommodationCoordinatesAccuracy} <br>`;
@@ -405,14 +409,16 @@ function load_country_map() {
             const el = document.createElement('div');
             el.className = 'custom-icon';
             el.innerHTML = `
-            <svg class="iib-trip-tab" width="32" height="32" viewBox="0 0 460.298 460.297">
+            <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+            width="32" height="32" viewBox="0 0 460.298 460.297" style="enable-background:new 0 0 460.298 460.297;"
+            xml:space="preserve">
             <g>
             <g>
-            <path class="accommodationColor" d="M230.149,120.939L65.986,256.274c0,0.191-0.048,0.472-0.144,0.855c-0.094,0.38-0.144,0.656-0.144,0.852v137.041
+            <path fill="#8000FF" d="M230.149,120.939L65.986,256.274c0,0.191-0.048,0.472-0.144,0.855c-0.094,0.38-0.144,0.656-0.144,0.852v137.041
             c0,4.948,1.809,9.236,5.426,12.847c3.616,3.613,7.898,5.431,12.847,5.431h109.63V303.664h73.097v109.64h109.629
             c4.948,0,9.236-1.814,12.847-5.435c3.617-3.607,5.432-7.898,5.432-12.847V257.981c0-0.76-0.104-1.334-0.288-1.707L230.149,120.939
             z"/>
-            <path class="accommodationColor" d="M457.122,225.438L394.6,173.476V56.989c0-2.663-0.856-4.853-2.574-6.567c-1.704-1.712-3.894-2.568-6.563-2.568h-54.816
+            <path fill="#8000FF" d="M457.122,225.438L394.6,173.476V56.989c0-2.663-0.856-4.853-2.574-6.567c-1.704-1.712-3.894-2.568-6.563-2.568h-54.816
             c-2.666,0-4.855,0.856-6.57,2.568c-1.711,1.714-2.566,3.905-2.566,6.567v55.673l-69.662-58.245
             c-6.084-4.949-13.318-7.423-21.694-7.423c-8.375,0-15.608,2.474-21.698,7.423L3.172,225.438c-1.903,1.52-2.946,3.566-3.14,6.136
             c-0.193,2.568,0.472,4.811,1.997,6.713l17.701,21.128c1.525,1.712,3.521,2.759,5.996,3.142c2.285,0.192,4.57-0.476,6.855-1.998
@@ -424,11 +430,10 @@ function load_country_map() {
             `;
 
             // Add marker with popup
-            const marker = new maplibregl.Marker(el)
+            const marker = new maplibregl.Marker({ element: el })
             .setLngLat(coordinates)
             .setPopup(new maplibregl.Popup({ offset: 25 }).setHTML(popupContent))
             .addTo(map);
-            register_map_marker(marker);
 
             bounds.extend(coordinates);
             });
@@ -484,6 +489,7 @@ function load_theme_map() {
                     allSubThemes.push({
                         InnerId: item.InnerId,
                         OuterId: item.OuterId,
+                        TripDomain: item.TripDomain,
                         ParticipantGroup: item.ParticipantGroup,
                         TravelParticipants: item.TravelParticipants,
                         Date: item.Date,
@@ -514,7 +520,7 @@ function load_theme_map() {
             </a><br>
             ${item.ParticipantGroup} ${item.TravelParticipants}<br>
             ${item.Date}<br>
-            <a href="?path=trip:${item.OuterId}" class="iib-map-ref" data-iib-tripDomain="${item.InnerId.charAt(0)}">${item.OuterId} ${item.OverallDestination}</a>
+            <a href="?path=trip:${item.OuterId}" class="iib-map-ref" data-trip-domain="${item.TripDomain}">${item.OuterId} ${item.OverallDestination}</a>
             `;
 
             const el = document.createElement('div');
@@ -523,7 +529,7 @@ function load_theme_map() {
             <svg xmlns="http://www.w3.org/2000/svg"
             width="32" height="32"
             viewBox="0 0 16 16">
-            <path class="themePinColor"
+            <path fill="#8000FF"
             d="M2 15.5V2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v13.5a.5.5 0 0 1-.74.439L8 13.069l-5.26 2.87A.5.5 0 0 1 2 15.5M8.16 4.1a.178.178 0 0 0-.32 0l-.634 1.285a.18.18 0 0 1-.134.098l-1.42.206a.178.178 0 0 0-.098.303L6.58 6.993c.042.041.061.1.051.158L6.39 8.565a.178.178 0 0 0 .258.187l1.27-.668a.18.18 0 0 1 .165 0l1.27.668a.178.178 0 0 0 .257-.187L9.368 7.15a.18.18 0 0 1 .05-.158l1.028-1.001a.178.178 0 0 0-.098-.303l-1.42-.206a.18.18 0 0 1-.134-.098z"/>
             </svg>
             `;

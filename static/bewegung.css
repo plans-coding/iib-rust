@@ -256,7 +256,7 @@ section#app {max-width:800pt;margin:10pt auto auto;width:100%;padding:3pt;box-si
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-    background-color: var(--color-background);
+    background-color: var(--color-background-search);
     background-clip: padding-box;
     border: 1pt solid var(--color-hover-background);
     border-radius: 5pt;
@@ -1504,14 +1504,12 @@ dialog{width:100vw;height:100vh;}
 #path-images {}
 
 #path-map {
-	height:100%; 
-   :root[data-bs-theme="light"] .accommodationColor,
-    :root[data-bs-theme="light"] .overviewColor { fill: #1d655e; }
-    :root[data-bs-theme="light"] .polylineMap { stroke: #1d655e; }
+	height:100%;
 
-    :root[data-bs-theme="dark"] .accommodationColor,
-    :root[data-bs-theme="dark"] .overviewColor { fill: #ffbf00; }
-    :root[data-bs-theme="dark"] .polylineMap { stroke: #ffbf00; }
+    select, select option {
+        background-color: var(--color-background);
+        color: var(--color-text);
+    }
     
     .iib-map-ref {
         background-color: var(--domain-color);

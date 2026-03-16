@@ -1,7 +1,7 @@
 <div id="path-map">
 <div style="margin-top:10pt;z-index:900; position:absolute; width:100%; text-align:center;">
 
-    <select id="alltrip" class="form-control text-center" style="max-width:200pt; display:inline-block;" onchange="history.pushState(null,'','?path=map'+this.value);page_load();">
+    <select id="alltrip" class="form-control text-center" style="max-width:200pt; display:inline-block;" onchange="history.pushState(null,'','?path=map'+this.value);page_load('app', 0);">
         <option value="">{{ translation.map.overallRoute | default(value="Overall route for all trips") }}</option>
         {% for trip in map_country_list %}
             <option value=":country:{{ trip.AccommodationCountry }}" {% if all.query_params.path is containing("country:") %}{% if all.query_params.path | split(pat="country:") | last == trip.AccommodationCountry %}selected{% endif %}{% endif %}>
@@ -19,7 +19,7 @@
 
     {% if theme_config | length >= 2 and theme_config[0] == "Enabled" %}
 
-    <select id="themeSelector" class="form-control text-center" style="max-width:200pt; display:inline-block;" onchange="history.pushState(null,'','?path=map:theme:'+this.value);page_load();">
+    <select id="themeSelector" class="form-control text-center" style="max-width:200pt; display:inline-block;" onchange="history.pushState(null,'','?path=map:theme:'+this.value);page_load('app', 0);">
 
         <option value="">{{ theme_config[1] }}</option>
 
