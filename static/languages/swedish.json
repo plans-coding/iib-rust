@@ -46,13 +46,13 @@
     "missing": "Databasfil saknas i OPFS.",
     "fetch_from_server": "Hämta från server",
     "fetch_from_server_desc": "Läs databasens sökväg från server_db_path.txt, hämta .sqlite-filen och spara den i OPFS.",
-    "bind_local_file": "Anslut lokal fil",
-    "bind_local_file_desc": "Välj en lokal .sqlite-fil. En kopia sparas i OPFS. Filhandtaget sparas permanent via IndexedDB. Vid omladdning jämförs filen via hash och synkroniseras igen om den ändrats.",
+    "bind_local_file": "Koppla en lokal fil",
+    "bind_local_file_desc": "Välj en lokal .sqlite-fil. En kopia sparas i OPFS. Filkopplingen sparas via IndexedDB. Vid omladdning jämförs kontrollsumman för filen och synkroniseras igen om den ändrats.",
     "upload_directly": "Ladda upp direkt",
     "upload_directly_desc": "Dra och släpp eller välj en .sqlite-fil för att ladda upp den direkt till OPFS.",
-    "fetch_override_placeholder": "Klistra in en direkt URL till .sqlite (valfritt)",
+    "fetch_override_placeholder": "Direkt-URL till .sqlite-fil (tomt = hämta från servern)",
     "fetch": "Hämta",
-    "upload": "Ladda upp",
+    "upload": "Koppla fil",
     "check_and_sync": "Kontrollera och synkronisera",
     "unbind": "Koppla bort",
     "upload_file": "Ladda upp fil",
@@ -162,7 +162,7 @@
   },
   "about": {
     "title": "Om",
-    "description": "är din resedokumentationsapp med öppen källkod. Framtidssäker och resurssnål.",
+    "description": "är ditt dokumentationsverktyg för resor byggt med öppen källkod. Framtidssäker och resurssnål.",
     "update": "Kontrollera uppdateringar på"
   },
   "update": {

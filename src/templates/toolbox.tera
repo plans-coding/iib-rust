@@ -2,9 +2,12 @@
 body {backdrop-filter: none !important;} /* Position fixed do not work with backdrop */
 .event:first-child .action-button { display:none; }
 </style>
-<div id="current_trip_documentation_status" style="z-index:10000;border:5pt solid red;position:fixed;bottom:0;right:0;background-color:var(--color-filter);color: #000;"></div>
 
 <div id="path-toolbox">
+
+	<div id="current_trip_documentation_status" style="z-index:10000;border:5pt solid red;position:fixed;bottom:0;right:0;background-color:var(--color-filter);color: #000;"></div>
+
+
     <div style="overflow-x: auto;display:flex;">
         <div style="display:flex;gap:3pt;margin-bottom:3pt;justify-content:flex-end;">
 
@@ -18,7 +21,7 @@ body {backdrop-filter: none !important;} /* Position fixed do not work with back
         <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708z"/>
         </svg> {{ translation.input.uploadJson | default(value="Upload JSON") }}</button>
 
-                <a href="coordinate-tool.html" target="_blank"><button class="action-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-geo-alt" viewBox="0 0 16 16">
+                <a href="static/coordinate-tool.html" target="_blank"><button class="action-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-geo-alt" viewBox="0 0 16 16">
         <path d="M12.166 8.94c-.524 1.062-1.234 2.12-1.96 3.07A32 32 0 0 1 8 14.58a32 32 0 0 1-2.206-2.57c-.726-.95-1.436-2.008-1.96-3.07C3.304 7.867 3 6.862 3 6a5 5 0 0 1 10 0c0 .862-.305 1.867-.834 2.94M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10"/>
         <path d="M8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4m0 1a3 3 0 1 0 0-6 3 3 0 0 0 0 6"/>
         </svg> Coordinate Tool</button></a>
@@ -219,7 +222,7 @@ body {backdrop-filter: none !important;} /* Position fixed do not work with back
 
   </fieldset>
 
-<div id="current_trip_date_selection" style="display:none;color: red;font-weight: bold;background-color: pink;padding: 10pt;margin:5pt 0 5pt 0;border-radius: 5pt;">{{ translation.input.selectStartEnd | default(value="Select start and end date") }}</div>
+<div id="current_trip_date_selection" style="display:none;color: var(--color-filter);font-weight: bold;background-color: var(--color-hover-background);padding: 10pt;margin:5pt 0 5pt 0;border-radius: 5pt;">{{ translation.input.selectStartEnd | default(value="Select start and end date") }}</div>
 
 
 

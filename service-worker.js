@@ -20,6 +20,7 @@ const urlsToCache = [
   './bundle/maplibre-gl/maplibre-gl.js',
   './bundle/tabulator/tabulator.min.js',
   './bundle/tabulator/tabulator.min.css',
+  './bundle/tabulator/tabulator_bewegung.css',
   './bundle/chartjs/chart.js',
   './bundle/codemirror/sql.min.js',
   './bundle/codemirror/source.txt',
