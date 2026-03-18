@@ -39,8 +39,21 @@
 
         <main>
 
+            <div id="trip-side-navigator-open" onclick="toggle_trip_side_navigator()" style="display:none;">
+                <div style="background-color:var(--color-hover-background);height:24px;margin-left:-2px;width:16px;cursor:pointer;border-radius: 0 2px 2px 0;align-items: center;display:flex;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708"></path>
+                    </svg>
+                </div>
+            </div>
             <nav id="trip-side-navigator" style="display: none;">
-                <div id="trip-side-navigator-resizer"></div>
+                <div id="trip-side-navigator-resizer"><div id="trip-side-navigator-close" onclick="toggle_trip_side_navigator()" style="cursor:pointer;background-color:var(--color-hover-background);color:var(--color-filter);height:24px;width:14px;cursor:pointer;border-radius: 0 2px 2px 0;align-items: center;display:flex;">
+
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-left" viewBox="0 0 16 16">
+	            <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0"></path>
+	          </svg>
+
+                </div></div>
                 <div id="trip-side-navigator-content"></div>
             </nav>
 
@@ -64,10 +77,12 @@
         
         
         <dialog id="image-viewer-dialog" style="overflow:hidden;">
-            <button id="close-dialog" style="position:fixed;bottom:10pt;left:10pt;"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-door-closed" viewBox="0 0 16 16">
-  <path d="M3 2a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v13h1.5a.5.5 0 0 1 0 1h-13a.5.5 0 0 1 0-1H3zm1 13h8V2H4z"/>
-  <path d="M9 9a1 1 0 1 0 2 0 1 1 0 0 0-2 0"/>
-</svg></button>
+          <button id="close-dialog" style="position:fixed;bottom:10pt;left:10pt;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-door-closed" viewBox="0 0 16 16">
+                <path d="M3 2a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v13h1.5a.5.5 0 0 1 0 1h-13a.5.5 0 0 1 0-1H3zm1 13h8V2H4z"/>
+                <path d="M9 9a1 1 0 1 0 2 0 1 1 0 0 0-2 0"/>
+            </svg>
+          </button>
           <iframe id="image-viewer-content" style="width:100%;height:100%;overflow:y-scroll;" frameborder="0"></iframe>
           
         </dialog>
@@ -77,7 +92,7 @@
             import init, { page_load, chart_js, user_run_sql, get_predefined_query } from "./pkg/bewegung.js";
             await init();
             
-            document.addEventListener("click", e => {
+            document.addEventListener("click", async (e) => {
               const a = e.target.closest("a");
               if (!a) return;
             
@@ -87,16 +102,24 @@
                 dialog.showModal();
                 return;
               }
-            
+
               const href = a.getAttribute("href");
+
               if (href && !href.startsWith("?path=trip")) {
+                document.getElementById('trip-side-navigator-open').style.display = "none";
                 document.getElementById('trip-side-navigator').style.display = "none";
               }
+
               if (!href || !href.startsWith("?")) return;
             
               e.preventDefault();
               history.pushState({}, "", href);
-              page_load("app", 0);
+              await page_load("app", 0);
+
+              if (document.getElementById('trip-side-navigator').style.display == "block") {
+                  document.getElementById('trip-side-navigator-open').style.display = 'none';
+              }
+
             });
             
             window.addEventListener("popstate", page_load);

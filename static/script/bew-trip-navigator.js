@@ -1,4 +1,7 @@
 function init_trip_navigator() {
+
+    document.getElementById('trip-side-navigator-open').style.display = 'flex';
+
     const sidebar = document.getElementById('trip-side-navigator');
     const resizer = document.getElementById('trip-side-navigator-resizer');
 
@@ -38,8 +41,11 @@ async function toggle_trip_side_navigator() {
     = (document.getElementById('trip-side-navigator').style.display === 'none' ? 'block' : 'none');
 
     if (document.getElementById('trip-side-navigator').style.display == "block") {
+        document.getElementById('trip-side-navigator-open').style.display = 'none';
         await load_trip_side_navigator('trip-side-navigator-content', 1);
         replace_links();
+    } else {
+        document.getElementById('trip-side-navigator-open').style.display = 'flex';
     }
 }
 
@@ -49,6 +55,7 @@ async function load_trip_side_navigator(destination, choice) {
 }
 
 function replace_links() {
+
     document
     .querySelectorAll(`#trip-side-navigator a[href^="?path=overview:year"]`)
     .forEach(link => {
