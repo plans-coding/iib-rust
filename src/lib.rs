@@ -179,6 +179,11 @@ static RENDER_STRUCTURE: OnceCell<Mutex<tera::Context>> = OnceCell::new();
 // -----------------------------------------------------------------------
 #[wasm_bindgen]
 extern "C" {
+
+    fn insert_html(destination: &str, code: &str);
+    fn set_title(title: &str);
+    fn get_query_param();
+
     // Charts
     fn initializeChart();
     fn initializeChartOvernights();
@@ -199,6 +204,7 @@ extern "C" {
 
     fn sync_db_init();
     fn init_trip_navigator();
+    fn addMediaToMap();
 
     #[wasm_bindgen(catch)]
     async fn get_filter_value_OPFS() -> Result<JsValue, JsValue>;
@@ -281,6 +287,7 @@ async fn session_load() -> (Vec<u8>, tera::Context) {
 
     // 1. Get current path from URL
     let path = if db_loaded {
+
         web_sys::window()
             .and_then(|w| w.location().search().ok())
             .and_then(|s| web_sys::UrlSearchParams::new_with_str(&s).ok())
@@ -366,11 +373,13 @@ async fn session_load() -> (Vec<u8>, tera::Context) {
             .render("menu", &context)
             .map_err(|e| format!("Render error: {e}"))?;
 
-        web_sys::window()
+        /*web_sys::window()
             .and_then(|w| w.document())
             .and_then(|d| d.get_element_by_id("menu"))
             .ok_or_else(|| "Element #menu not found".to_string())?
-            .set_inner_html(&rendered);
+            .set_inner_html(&rendered);*/
+
+        insert_html("menu", &rendered);
         
         Ok(())
     })();
@@ -743,7 +752,7 @@ async fn page_load_internal(destination: &str, choice: u8) {
                 queries: get_trip_queries("InnerId", inner_id, &participant_group, &trip_domain, &trip_label),
             });
             all_state["cover_photos_list"] = serde_json::to_value(&cover_photos_map).unwrap();
-            execute_after = vec!["load_trip_map".into(), "init_trip_navigator".into()];
+            execute_after = vec!["load_trip_map".into(), "init_trip_navigator".into(), "add_media2map".into()];
         }
 
         ("trip", outer_id, _) if !outer_id.is_empty() => {
@@ -756,7 +765,7 @@ async fn page_load_internal(destination: &str, choice: u8) {
                 queries,
             });
             all_state["cover_photos_list"] = serde_json::to_value(&cover_photos_map).unwrap();
-            execute_after = vec!["load_trip_map".into(), "init_trip_navigator".into()];
+            execute_after = vec!["load_trip_map".into(), "init_trip_navigator".into(), "add_media2map".into()];
         }
 
         ("images", trip_id, trip_date) => {
@@ -797,11 +806,12 @@ async fn page_load_internal(destination: &str, choice: u8) {
 
     // SET TITLE  -----------------------------------------------------------------------
     if choice == 0 {
-        web_sys::window()
+        /*web_sys::window()
             .expect("ERROR")
             .document()
             .expect("ERROR")
-            .set_title(&format!("{} - Immer in Bewegung", page_data.title));
+            .set_title(&format!("{} - Immer in Bewegung", page_data.title));*/
+        set_title(&format!("{} - Immer in Bewegung", page_data.title));
     }
 
     // RUN SQLITE QUERIES  -----------------------------------------------------------------------
@@ -870,11 +880,13 @@ async fn page_load_internal(destination: &str, choice: u8) {
                 .into_owned();
         }*/
 
-        web_sys::window()
+        /*web_sys::window()
             .and_then(|w| w.document())
             .and_then(|d| d.get_element_by_id(destination))
             .ok_or_else(|| "Destination element not found".to_string())?
-            .set_inner_html(&rendered);
+            .set_inner_html(&rendered);*/
+
+        insert_html(destination, &rendered);
 
         Ok(())
     })();
@@ -902,6 +914,7 @@ async fn page_load_internal(destination: &str, choice: u8) {
             "check_immich_authorization" => check_immich_authorization(),
             "init_create_trip" => init_create_trip(),
             "init_trip_navigator" => init_trip_navigator(),
+            "add_media2map" => addMediaToMap(),
             _ => {}
         }
     }

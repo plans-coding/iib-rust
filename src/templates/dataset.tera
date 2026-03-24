@@ -8,11 +8,11 @@
       <summary>{{ translation.dataset.general | default(value="General") }}</summary>
       <div class="details-content">
         <div class="clickable" data-sql="SELECT
-            m.name AS table_name,
-            p.name AS column_name
-        FROM sqlite_master m
-        JOIN pragma_table_info(m.name) p
-        WHERE m.type='table' ORDER BY table_name;"
+    m.name AS table_name,
+    p.name AS column_name
+FROM sqlite_master m
+JOIN pragma_table_info(m.name) p
+WHERE m.type='table' ORDER BY table_name;"
               onclick="load_code_editor(this.dataset.sql)">
           {{ translation.dataset.allFieldNames | default(value="All field names") }}
         </div>
@@ -23,9 +23,7 @@
       <summary>{{ translation.dataset.tables | default(value="Tables") }}</summary>
       <div class="details-content">
         {% for item in table_list %}
-        <div class="clickable" onclick="load_code_editor('SELECT * FROM ' + this.innerHTML + ';');user_sql_execution();">
-          {{ item.name }}
-        </div>
+        <div class="clickable" onclick="load_code_editor('SELECT * FROM ' + this.textContent + ';');user_sql_execution();">{{ item.name }}</div>
         {% endfor %}
       </div>
     </details>

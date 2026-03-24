@@ -380,14 +380,14 @@ function createEventElement(dateStr, eventData = {}, index = 0) {
                 </div>
 
             </div>
-            <div style="padding:0 5pt 5pt 5pt;"><button style="width:100%;" class="filter-button" type="button" onclick="copyPreviousDetails(this, 'AccommodationFields')">Copy Accommodation</button></div>
+            <div style="padding:0 5pt 5pt 5pt;"><button style="width:100%;" class="action-button" type="button" onclick="copyPreviousDetails(this, 'AccommodationFields')">Copy Accommodation</button></div>
 
             <div class="trip-details-container">
                 <div class="trip-details-label"><label>Travel Participants</label></div>
                 <div class="trip-details-field"><input type="text" name="TravelParticipants" value="${eventData.TravelParticipants || ""}" class="form-control"></div>
             </div>
 
-            <div style="padding:0 5pt 5pt 5pt;"><button style="width:100%;" class="filter-button" type="button" onclick="copyPreviousDetails(this, 'TravelParticipants')">Copy TravelParticipants</button></div>
+            <div style="padding:0 5pt 5pt 5pt;"><button style="width:100%;" class="action-button" type="button" onclick="copyPreviousDetails(this, 'TravelParticipants')">Copy TravelParticipants</button></div>
 
             <div class="trip-details-container">
                 <div class="trip-details-label"><label>Additional Notes</label></div>

@@ -14,6 +14,10 @@
 
 </style>
 
+{% if settings.Photos %}
+	<script id="immichUrl" type="application/json">{{ settings.Photos.ImmichUrl | safe }}</script>
+{% endif %}
+
 <div id="path-trip">
 
   <div id="trip-container">

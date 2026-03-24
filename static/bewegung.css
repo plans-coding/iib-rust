@@ -294,13 +294,14 @@ section#app {max-width:800pt;margin:10pt auto auto;width:100%;padding:3pt;box-si
     appearance: none;
     background-color: var(--color-background-search);
     background-clip: padding-box;
-    border: 1pt solid var(--color-hover-background);
+    border: 0pt solid var(--color-hover-background);
     border-radius: 5pt;
     transition: border-color .15s
     ease-in-out, box-shadow .15s
     ease-in-out;
     box-sizing: border-box;
     font-family:system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.15);
     &:focus {background-color:var(--color-white);}
 }
 
@@ -427,6 +428,7 @@ dialog{width:100vw;height:100vh;}
     .card-container, #statistics-summary-flex, #statistics-summary-flex-widget { flex-direction: column!important; }
     #filter-button-overmenu{display:none;}
     #non_widescreen {display:none;}
+    #filter {border-radius: 10pt 10pt 0 0;}
 }
 
 .stripes {
@@ -506,17 +508,17 @@ dialog{width:100vw;height:100vh;}
         margin: 5pt 5pt 0 5pt;
         font-size:1.2rem;
 
-        & img, & svg, #more {
-            vertical-align: middle;
-        }
 
         & img { height: 1.25rem; }
 
         & > div, & > a { padding: 0.75rem; }
 
 	@media (max-width:  600px) {
-        background-image:none;background-color:var(--color-bg-menu-smallscreen);margin:0;border-radius:0;
-    }
+            background-image:none;
+	    background-color:var(--color-bg-menu-smallscreen);
+	    margin:0;
+	    border-radius:0;
+        }
 
     }
 
@@ -545,8 +547,8 @@ dialog{width:100vw;height:100vh;}
         & > div, & > a { padding: 0.75rem; }
 
 	@media (max-width:  600px) {
-		margin:0;border-radius:0;
-		border-radius: 0;
+		margin:0;
+		/*border-radius:0;*/
 	}
 
     }
@@ -556,7 +558,7 @@ dialog{width:100vw;height:100vh;}
         cursor: pointer;
         color: #000;
 
-        .iib-menu:hover & { border-radius: 0; }
+        .iib-menu:hover & {  }
 
         &:hover,
         .iib-menu:has(#submenu-filter:hover, select:focus, select:focus-within) & {
@@ -1568,7 +1570,7 @@ body:has(#path-trip) {
         background-color: var(--color-background);
         color: var(--color-text);
     }
-    
+    .form-control {    border-width: 1pt;}   
     .iib-map-ref {
         background-color: var(--domain-color);
         color: #fff;
@@ -2220,7 +2222,7 @@ h1 { font-size:40pt; }
         padding: 0 4px;
         pointer-events: none;
     }
-    input { background-color: var(--color-background-search);}
+    input, textarea { background-color: var(--color-background-search);}
 }
 
 

@@ -26,6 +26,7 @@ async function save_filter_OPFS() {
         await page_load("app", false);
 
         if ( document.getElementById('trip-side-navigator').style.display === 'block' ) {
+	    document.getElementById('trip-side-navigator-open').style.display = 'none';
             await load_trip_side_navigator('trip-side-navigator-content', 1);
         }
 

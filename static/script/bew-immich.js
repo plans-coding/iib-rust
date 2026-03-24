@@ -286,3 +286,83 @@ async function process_album_string(immichUrl, input) {
         await add_photo_to_album(immichUrl, immichAlbumId, assetIds);
     }
 }
+
+// Plot Photos to trip map
+// await fetchAllMediaInInterval({startDateTime: "2025-01-01T00:00:00.000Z", endDateTime: "2025-01-15T23:59:59.999Z"})
+async function fetchAllMediaInInterval({startDateTime, endDateTime}) {
+  const size = 1000;
+  let page = 1;
+  let all = [];
+  const immichUrl = document.getElementById("immichUrl").textContent;
+  while (true) {
+      const res = await fetch(`${immichUrl}api/search/metadata`, {
+      method: "POST", headers: { "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ takenAfter: startDateTime, takenBefore: endDateTime, page, size, withExif: true },
+    )
+    });
+    if (!res.ok) { throw new Error(`HTTP ${res.status} on page ${page}`);
+    }
+    const data = await res.json();
+    const items = data.assets?.items ?? [];
+    if (items.length === 0) break;
+    all.push(...items);
+    // stop early if last page
+    if (items.length < size) break; page++;
+  }
+  return all;
+}
+
+function toGeoJSON(assets) {
+    return {
+        type: "FeatureCollection",
+        features: assets.map(a => ({
+            type: "Feature",
+            geometry: {
+                type: "Point",
+                coordinates: [a.lon, a.lat],
+            },
+            properties: a,
+        })),
+    };
+}
+
+async function fetchAllMediaWithCoords(config) {
+    const all = await fetchAllMediaInInterval(config);
+
+    return all
+    .map(a => ({
+        id: a.id,
+        type: a.type,
+        lat: Number(a.exifInfo?.latitude),
+        lon: Number(a.exifInfo?.longitude),
+        date: a.fileCreatedAt ?? a.localDateTime ?? null,
+    }))
+    .filter(a => a.lat != null && a.lon != null);
+}
+
+
+function addMediaToMap(map, geojson) {
+    if (map.getSource("media")) {
+        map.getSource("media").setData(geojson);
+        return;
+    }
+
+    // Add source
+    map.addSource("media", {
+        type: "geojson",
+        data: geojson,
+    });
+
+    // Add layer
+    map.addLayer({
+        id: "media-points",
+        type: "circle",
+        source: "media",
+        paint: {
+            "circle-radius": 4,
+            "circle-color": "#ff5500",
+            "circle-opacity": 0.8,
+        },
+    });
+}

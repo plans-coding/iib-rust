@@ -328,6 +328,7 @@ function load_contour_map() {
 
         execute_when_map_ready(map, () => {
             reset_dynamic_map_content(map);
+	    document.querySelectorAll('.maplibregl-marker').forEach(marker => marker.remove());
             map.addSource('contour-line', {
                 type: 'geojson',
                 data: {
@@ -382,6 +383,8 @@ function load_country_map() {
 
         execute_when_map_ready(map, () => {
             reset_dynamic_map_content(map);
+
+	    document.querySelectorAll('.maplibregl-marker').forEach(marker => marker.remove());
 
             jsonData.forEach(pin => {
             const { InnerId, OuterId, OverallDestination, AccommodationCoordinates, AccommodationCoordinatesAccuracy, Accommodation, ParticipantGroup, TravelParticipants, Date, TripDomain } = pin;

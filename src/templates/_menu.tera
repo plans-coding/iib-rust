@@ -26,9 +26,7 @@
   </svg> <span>{{ translation.statistics.title | default(value="Statistics") }}</span></a>
           <div id="filter">
               <img src="static/images/funnel.svg"> <span>Filter</span>
-              <button id="filter-button-overmenu" class="remove-filter" style="display:none;" onclick="remove_filter();">
-                <img src="static/images/remove.svg" />
-              </button>
+              <img id="filter-button-overmenu" style="display:none;" onclick="remove_filter();"  src="static/images/remove.svg">
           </div>
           <div style="flex: 1;"></div>
           <a class="widescreen shortcut" href="?path=dataset"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-terminal" viewBox="0 0 16 16">

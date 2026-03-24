@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Immer in Bewegung</title>
         <meta name="mobile-web-app-capable" content="yes">
-        <meta name="theme-color" content="gold" id="themeColorMeta">
+        <meta name="theme-color" content="#f4f7fa" id="themeColorMeta">
         <meta name="msapplication-navbutton-color" content="#f4f7fa">
         <link rel="shortcut icon" href="static/images/frog.svg" />
 
@@ -20,7 +20,7 @@
         <script src="bundle/tabulator/tabulator.min.js"></script>
         <link href="bundle/tabulator/tabulator_bewegung.css" rel="stylesheet">
 
-
+        <script src="static/script/bew-manifest.js"></script>
         <script src="static/script/bew-file-access.js"></script>
         <script src="static/script/bew-filter.js"></script>
         <script src="static/script/bew-immich.js"></script>
@@ -282,6 +282,25 @@
             l.href = h;
             });
         }
+
+        function insert_html(destination, code) {
+            document.getElementById(destination).innerHTML = code;
+        }
+
+        function set_title(title) {
+            document.title = title;
+        }
+
+        function getRoute() {
+            return window.location.hash.slice(1) || "selection";
+        }
+
+        function navigate() {
+            document.getElementById("page-content").innerHTML = render(getRoute());
+        }
+
+        //navigate();
+        //window.addEventListener("hashchange", navigate);
 
         </script>
 

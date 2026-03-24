@@ -1,5 +1,4 @@
 SELECT
-    OuterId,
     *,
     CAST(julianday(ReturnDate) - julianday(DepartureDate) AS INTEGER) AS NumberOfDays,
     CAST(strftime('%Y', DepartureDate) AS INTEGER) AS TripYear,
