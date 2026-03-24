@@ -204,7 +204,7 @@ extern "C" {
 
     fn sync_db_init();
     fn init_trip_navigator();
-    fn addMediaToMap();
+    fn fetchAllMediaWithCoords();
 
     #[wasm_bindgen(catch)]
     async fn get_filter_value_OPFS() -> Result<JsValue, JsValue>;
@@ -752,7 +752,7 @@ async fn page_load_internal(destination: &str, choice: u8) {
                 queries: get_trip_queries("InnerId", inner_id, &participant_group, &trip_domain, &trip_label),
             });
             all_state["cover_photos_list"] = serde_json::to_value(&cover_photos_map).unwrap();
-            execute_after = vec!["load_trip_map".into(), "init_trip_navigator".into(), "add_media2map".into()];
+            execute_after = vec!["load_trip_map".into(), "init_trip_navigator".into(), "fetchAllMediaWithCoords".into()];
         }
 
         ("trip", outer_id, _) if !outer_id.is_empty() => {
@@ -765,7 +765,7 @@ async fn page_load_internal(destination: &str, choice: u8) {
                 queries,
             });
             all_state["cover_photos_list"] = serde_json::to_value(&cover_photos_map).unwrap();
-            execute_after = vec!["load_trip_map".into(), "init_trip_navigator".into(), "add_media2map".into()];
+            execute_after = vec!["load_trip_map".into(), "init_trip_navigator".into(), "fetchAllMediaWithCoords".into()];
         }
 
         ("images", trip_id, trip_date) => {
@@ -914,7 +914,7 @@ async fn page_load_internal(destination: &str, choice: u8) {
             "check_immich_authorization" => check_immich_authorization(),
             "init_create_trip" => init_create_trip(),
             "init_trip_navigator" => init_trip_navigator(),
-            "add_media2map" => addMediaToMap(),
+            "fetchAllMediaWithCoords" => fetchAllMediaWithCoords(),
             _ => {}
         }
     }

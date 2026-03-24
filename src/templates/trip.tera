@@ -16,6 +16,8 @@
 
 {% if settings.Photos %}
 	<script id="immichUrl" type="application/json">{{ settings.Photos.ImmichUrl | safe }}</script>
+	<script id="startDateTime" type="application/json">{{ trip_summary[0].DepartureDate }}T{{ trip_summary[0].PhotoStarttime | default(value="00:00") }}:00.000Z</script>
+	<script id="endDateTime" type="application/json">{{ trip_summary[0].ReturnDate }}T{{ trip_summary[0].PhotoEndtime | default(value="23:59")}}:59.999Z</script>
 {% endif %}
 
 <div id="path-trip">

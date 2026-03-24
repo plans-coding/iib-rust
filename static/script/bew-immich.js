@@ -313,8 +313,47 @@ async function fetchAllMediaInInterval({startDateTime, endDateTime}) {
   return all;
 }
 
-function toGeoJSON(assets) {
-    return {
+async function fetchAllMediaWithCoords() {
+
+    const startDateTime = document.getElementById("startDateTime").textContent;
+    const endDateTime = document.getElementById("endDateTime").textContent;
+
+    const config = { startDateTime: startDateTime, endDateTime: endDateTime }
+
+    const map = initiate_map();
+    if (!map) return;
+
+    if (!map.isStyleLoaded()) {
+        await new Promise(res => map.once("load", res));
+    }
+
+    const all = await fetchAllMediaInInterval(config);
+
+    const assets = all
+    .map(a => {
+        const lat = Number(a.exifInfo?.latitude);
+        const lon = Number(a.exifInfo?.longitude);
+        if (
+            !Number.isFinite(lat) ||
+            !Number.isFinite(lon) ||
+            lat < -90 || lat > 90 ||
+            lon < -180 || lon > 180 ||
+            (lat === 0 && lon === 0)
+        ) return null;
+
+        return {
+            id: a.id,
+            type: a.type,
+            lat,
+            lon,
+            date: a.fileCreatedAt ?? a.localDateTime ?? null,
+        };
+    })
+    .filter(Boolean);
+
+    if (!assets.length) return assets;
+
+    const geojson = {
         type: "FeatureCollection",
         features: assets.map(a => ({
             type: "Feature",
@@ -325,44 +364,87 @@ function toGeoJSON(assets) {
             properties: a,
         })),
     };
-}
 
-async function fetchAllMediaWithCoords(config) {
-    const all = await fetchAllMediaInInterval(config);
+    const lineGeoJSON = {
+        type: "Feature",
+        geometry: {
+            type: "LineString",
+            coordinates: assets.map(a => [a.lon, a.lat]),
+        },
+    };
 
-    return all
-    .map(a => ({
-        id: a.id,
-        type: a.type,
-        lat: Number(a.exifInfo?.latitude),
-        lon: Number(a.exifInfo?.longitude),
-        date: a.fileCreatedAt ?? a.localDateTime ?? null,
-    }))
-    .filter(a => a.lat != null && a.lon != null);
-}
-
-
-function addMediaToMap(map, geojson) {
     if (map.getSource("media")) {
         map.getSource("media").setData(geojson);
-        return;
+    } else {
+        map.addSource("media", {
+            type: "geojson",
+            data: geojson,
+        });
+
+        map.addLayer({
+            id: "media-points",
+            type: "circle",
+            source: "media",
+            paint: {
+                'circle-radius': 6,
+                'circle-color': 'red',
+                'circle-stroke-color': '#000',
+                'circle-stroke-width': 1,
+                'circle-opacity': 0.7,
+            },
+        });
+
+        // 👉 Popup handler (only register once)
+        map.on("click", "media-points", (e) => {
+            const f = e.features[0];
+            const { id, date, type } = f.properties;
+
+            new maplibregl.Popup()
+            .setLngLat(f.geometry.coordinates)
+            .setHTML(`
+            <b>${type}</b><br>
+            ${date ?? ""}<br>
+            ${id}
+            `)
+            .addTo(map);
+        });
+
+        map.on("mouseenter", "media-points", () => {
+            map.getCanvas().style.cursor = "pointer";
+        });
+
+        map.on("mouseleave", "media-points", () => {
+            map.getCanvas().style.cursor = "";
+        });
     }
 
-    // Add source
-    map.addSource("media", {
-        type: "geojson",
-        data: geojson,
-    });
+    if (map.getSource("media-line")) {
+        map.getSource("media-line").setData(lineGeoJSON);
+    } else {
+        map.addSource("media-line", {
+            type: "geojson",
+            data: lineGeoJSON,
+        });
 
-    // Add layer
-    map.addLayer({
-        id: "media-points",
-        type: "circle",
-        source: "media",
-        paint: {
-            "circle-radius": 4,
-            "circle-color": "#ff5500",
-            "circle-opacity": 0.8,
-        },
-    });
+        map.addLayer({
+            id: "media-line-layer",
+            type: "line",
+            source: "media-line",
+            layout: {
+                "line-cap": "round",
+                "line-join": "round",
+            },
+            paint: {
+                "line-color": "#ff5500",
+                "line-width": 3,
+                "line-opacity": 0.7,
+            },
+        });
+    }
+
+    const bounds = new maplibregl.LngLatBounds();
+    assets.forEach(a => bounds.extend([a.lon, a.lat]));
+    map.fitBounds(bounds, { padding: 40, maxZoom: 12 });
+
+    return assets;
 }
