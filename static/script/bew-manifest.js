@@ -5,7 +5,7 @@ manifestLink.rel = "manifest"; document.head.appendChild(manifestLink);
 // Get the base path dynamically
 const basePath = (window.location.origin + window.location.pathname.replace(/\/[^/]*$/, '/')).replace(/\/+$/, '/');
 // Define the manifest object dynamically
-const manifest = { name: "Immer in Bewegung", short_name: "IIB", start_url: basePath, // Ensure it's a proper relative path 
+const manifest = { name: "Immer in Bewegung", short_name: "Bewegung", start_url: basePath, // Ensure it's a proper relative path
   display: "standalone", background_color: "#1d655e", theme_color: "#6f757e", "icons": [
     { "src": basePath + "static/images/frog.svg", "sizes": "any", "type": "image/svg+xml"
     }

@@ -18,6 +18,7 @@
 	<script id="immichUrl" type="application/json">{{ settings.Photos.ImmichUrl | safe }}</script>
 	<script id="startDateTime" type="application/json">{{ trip_summary[0].DepartureDate }}T{{ trip_summary[0].PhotoStarttime | default(value="00:00") }}:00.000Z</script>
 	<script id="endDateTime" type="application/json">{{ trip_summary[0].ReturnDate }}T{{ trip_summary[0].PhotoEndtime | default(value="23:59")}}:59.999Z</script>
+	<script id="immichDescSearch" type="application/json">{{ trip_immich_desc_search[0].ImmichDescSearch | default(value="") }}</script>
 {% endif %}
 
 <div id="path-trip">
@@ -184,7 +185,7 @@
 	        </div>
 	      </div>
 
-	      <div><div id="map" class="map-frame"></div></div>
+	      <div><div style="position:absolute;z-index:1000;cursor:pointer;display:none;" onclick="const map = initiate_map(); ['media-points','media-line-layer'].forEach(id => map.setLayoutProperty(id,'visibility',map.getLayoutProperty(id,'visibility') === 'none' ? 'visible' : 'none'));" id="media-toggle-button"><img src="static/images/database.svg"></div><div id="map" class="map-frame"></div></div>
 	      <div id="map-pin-data" data-trip-map-overall='{{ trip_map_pins_overall | json_encode }}' data-trip-map-accommodation='{{ trip_map_pins_accommodation | json_encode | escape }}' data-theme-color="{{ theme_color }}"></div>
 	    </div>
 	  </details>

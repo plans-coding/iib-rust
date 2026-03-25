@@ -289,45 +289,74 @@ async function process_album_string(immichUrl, input) {
 
 // Plot Photos to trip map
 // await fetchAllMediaInInterval({startDateTime: "2025-01-01T00:00:00.000Z", endDateTime: "2025-01-15T23:59:59.999Z"})
-async function fetchAllMediaInInterval({startDateTime, endDateTime}) {
-  const size = 1000;
-  let page = 1;
-  let all = [];
-  const immichUrl = document.getElementById("immichUrl").textContent;
-  while (true) {
-      const res = await fetch(`${immichUrl}api/search/metadata`, {
-      method: "POST", headers: { "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ takenAfter: startDateTime, takenBefore: endDateTime, page, size, withExif: true },
-    )
-    });
-    if (!res.ok) { throw new Error(`HTTP ${res.status} on page ${page}`);
-    }
-    const data = await res.json();
-    const items = data.assets?.items ?? [];
-    if (items.length === 0) break;
-    all.push(...items);
-    // stop early if last page
-    if (items.length < size) break; page++;
-  }
-  return all;
-}
-
-async function fetchAllMediaWithCoords() {
+async function fetchAllMediaInInterval() {
 
     const startDateTime = document.getElementById("startDateTime").textContent;
     const endDateTime = document.getElementById("endDateTime").textContent;
 
     const config = { startDateTime: startDateTime, endDateTime: endDateTime }
 
+    const immichDescSearch = document.getElementById("immichDescSearch").textContent;
+
+    const size = 1000;
+    let page = 1;
+    let all = [];
+    const immichUrl = document.getElementById("immichUrl").textContent;
+
+    if (immichDescSearch == "") {
+        while (true) {
+            const res = await fetch(`${immichUrl}api/search/metadata`, {
+            method: "POST", headers: { "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ takenAfter: startDateTime, takenBefore: endDateTime, page, size, withExif: true },
+            )
+            });
+            if (!res.ok) { throw new Error(`HTTP ${res.status} on page ${page}`);
+            }
+            const data = await res.json();
+            const items = data.assets?.items ?? [];
+            if (items.length === 0) break;
+            all.push(...items);
+            // stop early if last page
+            if (items.length < size) break; page++;
+        }
+    } else {
+        while (true) {
+            const res = await fetch(`${immichUrl}api/search/metadata`, {
+                method: "POST", headers: { "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ description: '('+immichDescSearch+')', page, size, withExif: true },
+                )
+            });
+            if (!res.ok) { throw new Error(`HTTP ${res.status} on page ${page}`);
+            }
+            const data = await res.json();
+            const items = data.assets?.items ?? [];
+            if (items.length === 0) break;
+            all.push(...items);
+            // stop early if last page
+            if (items.length < size) break; page++;
+        }
+    }
+    return all;
+}
+
+async function fetchAllMediaWithCoords() {
+
     const map = initiate_map();
     if (!map) return;
+
+    document.getElementById('media-toggle-button').style.display = 'none';
+    if (map.getLayer("media-points")) map.removeLayer("media-points");
+    if (map.getLayer("media-line-layer")) map.removeLayer("media-line-layer");
+    if (map.getSource("media")) map.removeSource("media");
+    if (map.getSource("media-line")) map.removeSource("media-line");
 
     if (!map.isStyleLoaded()) {
         await new Promise(res => map.once("load", res));
     }
 
-    const all = await fetchAllMediaInInterval(config);
+    const all = await fetchAllMediaInInterval();
 
     const assets = all
     .map(a => {
@@ -352,6 +381,10 @@ async function fetchAllMediaWithCoords() {
     .filter(Boolean);
 
     if (!assets.length) return assets;
+
+    if (assets.length) {
+	document.getElementById('media-toggle-button').style.display = 'block';
+    }
 
     const geojson = {
         type: "FeatureCollection",
@@ -390,21 +423,23 @@ async function fetchAllMediaWithCoords() {
                 'circle-color': 'red',
                 'circle-stroke-color': '#000',
                 'circle-stroke-width': 1,
-                'circle-opacity': 0.7,
+                'circle-opacity': 0.4,
             },
         });
 
-        // 👉 Popup handler (only register once)
+        // Popup handler (only register once)
         map.on("click", "media-points", (e) => {
             const f = e.features[0];
             const { id, date, type } = f.properties;
+            const immichUrl = document.getElementById("immichUrl").textContent;
+
 
             new maplibregl.Popup()
             .setLngLat(f.geometry.coordinates)
             .setHTML(`
-            <b>${type}</b><br>
-            ${date ?? ""}<br>
-            ${id}
+            	<a href="${immichUrl}photos/${id}" target="_blank"><img style="width:100%;" src="${immichUrl}api/assets/${id}/thumbnail"></a>
+		<b>${type}</b><br>
+            ${date ?? ""}
             `)
             .addTo(map);
         });
@@ -437,14 +472,17 @@ async function fetchAllMediaWithCoords() {
             paint: {
                 "line-color": "#ff5500",
                 "line-width": 3,
-                "line-opacity": 0.7,
+                "line-opacity": 0.4,
             },
         });
     }
 
-    const bounds = new maplibregl.LngLatBounds();
-    assets.forEach(a => bounds.extend([a.lon, a.lat]));
-    map.fitBounds(bounds, { padding: 40, maxZoom: 12 });
+    map.setLayoutProperty('media-points', 'visibility', 'none');
+    map.setLayoutProperty('media-line-layer', 'visibility', 'none');
+
+    //const bounds = new maplibregl.LngLatBounds();
+    //assets.forEach(a => bounds.extend([a.lon, a.lat]));
+    //map.fitBounds(bounds, { padding: 40, maxZoom: 12 });
 
     return assets;
 }

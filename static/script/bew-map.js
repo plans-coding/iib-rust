@@ -141,6 +141,9 @@ function load_trip_map() {
     execute_when_map_ready(map, () => {
         reset_dynamic_map_content(map);
 
+	// Draw photos to map
+	fetchAllMediaWithCoords();
+
         // Prepare marker features
         const overviewFeatures = overviewData.map(loc => {
             const lat = parseFloat(loc.Latitude);
@@ -280,8 +283,8 @@ function load_trip_map() {
         if (!bounds.isEmpty()) {
             map.fitBounds(bounds, { padding: 50, maxZoom: 12, linear: true });
         }
-
     });
+
 }
 
 
@@ -289,6 +292,11 @@ function load_contour_map() {
 
     let map = initiate_map();
     if (!map) return;
+
+    if (map.getLayer("media-points")) map.removeLayer("media-points");
+    if (map.getLayer("media-line-layer")) map.removeLayer("media-line-layer");
+    if (map.getSource("media")) map.removeSource("media");
+    if (map.getSource("media-line")) map.removeSource("media-line");
 
     const mapPinDataContainer = document.getElementById('map-pin-data');
     if (!mapPinDataContainer) return;
@@ -368,6 +376,11 @@ function load_country_map() {
 
     let map = initiate_map();
     if (!map) return;
+
+    if (map.getLayer("media-points")) map.removeLayer("media-points");
+    if (map.getLayer("media-line-layer")) map.removeLayer("media-line-layer");
+    if (map.getSource("media")) map.removeSource("media");
+    if (map.getSource("media-line")) map.removeSource("media-line");
 
     const mapPinDataContainer = document.getElementById('map-pin-data');
     if (!mapPinDataContainer) return;
@@ -456,6 +469,11 @@ function load_theme_map() {
 
     let map = initiate_map();
     if (!map) return;
+
+    if (map.getLayer("media-points")) map.removeLayer("media-points");
+    if (map.getLayer("media-line-layer")) map.removeLayer("media-line-layer");
+    if (map.getSource("media")) map.removeSource("media");
+    if (map.getSource("media-line")) map.removeSource("media-line");
 
     const mapPinDataContainer = document.getElementById('map-pin-data');
     if (!mapPinDataContainer) return;
