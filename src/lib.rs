@@ -47,6 +47,7 @@ define_resources! {
         QUERY_STATISTICS_PER_DOMAIN_YEAR    => "../src/queries/statistics/statistics_per_domain_year.sql",
         QUERY_STATISTICS_THEME_COUNT        => "../src/queries/statistics/statistics_theme_count.sql",
         QUERY_STATISTICS_TRIP_COUNT         => "../src/queries/statistics/statistics_trip_count.sql",
+        QUERY_COMMON_SETTINGS               => "../src/queries/_common/common_settings.sql",
         QUERY_COMMON_PARTICIPANT_GROUPS     => "../src/queries/_common/common_participant_groups.sql",
         QUERY_COMMON_TRIP_DOMAINS           => "../src/queries/_common/common_trip_domains.sql",
         QUERY_COMMON_TRIP_LABELS            => "../src/queries/_common/common_trip_labels.sql",
